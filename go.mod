@@ -1,13 +1,10 @@
-module github.com/mattermost/mattermost-plugin-starter-template
+module de.dakosy/enhanced-emojis
 
 go 1.25
 
 require (
-	github.com/gorilla/mux v1.8.1
 	github.com/mattermost/mattermost/server/public v0.1.21
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.11.1
-	go.uber.org/mock v0.6.0
 )
 
 require (

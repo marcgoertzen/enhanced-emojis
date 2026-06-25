@@ -1,0 +1,16 @@
+{
+  "name": "enhanced-emojis",
+  "private": true,
+  "scripts": {
+    "check-manifest": "node scripts/update-webapp-manifest.js --check",
+    "sync-manifest": "node scripts/update-webapp-manifest.js",
+    "lint": "npm --prefix webapp run lint",
+    "typecheck": "npm run check-manifest && npm --prefix webapp run check-types",
+    "test": "npm run check-manifest && npm --prefix webapp run test -- --runInBand",
+    "build:webapp": "npm run check-manifest && npm --prefix webapp run build",
+    "package:plugin": "node scripts/package-plugin.js",
+    "package": "npm run build:webapp && npm run package:plugin",
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run package",
+    "clean": "node scripts/clean.js"
+  }
+}

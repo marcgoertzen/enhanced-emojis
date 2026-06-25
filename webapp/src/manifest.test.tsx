@@ -1,10 +1,8 @@
-// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
-// See LICENSE.txt for license information.
-
 import manifest from 'manifest';
 
-test('Plugin manifest, id and version are defined', () => {
+test('plugin manifest contains the enhanced emojis metadata', () => {
     expect(manifest).toBeDefined();
-    expect(manifest.id).toBeDefined();
-    expect(manifest.version).toBeDefined();
+    expect(manifest.id).toBe('de.dakosy.enhanced-emojis');
+    expect(manifest.name).toBe('Enhanced Emojis');
+    expect(manifest.description).toBe('Enhances the display of custom and standard emojis.');
 });
