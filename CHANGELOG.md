@@ -10,6 +10,21 @@ The format is based on Keep a Changelog and the project uses Semantic Versioning
 
 - User-level size preferences for custom emojis in posts and reactions.
 
+## [0.3.0]
+
+### Added
+
+- Added user-specific emoji size preferences.
+- Added separate size presets for post emojis and reaction emojis.
+
+### Changed
+
+- Removed admin-controlled emoji size settings.
+- Admins now control feature availability, while users control personal emoji sizes.
+- Updated reaction emoji size presets.
+- Improved reaction chip layout across different emoji sizes.
+- Updated documentation for admin settings and user preferences.
+
 ## [0.2.0] - 2026-06-30
 
 ### Added

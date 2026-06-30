@@ -1,6 +1,6 @@
 {
   "name": "enhanced-emojis",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Mattermost WebApp plugin for improving custom and standard emoji rendering.",
   "private": true,
   "license": "Apache-2.0",

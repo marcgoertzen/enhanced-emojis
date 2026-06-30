@@ -1,7 +1,7 @@
 {
     "id": "de.dakosy.enhanced-emojis",
     "name": "Enhanced Emojis",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "description": "Enhances the display of custom emojis in Mattermost.",
     "homepage_url": "https://github.com/marcgoertzen/enhanced-emojis",
     "support_url": "https://github.com/marcgoertzen/enhanced-emojis/issues",

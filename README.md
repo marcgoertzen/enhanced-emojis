@@ -2,7 +2,7 @@
 
 Enhanced Emojis is a Mattermost plugin for improving the display of custom emojis in post content.
 
-Version `0.2.0` is the current release. It uses a minimal server component only to expose plugin configuration reliably to the WebApp.
+Version `0.3.0` is the current release. It uses a minimal server component only to expose plugin configuration reliably to the WebApp.
 
 ## Current Features
 
@@ -13,7 +13,7 @@ Version `0.2.0` is the current release. It uses a minimal server component only 
 - User-level size preferences for post and reaction emojis
 - Node-based build, test, and packaging workflow
 
-Current non-goals for `v0.2.0`:
+Current non-goals for `v0.3.0`:
 
 - No reaction or emoji picker styling yet
 - No Unicode emoji styling yet
@@ -64,6 +64,8 @@ Reaction emoji presets:
 - `Max` = `128px`
 
 User settings never enable a feature on their own. They only customize the size of features that the admin has already enabled.
+
+Current release: `v0.3.0`.
 
 ## Installation
 
