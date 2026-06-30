@@ -9,6 +9,8 @@ The format is based on Keep a Changelog and the project uses Semantic Versioning
 ### Added
 
 - First public WebApp-only MVP release of Enhanced Emojis.
+- Minimal server component for reliable plugin configuration.
 - CSS-first custom emoji enlargement for Mattermost post content.
+- Admin settings for enabling the plugin, developer mode, and configurable emoji size.
 - Node-based lint, typecheck, test, build, and packaging workflow.
 - Basic release metadata and contributor documentation.

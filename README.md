@@ -1,20 +1,21 @@
 # Enhanced Emojis
 
-Enhanced Emojis is a Mattermost WebApp plugin for improving the display of custom and standard emojis in Mattermost.
+Enhanced Emojis is a Mattermost plugin for improving the display of custom emojis in post content.
 
-Version `0.1.0` is the first public MVP release. It is intentionally WebApp-only and does not include server-side plugin functionality.
+Version `0.1.0` is the first public release. It uses a minimal server component only to expose plugin configuration reliably to the WebApp.
 
 ## Current Features
 
 - Larger custom emojis in Mattermost post content
-- WebApp-only implementation with CSS-first styling
-- Minimal build, test, and packaging workflow
+- CSS-first WebApp styling
+- Reliable admin configuration through a minimal server endpoint
+- Node-based build, test, and packaging workflow
 
 Current non-goals for `v0.1.0`:
 
-- No admin or user settings yet
+- No user-specific settings yet
 - No reaction or emoji picker styling yet
-- No server-side functionality
+- No Unicode emoji styling yet
 
 ## Compatibility
 
@@ -30,7 +31,22 @@ The plugin currently exposes three admin settings:
 - `Enable Developer Mode`
 - `Emoji Size`
 
-Developer Mode overrides the configured emoji size for visual debugging. The default size is `32px`, and `Large`/`Extra Large` map to `48px` and `64px` respectively.
+`Emoji Size` accepts `Small`, `Default`, `Large`, and `Extra Large`.
+
+Developer Mode overrides the configured emoji size for visual debugging and enables a red outline around targeted custom emojis.
+
+Size mapping:
+
+- `Small` = `24px`
+- `Default` = `32px`
+- `Large` = `48px`
+- `Extra Large` = `64px`
+
+## Installation
+
+1. Run `npm run package`.
+2. Upload `dist/de.dakosy.enhanced-emojis.tar.gz` in the Mattermost System Console.
+3. Enable the plugin.
 
 ## Development
 
@@ -64,9 +80,9 @@ npm run check-types
 npm run build
 ```
 
-## Packaging
+## Build And Package
 
-`npm run package` builds the WebApp and creates a Mattermost plugin archive at:
+`npm run package` builds the WebApp, builds the server executables, and creates a Mattermost plugin archive at:
 
 ```bash
 dist/de.dakosy.enhanced-emojis.tar.gz
@@ -76,16 +92,22 @@ The package contains:
 
 - `plugin.json`
 - `webapp/dist/main.js`
-- `assets/` when present
-- `public/` when present
+- `server/dist/enhanced-emojis-linux-amd64`
+- `server/dist/enhanced-emojis-darwin-amd64`
+- `server/dist/enhanced-emojis-windows-amd64.exe`
+- `assets/`
+
+`public/` is not currently used.
 
 ## Local Testing In Mattermost
 
 1. Run `npm run package`.
 2. Upload `dist/de.dakosy.enhanced-emojis.tar.gz` in the Mattermost System Console.
-3. Enable the plugin.
-4. Create or use an existing custom emoji.
-5. Post a message containing that custom emoji and confirm it renders larger in post content.
+3. Configure `Enable Enhanced Emojis`, `Enable Developer Mode`, and `Emoji Size` as needed.
+4. Enable the plugin.
+5. Create or use an existing custom emoji.
+6. Post a message containing that custom emoji and confirm it renders larger in post content.
+7. Turn on Developer Mode to verify the 64px debug size and red outline.
 
 ## Repository Structure
 
@@ -100,6 +122,13 @@ The package contains:
 The repository still contains Mattermost starter-template Go build files under `build/` as well as `go.mod`, `go.sum`, and `.golangci.yml`.
 
 These files are retained temporarily during the migration, but they are no longer part of the primary build and packaging workflow.
+
+## Known Limitations
+
+- Only custom emojis in post content are enlarged.
+- Unicode emojis are unchanged.
+- Reactions and the emoji picker are unchanged.
+- Developer Mode is intended for visual debugging and should stay disabled in normal use.
 
 ## Future Work
 
