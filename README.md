@@ -2,7 +2,7 @@
 
 Enhanced Emojis is a Mattermost plugin for improving the display of custom emojis in post content.
 
-Version `0.1.0` is the first public release. It uses a minimal server component only to expose plugin configuration reliably to the WebApp.
+Version `0.2.0` is the current release. It uses a minimal server component only to expose plugin configuration reliably to the WebApp.
 
 ## Current Features
 
@@ -11,7 +11,7 @@ Version `0.1.0` is the first public release. It uses a minimal server component 
 - Reliable admin configuration through a minimal server endpoint
 - Node-based build, test, and packaging workflow
 
-Current non-goals for `v0.1.0`:
+Current non-goals for `v0.2.0`:
 
 - No user-specific settings yet
 - No reaction or emoji picker styling yet

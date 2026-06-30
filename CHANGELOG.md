@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and the project uses Semantic Versioning.
 
+## [0.2.0] - 2026-06-30
+
+### Added
+
+- Added custom emoji reaction support.
+- Added configurable emoji sizes.
+- Added reliable server-backed admin configuration.
+- Added Developer Mode.
+- Added reaction-specific setting.
+- Improved package/build workflow.
+
+### Fixed
+
+- Fixed Linux server executable permissions in the package.
+- Fixed custom emoji reaction selector handling.
+
 ## [0.1.0] - 2026-06-30
 
 ### Added
