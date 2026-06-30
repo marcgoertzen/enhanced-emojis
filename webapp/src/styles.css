@@ -22,15 +22,15 @@ html.enhanced-emojis-enabled.enhanced-emojis-reactions-enabled .Reaction:has(img
     display: inline-flex;
     align-items: center;
     gap: 0.125rem;
-    min-height: var(--enhanced-emojis-size);
+    min-height: var(--enhanced-reaction-emojis-size);
     white-space: nowrap;
 }
 
 html.enhanced-emojis-enabled.enhanced-emojis-reactions-enabled .Reaction:has(img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"]) img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"] {
-    width: var(--enhanced-emojis-size) !important;
-    height: var(--enhanced-emojis-size) !important;
-    min-width: var(--enhanced-emojis-size) !important;
-    min-height: var(--enhanced-emojis-size) !important;
+    width: var(--enhanced-reaction-emojis-size) !important;
+    height: var(--enhanced-reaction-emojis-size) !important;
+    min-width: var(--enhanced-reaction-emojis-size) !important;
+    min-height: var(--enhanced-reaction-emojis-size) !important;
     vertical-align: text-bottom;
 }
 

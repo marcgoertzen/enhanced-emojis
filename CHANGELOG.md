@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and the project uses Semantic Versioning.
 
+## [Unreleased]
+
+### Added
+
+- Separate configurable size for custom emoji reactions.
+
 ## [0.2.0] - 2026-06-30
 
 ### Added

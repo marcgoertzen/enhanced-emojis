@@ -41,6 +41,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
                 enableDeveloperMode: false,
                 enableReactionEmojis: true,
                 emojiSize: 'small',
+                reactionEmojiSize: 'large',
             }),
         }));
 
@@ -73,6 +74,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-developer-mode', false);
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-reactions-enabled', true);
         expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-size', '24px');
+        expect(style.setProperty).toHaveBeenCalledWith('--enhanced-reaction-emojis-size', '48px');
     });
 
     test('removes the enabled class when the server config disables it', async () => {
@@ -90,6 +92,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
                 enableDeveloperMode: true,
                 enableReactionEmojis: false,
                 emojiSize: 'large',
+                reactionEmojiSize: 'extraLarge',
             }),
         }));
 
@@ -121,6 +124,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-developer-mode', true);
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-reactions-enabled', false);
         expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-size', '64px');
+        expect(style.setProperty).toHaveBeenCalledWith('--enhanced-reaction-emojis-size', '64px');
     });
 
     test('falls back to default classes when the config fetch fails', async () => {
@@ -163,6 +167,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-developer-mode', false);
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-reactions-enabled', false);
         expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-size', '32px');
+        expect(style.setProperty).toHaveBeenCalledWith('--enhanced-reaction-emojis-size', '32px');
     });
 
     test('removes the enabled class during uninitialize', async () => {
@@ -181,6 +186,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
                 enableDeveloperMode: true,
                 enableReactionEmojis: true,
                 emojiSize: 'default',
+                reactionEmojiSize: 'maxSize',
             }),
         }));
 
@@ -213,5 +219,6 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         expect(classList.remove).toHaveBeenCalledWith('enhanced-emojis-developer-mode');
         expect(classList.remove).toHaveBeenCalledWith('enhanced-emojis-reactions-enabled');
         expect(style.removeProperty).toHaveBeenCalledWith('--enhanced-emojis-size');
+        expect(style.removeProperty).toHaveBeenCalledWith('--enhanced-reaction-emojis-size');
     });
 });
