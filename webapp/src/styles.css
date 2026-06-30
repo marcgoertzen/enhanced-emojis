@@ -1,12 +1,18 @@
+html {
+    --enhanced-emojis-size: 64px;
+}
+
 /*
  * Posts
  */
 
-.post-message__text img.emoticon[src*="/api/v4/emoji/"],
-.post-message__text img.emoticon--custom {
-    width: 32px;
-    height: 32px;
+html.enhanced-emojis-enabled .post-message__text span.emoticon[style*="/api/v4/emoji/"] {
+    width: var(--enhanced-emojis-size) !important;
+    height: var(--enhanced-emojis-size) !important;
+    min-width: var(--enhanced-emojis-size) !important;
+    min-height: var(--enhanced-emojis-size) !important;
     vertical-align: text-bottom;
+    outline: 2px solid red;
 }
 
 /*
