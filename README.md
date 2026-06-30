@@ -22,6 +22,16 @@ Current non-goals for `v0.1.0`:
 - Minimum server version: `10.0.0`
 - Plugin archive output: `dist/de.dakosy.enhanced-emojis.tar.gz`
 
+## Configuration
+
+The plugin currently exposes three admin settings:
+
+- `Enable Enhanced Emojis`
+- `Enable Developer Mode`
+- `Emoji Size`
+
+Developer Mode overrides the configured emoji size for visual debugging. The default size is `32px`, and `Large`/`Extra Large` map to `48px` and `64px` respectively.
+
 ## Development
 
 The primary workflow is Node-based. The WebApp source lives in `webapp/src/` and automated tests live in `webapp/tests/`.

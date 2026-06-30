@@ -30,11 +30,16 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         const classList = {
             toggle: jest.fn(),
         };
+        const style = {
+            setProperty: jest.fn(),
+            removeProperty: jest.fn(),
+        };
         const fetch = jest.fn(async () => ({
             ok: true,
             json: async () => ({
                 enableEnhancedEmojis: true,
                 enableDeveloperMode: false,
+                emojiSize: 'small',
             }),
         }));
 
@@ -43,6 +48,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             document: {
                 documentElement: {
                     classList,
+                    style,
                 },
             },
         });
@@ -64,17 +70,23 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         expect(fetch).toHaveBeenCalledWith('/plugins/de.dakosy.enhanced-emojis/config');
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-enabled', true);
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-developer-mode', false);
+        expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-size', '24px');
     });
 
     test('removes the enabled class when the server config disables it', async () => {
         const classList = {
             toggle: jest.fn(),
         };
+        const style = {
+            setProperty: jest.fn(),
+            removeProperty: jest.fn(),
+        };
         const fetch = jest.fn(async () => ({
             ok: true,
             json: async () => ({
                 enableEnhancedEmojis: false,
                 enableDeveloperMode: true,
+                emojiSize: 'large',
             }),
         }));
 
@@ -83,6 +95,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             document: {
                 documentElement: {
                     classList,
+                    style,
                 },
             },
         });
@@ -103,11 +116,16 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
 
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-enabled', false);
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-developer-mode', true);
+        expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-size', '64px');
     });
 
     test('falls back to default classes when the config fetch fails', async () => {
         const classList = {
             toggle: jest.fn(),
+        };
+        const style = {
+            setProperty: jest.fn(),
+            removeProperty: jest.fn(),
         };
         const fetch = jest.fn(async () => {
             throw new Error('network error');
@@ -118,6 +136,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             document: {
                 documentElement: {
                     classList,
+                    style,
                 },
             },
         });
@@ -138,6 +157,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
 
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-enabled', true);
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-developer-mode', false);
+        expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-size', '32px');
     });
 
     test('removes the enabled class during uninitialize', async () => {
@@ -145,11 +165,16 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             toggle: jest.fn(),
             remove: jest.fn(),
         };
+        const style = {
+            setProperty: jest.fn(),
+            removeProperty: jest.fn(),
+        };
         const fetch = jest.fn(async () => ({
             ok: true,
             json: async () => ({
                 enableEnhancedEmojis: true,
                 enableDeveloperMode: true,
+                emojiSize: 'default',
             }),
         }));
 
@@ -158,6 +183,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             document: {
                 documentElement: {
                     classList,
+                    style,
                 },
             },
         });
@@ -179,5 +205,6 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
 
         expect(classList.remove).toHaveBeenCalledWith('enhanced-emojis-enabled');
         expect(classList.remove).toHaveBeenCalledWith('enhanced-emojis-developer-mode');
+        expect(style.removeProperty).toHaveBeenCalledWith('--enhanced-emojis-size');
     });
 });

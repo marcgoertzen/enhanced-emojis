@@ -1,27 +1,64 @@
 package main
 
-type configuration struct {
-    EnableEnhancedEmojis *bool `json:"EnableEnhancedEmojis"`
-    EnableDeveloperMode   *bool `json:"EnableDeveloperMode"`
+type emojiSize string
+
+const (
+    emojiSizeSmall      emojiSize = "small"
+    emojiSizeDefault    emojiSize = "default"
+    emojiSizeLarge      emojiSize = "large"
+    emojiSizeExtraLarge emojiSize = "extraLarge"
+)
+
+type pluginConfiguration struct {
+    EnableEnhancedEmojis *bool   `json:"EnableEnhancedEmojis"`
+    EnableDeveloperMode   *bool   `json:"EnableDeveloperMode"`
+    EmojiSize             *string `json:"EmojiSize"`
 }
 
-type configResponse struct {
-    EnableEnhancedEmojis bool `json:"enableEnhancedEmojis"`
-    EnableDeveloperMode   bool `json:"enableDeveloperMode"`
+type EnhancedEmojisConfig struct {
+    EnableEnhancedEmojis bool      `json:"enableEnhancedEmojis"`
+    EnableDeveloperMode   bool      `json:"enableDeveloperMode"`
+    EmojiSize             emojiSize `json:"emojiSize"`
 }
 
-func (c *configuration) isEnhancedEmojisEnabled() bool {
-    if c == nil || c.EnableEnhancedEmojis == nil {
-        return true
+func defaultEnhancedEmojisConfig() EnhancedEmojisConfig {
+    return EnhancedEmojisConfig{
+        EnableEnhancedEmojis: true,
+        EnableDeveloperMode:   false,
+        EmojiSize:             emojiSizeDefault,
+    }
+}
+
+func (c *pluginConfiguration) normalize() EnhancedEmojisConfig {
+    config := defaultEnhancedEmojisConfig()
+    if c == nil {
+        return config
     }
 
-    return *c.EnableEnhancedEmojis
-}
-
-func (c *configuration) isDeveloperModeEnabled() bool {
-    if c == nil || c.EnableDeveloperMode == nil {
-        return false
+    if c.EnableEnhancedEmojis != nil {
+        config.EnableEnhancedEmojis = *c.EnableEnhancedEmojis
     }
 
-    return *c.EnableDeveloperMode
+    if c.EnableDeveloperMode != nil {
+        config.EnableDeveloperMode = *c.EnableDeveloperMode
+    }
+
+    if normalizedEmojiSize, ok := normalizeEmojiSize(c.EmojiSize); ok {
+        config.EmojiSize = normalizedEmojiSize
+    }
+
+    return config
+}
+
+func normalizeEmojiSize(raw *string) (emojiSize, bool) {
+    if raw == nil {
+        return emojiSizeDefault, false
+    }
+
+    switch emojiSize(*raw) {
+    case emojiSizeSmall, emojiSizeDefault, emojiSizeLarge, emojiSizeExtraLarge:
+        return emojiSize(*raw), true
+    default:
+        return emojiSizeDefault, false
+    }
 }

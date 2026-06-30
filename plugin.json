@@ -2,9 +2,10 @@
     "id": "de.dakosy.enhanced-emojis",
     "name": "Enhanced Emojis",
     "version": "0.1.0",
-    "description": "Enhances the display of custom and standard emojis.",
+    "description": "Enhances the display of custom emojis in Mattermost.",
     "homepage_url": "https://github.com/marcgoertzen/enhanced-emojis",
     "support_url": "https://github.com/marcgoertzen/enhanced-emojis/issues",
+    "icon_path": "assets/enhanced_emojis_icon.png",
 
     "min_server_version": "10.0.0",
     "settings_schema": {
@@ -26,6 +27,32 @@
                 "help_text": "Enables visual debugging features for Enhanced Emojis.",
                 "placeholder": "",
                 "default": false
+            },
+            {
+                "key": "EmojiSize",
+                "display_name": "Emoji Size",
+                "type": "dropdown",
+                "help_text": "Select the size used for custom emojis in post content.",
+                "placeholder": "",
+                "default": "default",
+                "options": [
+                    {
+                        "display_name": "Small (24px)",
+                        "value": "small"
+                    },
+                    {
+                        "display_name": "Default (32px)",
+                        "value": "default"
+                    },
+                    {
+                        "display_name": "Large (48px)",
+                        "value": "large"
+                    },
+                    {
+                        "display_name": "Extra Large (64px)",
+                        "value": "extraLarge"
+                    }
+                ]
             }
         ]
     },

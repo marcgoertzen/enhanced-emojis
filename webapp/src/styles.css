@@ -1,11 +1,3 @@
-html.enhanced-emojis-enabled {
-    --enhanced-emojis-size: 32px;
-}
-
-html.enhanced-emojis-enabled.enhanced-emojis-developer-mode {
-    --enhanced-emojis-size: 64px;
-}
-
 /*
  * Posts
  */

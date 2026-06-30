@@ -1,3 +1,10 @@
+import {
+    DEFAULT_ENHANCED_EMOJIS_CONFIG,
+    applyEnhancedEmojisConfig,
+    clearEnhancedEmojisConfig,
+    normalizeEnhancedEmojisConfig,
+    type EnhancedEmojisConfig,
+} from 'config';
 import manifest from 'manifest';
 import type {Store} from 'redux';
 
@@ -7,68 +14,38 @@ import type {PluginRegistry} from 'types/mattermost-webapp';
 
 import './styles.css';
 
-const ENABLED_ROOT_CLASS = 'enhanced-emojis-enabled';
-const DEVELOPER_MODE_ROOT_CLASS = 'enhanced-emojis-developer-mode';
-const DEFAULT_ENABLE_ENHANCED_EMOJIS = true;
-const DEFAULT_ENABLE_DEVELOPER_MODE = false;
-
-interface PluginConfigResponse {
-    enableEnhancedEmojis?: boolean;
-    enableDeveloperMode?: boolean;
-}
-
 export default class EnhancedEmojisPlugin {
     public async initialize(registry: PluginRegistry, store: Store<GlobalState>): Promise<void> {
         await Promise.all([Promise.resolve(registry), Promise.resolve(store)]);
-        this.applyRootClasses(await this.fetchPluginConfig());
-    }
-
-    public uninitialize(): void {
-        const classList = globalThis.document?.documentElement?.classList;
-        classList?.remove(ENABLED_ROOT_CLASS);
-        classList?.remove(DEVELOPER_MODE_ROOT_CLASS);
-    }
-
-    private applyRootClasses(config: PluginConfigResponse): void {
-        const classList = globalThis.document?.documentElement?.classList;
-        if (!classList) {
+        const rootElement = globalThis.document?.documentElement;
+        if (!rootElement) {
             return;
         }
 
-        classList.toggle(ENABLED_ROOT_CLASS, this.resolveEnhancedEmojisEnabled(config));
-        classList.toggle(DEVELOPER_MODE_ROOT_CLASS, this.resolveDeveloperModeEnabled(config));
+        applyEnhancedEmojisConfig(rootElement, await this.fetchPluginConfig());
     }
 
-    private resolveEnhancedEmojisEnabled(config: PluginConfigResponse): boolean {
-        if (typeof config.enableEnhancedEmojis === 'boolean') {
-            return config.enableEnhancedEmojis;
+    public uninitialize(): void {
+        const rootElement = globalThis.document?.documentElement;
+        if (rootElement) {
+            clearEnhancedEmojisConfig(rootElement);
         }
-
-        return DEFAULT_ENABLE_ENHANCED_EMOJIS;
     }
 
-    private resolveDeveloperModeEnabled(config: PluginConfigResponse): boolean {
-        if (typeof config.enableDeveloperMode === 'boolean') {
-            return config.enableDeveloperMode;
-        }
-
-        return DEFAULT_ENABLE_DEVELOPER_MODE;
-    }
-
-    private async fetchPluginConfig(): Promise<PluginConfigResponse> {
+    private async fetchPluginConfig(): Promise<EnhancedEmojisConfig> {
         if (!globalThis.fetch) {
-            return {};
+            return DEFAULT_ENHANCED_EMOJIS_CONFIG;
         }
 
         try {
             const response = await globalThis.fetch(`/plugins/${manifest.id}/config`);
             if (!response.ok) {
-                return {};
+                return DEFAULT_ENHANCED_EMOJIS_CONFIG;
             }
 
-            return await response.json() as PluginConfigResponse;
+            return normalizeEnhancedEmojisConfig(await response.json() as Partial<EnhancedEmojisConfig>);
         } catch {
-            return {};
+            return DEFAULT_ENHANCED_EMOJIS_CONFIG;
         }
     }
 }

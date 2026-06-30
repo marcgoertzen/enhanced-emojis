@@ -13,16 +13,16 @@ type EnhancedEmojisPlugin struct {
     plugin.MattermostPlugin
 
     configurationLock sync.RWMutex
-    configuration     *configuration
+    configuration     EnhancedEmojisConfig
 }
 
 func (p *EnhancedEmojisPlugin) OnConfigurationChange() error {
-    configuration := new(configuration)
+    configuration := new(pluginConfiguration)
     if err := p.API.LoadPluginConfiguration(configuration); err != nil {
         return fmt.Errorf("failed to load plugin configuration: %w", err)
     }
 
-    p.setConfiguration(configuration)
+    p.setConfiguration(configuration.normalize())
     return nil
 }
 
@@ -38,26 +38,23 @@ func (p *EnhancedEmojisPlugin) ServeHTTP(_ *plugin.Context, w http.ResponseWrite
     }
 
     w.Header().Set("Content-Type", "application/json")
-    if err := json.NewEncoder(w).Encode(configResponse{
-        EnableEnhancedEmojis: p.getConfiguration().isEnhancedEmojisEnabled(),
-        EnableDeveloperMode:   p.getConfiguration().isDeveloperModeEnabled(),
-    }); err != nil {
+    if err := json.NewEncoder(w).Encode(p.getConfiguration()); err != nil {
         http.Error(w, "failed to encode config response", http.StatusInternalServerError)
     }
 }
 
-func (p *EnhancedEmojisPlugin) getConfiguration() *configuration {
+func (p *EnhancedEmojisPlugin) getConfiguration() EnhancedEmojisConfig {
     p.configurationLock.RLock()
     defer p.configurationLock.RUnlock()
 
-    if p.configuration == nil {
-        return &configuration{}
+    if p.configuration.EmojiSize == "" {
+        return defaultEnhancedEmojisConfig()
     }
 
     return p.configuration
 }
 
-func (p *EnhancedEmojisPlugin) setConfiguration(configuration *configuration) {
+func (p *EnhancedEmojisPlugin) setConfiguration(configuration EnhancedEmojisConfig) {
     p.configurationLock.Lock()
     defer p.configurationLock.Unlock()
     p.configuration = configuration
