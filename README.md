@@ -25,15 +25,18 @@ Current non-goals for `v0.1.0`:
 
 ## Configuration
 
-The plugin currently exposes three admin settings:
+The plugin currently exposes four admin settings:
 
 - `Enable Enhanced Emojis`
 - `Enable Developer Mode`
+- `Enable Reaction Emojis`
 - `Emoji Size`
 
-`Emoji Size` accepts `Small`, `Default`, `Large`, and `Extra Large`.
+`Emoji Size` accepts `Small`, `Default`, `Large`, `Extra Large`, and `Max Size`.
 
 Developer Mode overrides the configured emoji size for visual debugging and enables a red outline around targeted custom emojis.
+
+`Enable Reaction Emojis` is off by default and only affects custom emoji reactions under posts.
 
 Size mapping:
 
@@ -41,6 +44,7 @@ Size mapping:
 - `Default` = `32px`
 - `Large` = `48px`
 - `Extra Large` = `64px`
+- `Max Size` = `128px`
 
 ## Installation
 

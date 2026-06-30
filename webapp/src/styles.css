@@ -18,6 +18,26 @@ html.enhanced-emojis-enabled.enhanced-emojis-developer-mode .post-message__text 
  * Reactions
  */
 
+html.enhanced-emojis-enabled.enhanced-emojis-reactions-enabled .Reaction:has(img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"]) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.125rem;
+    min-height: var(--enhanced-emojis-size);
+    white-space: nowrap;
+}
+
+html.enhanced-emojis-enabled.enhanced-emojis-reactions-enabled .Reaction:has(img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"]) img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"] {
+    width: var(--enhanced-emojis-size) !important;
+    height: var(--enhanced-emojis-size) !important;
+    min-width: var(--enhanced-emojis-size) !important;
+    min-height: var(--enhanced-emojis-size) !important;
+    vertical-align: text-bottom;
+}
+
+html.enhanced-emojis-enabled.enhanced-emojis-reactions-enabled.enhanced-emojis-developer-mode .Reaction:has(img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"]) img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"] {
+    outline: 2px solid red;
+}
+
 /*
  * Emoji Picker
  */

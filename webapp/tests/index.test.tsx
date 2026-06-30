@@ -39,6 +39,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             json: async () => ({
                 enableEnhancedEmojis: true,
                 enableDeveloperMode: false,
+                enableReactionEmojis: true,
                 emojiSize: 'small',
             }),
         }));
@@ -70,6 +71,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         expect(fetch).toHaveBeenCalledWith('/plugins/de.dakosy.enhanced-emojis/config');
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-enabled', true);
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-developer-mode', false);
+        expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-reactions-enabled', true);
         expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-size', '24px');
     });
 
@@ -86,6 +88,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             json: async () => ({
                 enableEnhancedEmojis: false,
                 enableDeveloperMode: true,
+                enableReactionEmojis: false,
                 emojiSize: 'large',
             }),
         }));
@@ -116,6 +119,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
 
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-enabled', false);
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-developer-mode', true);
+        expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-reactions-enabled', false);
         expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-size', '64px');
     });
 
@@ -157,6 +161,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
 
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-enabled', true);
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-developer-mode', false);
+        expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-reactions-enabled', false);
         expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-size', '32px');
     });
 
@@ -174,6 +179,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             json: async () => ({
                 enableEnhancedEmojis: true,
                 enableDeveloperMode: true,
+                enableReactionEmojis: true,
                 emojiSize: 'default',
             }),
         }));
@@ -205,6 +211,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
 
         expect(classList.remove).toHaveBeenCalledWith('enhanced-emojis-enabled');
         expect(classList.remove).toHaveBeenCalledWith('enhanced-emojis-developer-mode');
+        expect(classList.remove).toHaveBeenCalledWith('enhanced-emojis-reactions-enabled');
         expect(style.removeProperty).toHaveBeenCalledWith('--enhanced-emojis-size');
     });
 });

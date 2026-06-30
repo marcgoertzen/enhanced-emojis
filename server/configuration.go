@@ -7,17 +7,20 @@ const (
     emojiSizeDefault    emojiSize = "default"
     emojiSizeLarge      emojiSize = "large"
     emojiSizeExtraLarge emojiSize = "extraLarge"
+    emojiSizeMaxSize    emojiSize = "maxSize"
 )
 
 type pluginConfiguration struct {
     EnableEnhancedEmojis *bool   `json:"EnableEnhancedEmojis"`
     EnableDeveloperMode   *bool   `json:"EnableDeveloperMode"`
+    EnableReactionEmojis  *bool   `json:"EnableReactionEmojis"`
     EmojiSize             *string `json:"EmojiSize"`
 }
 
 type EnhancedEmojisConfig struct {
     EnableEnhancedEmojis bool      `json:"enableEnhancedEmojis"`
     EnableDeveloperMode   bool      `json:"enableDeveloperMode"`
+    EnableReactionEmojis  bool      `json:"enableReactionEmojis"`
     EmojiSize             emojiSize `json:"emojiSize"`
 }
 
@@ -25,6 +28,7 @@ func defaultEnhancedEmojisConfig() EnhancedEmojisConfig {
     return EnhancedEmojisConfig{
         EnableEnhancedEmojis: true,
         EnableDeveloperMode:   false,
+        EnableReactionEmojis:  false,
         EmojiSize:             emojiSizeDefault,
     }
 }
@@ -43,6 +47,10 @@ func (c *pluginConfiguration) normalize() EnhancedEmojisConfig {
         config.EnableDeveloperMode = *c.EnableDeveloperMode
     }
 
+    if c.EnableReactionEmojis != nil {
+        config.EnableReactionEmojis = *c.EnableReactionEmojis
+    }
+
     if normalizedEmojiSize, ok := normalizeEmojiSize(c.EmojiSize); ok {
         config.EmojiSize = normalizedEmojiSize
     }
@@ -56,7 +64,7 @@ func normalizeEmojiSize(raw *string) (emojiSize, bool) {
     }
 
     switch emojiSize(*raw) {
-    case emojiSizeSmall, emojiSizeDefault, emojiSizeLarge, emojiSizeExtraLarge:
+    case emojiSizeSmall, emojiSizeDefault, emojiSizeLarge, emojiSizeExtraLarge, emojiSizeMaxSize:
         return emojiSize(*raw), true
     default:
         return emojiSizeDefault, false
