@@ -7,6 +7,28 @@
     "support_url": "https://github.com/marcgoertzen/enhanced-emojis/issues",
 
     "min_server_version": "10.0.0",
+    "settings_schema": {
+        "header": "",
+        "footer": "",
+        "settings": [
+            {
+                "key": "EnableEnhancedEmojis",
+                "display_name": "Enable Enhanced Emojis",
+                "type": "bool",
+                "help_text": "Enable larger custom emojis in Mattermost post content.",
+                "placeholder": "",
+                "default": true
+            }
+        ]
+    },
+    "server": {
+        "executable": "server/dist/enhanced-emojis-windows-amd64.exe",
+        "executables": {
+            "linux-amd64": "server/dist/enhanced-emojis-linux-amd64",
+            "darwin-amd64": "server/dist/enhanced-emojis-darwin-amd64",
+            "windows-amd64": "server/dist/enhanced-emojis-windows-amd64.exe"
+        }
+    },
 
     "webapp": {
         "bundle_path": "webapp/dist/main.js"

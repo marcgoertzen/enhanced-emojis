@@ -19,8 +19,9 @@
     "typecheck": "npm run check-manifest && npm --prefix webapp run check-types",
     "test": "npm run check-manifest && npm --prefix webapp run test -- --runInBand",
     "build:webapp": "npm run check-manifest && npm --prefix webapp run build",
+    "build:server": "node scripts/build-server.js",
     "package:plugin": "node scripts/package-plugin.js",
-    "package": "npm run build:webapp && npm run package:plugin",
+    "package": "npm run build:webapp && npm run build:server && npm run package:plugin",
     "verify": "npm run lint && npm run typecheck && npm run test && npm run package",
     "clean": "node scripts/clean.js"
   }

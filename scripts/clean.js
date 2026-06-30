@@ -4,6 +4,7 @@ const path = require('node:path');
 const rootDir = path.resolve(__dirname, '..');
 const pathsToRemove = [
     path.join(rootDir, 'dist'),
+    path.join(rootDir, 'server', 'dist'),
     path.join(rootDir, 'webapp', 'dist'),
     path.join(rootDir, 'webapp', 'junit.xml'),
 ];
