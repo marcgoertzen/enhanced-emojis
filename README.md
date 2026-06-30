@@ -25,23 +25,19 @@ Current non-goals for `v0.2.0`:
 
 ## Configuration
 
-The plugin currently exposes five admin settings:
+The plugin exposes three admin settings:
 
 - `Enable Enhanced Emojis`
-- `Enable Developer Mode`
 - `Enable Reaction Emojis`
-- `Emoji Size`
-- `Reaction Emoji Size`
+- `Enable Developer Mode`
 
-`Emoji Size` accepts `Small`, `Default`, `Large`, `Extra Large`, and `Max Size`.
+Administrators decide which features are available in Mattermost.
 
-Developer Mode is admin-controlled, overrides both configured emoji sizes, and enables a red outline around targeted custom emojis.
+`Enable Enhanced Emojis` turns post emoji sizing on or off.
 
-`Enable Reaction Emojis` is off by default and only affects custom emoji reactions under posts.
+`Enable Reaction Emojis` turns reaction emoji sizing on or off.
 
-`Emoji Size` and `Reaction Emoji Size` are legacy admin defaults for backwards compatibility. User preferences control the effective sizes for enabled features.
-
-`Reaction Emoji Size` controls custom emoji reactions independently from post emojis.
+`Enable Developer Mode` overrides both emoji sizes to `64px` and enables the red outline used for visual debugging.
 
 ## User Settings
 
@@ -123,7 +119,7 @@ The package contains:
 
 1. Run `npm run package`.
 2. Upload `dist/de.dakosy.enhanced-emojis.tar.gz` in the Mattermost System Console.
-3. Configure `Enable Enhanced Emojis`, `Enable Developer Mode`, `Emoji Size`, `Enable Reaction Emojis`, and `Reaction Emoji Size` as needed.
+3. Configure `Enable Enhanced Emojis`, `Enable Reaction Emojis`, and `Enable Developer Mode` as needed.
 4. Enable the plugin.
 5. Open your user settings and set `Post Emoji Size` and `Reaction Emoji Size` if you want custom sizes.
 6. Create or use an existing custom emoji.

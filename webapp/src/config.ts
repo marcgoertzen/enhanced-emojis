@@ -4,8 +4,6 @@ export interface EnhancedEmojisConfig {
     enableEnhancedEmojis: boolean;
     enableDeveloperMode: boolean;
     enableReactionEmojis: boolean;
-    emojiSize: EmojiSize;
-    reactionEmojiSize: EmojiSize;
 }
 
 export interface EnhancedEmojisUserPreferences {
@@ -25,8 +23,6 @@ export const DEFAULT_ENHANCED_EMOJIS_CONFIG: EnhancedEmojisConfig = {
     enableEnhancedEmojis: true,
     enableDeveloperMode: false,
     enableReactionEmojis: false,
-    emojiSize: 'default',
-    reactionEmojiSize: 'default',
 };
 
 export const DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES: EnhancedEmojisUserPreferences = {
@@ -45,24 +41,10 @@ const EMOJI_SIZE_TO_PIXELS: Record<EmojiSize, number> = {
 const VALID_EMOJI_SIZES: EmojiSize[] = ['small', 'default', 'large', 'extraLarge', 'maxSize'];
 
 export function normalizeEnhancedEmojisConfig(config: Partial<EnhancedEmojisConfig> | null | undefined): EnhancedEmojisConfig {
-    const enableEnhancedEmojisValue = config?.enableEnhancedEmojis;
-    const enableDeveloperModeValue = config?.enableDeveloperMode;
-    const enableReactionEmojisValue = config?.enableReactionEmojis;
-    const emojiSizeValue = config?.emojiSize;
-    const reactionEmojiSizeValue = config?.reactionEmojiSize;
-
-    const enableEnhancedEmojis = typeof enableEnhancedEmojisValue === 'boolean' ? enableEnhancedEmojisValue : DEFAULT_ENHANCED_EMOJIS_CONFIG.enableEnhancedEmojis;
-    const enableDeveloperMode = typeof enableDeveloperModeValue === 'boolean' ? enableDeveloperModeValue : DEFAULT_ENHANCED_EMOJIS_CONFIG.enableDeveloperMode;
-    const enableReactionEmojis = typeof enableReactionEmojisValue === 'boolean' ? enableReactionEmojisValue : DEFAULT_ENHANCED_EMOJIS_CONFIG.enableReactionEmojis;
-    const emojiSize = isEmojiSize(emojiSizeValue) ? emojiSizeValue : DEFAULT_ENHANCED_EMOJIS_CONFIG.emojiSize;
-    const reactionEmojiSize = isEmojiSize(reactionEmojiSizeValue) ? reactionEmojiSizeValue : DEFAULT_ENHANCED_EMOJIS_CONFIG.reactionEmojiSize;
-
     return {
-        enableEnhancedEmojis,
-        enableDeveloperMode,
-        enableReactionEmojis,
-        emojiSize,
-        reactionEmojiSize,
+        enableEnhancedEmojis: typeof config?.enableEnhancedEmojis === 'boolean' ? config.enableEnhancedEmojis : DEFAULT_ENHANCED_EMOJIS_CONFIG.enableEnhancedEmojis,
+        enableDeveloperMode: typeof config?.enableDeveloperMode === 'boolean' ? config.enableDeveloperMode : DEFAULT_ENHANCED_EMOJIS_CONFIG.enableDeveloperMode,
+        enableReactionEmojis: typeof config?.enableReactionEmojis === 'boolean' ? config.enableReactionEmojis : DEFAULT_ENHANCED_EMOJIS_CONFIG.enableReactionEmojis,
     };
 }
 

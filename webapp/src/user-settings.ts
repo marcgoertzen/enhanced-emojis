@@ -21,7 +21,7 @@ export function registerEnhancedEmojisUserSettings(registry: PluginRegistry): vo
         uiName: manifest.name,
         sections: [
             {
-                title: 'Enhanced Emojis',
+                title: 'Post Emojis',
                 settings: [
                     {
                         type: 'radio',
@@ -31,6 +31,11 @@ export function registerEnhancedEmojisUserSettings(registry: PluginRegistry): vo
                         default: DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.postEmojiSize,
                         options: EMOJI_SIZE_OPTIONS,
                     },
+                ],
+            },
+            {
+                title: 'Reaction Emojis',
+                settings: [
                     {
                         type: 'radio',
                         name: 'reactionEmojiSize',

@@ -65,8 +65,6 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
                 enableEnhancedEmojis: true,
                 enableDeveloperMode: false,
                 enableReactionEmojis: true,
-                emojiSize: 'small',
-                reactionEmojiSize: 'large',
             }),
         }));
         const registerUserSettings = jest.fn();
@@ -91,6 +89,18 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         await plugin.initialize({registerUserSettings} as never, store as never);
 
         expect(registerUserSettings).toHaveBeenCalledTimes(1);
+        expect(registerUserSettings).toHaveBeenCalledWith(expect.objectContaining({
+            id: PLUGIN_ID,
+            uiName: 'Enhanced Emojis',
+            sections: [
+                expect.objectContaining({
+                    title: 'Post Emojis',
+                }),
+                expect.objectContaining({
+                    title: 'Reaction Emojis',
+                }),
+            ],
+        }));
         expect(fetch).toHaveBeenCalledWith(`/plugins/${PLUGIN_ID}/config`);
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-enabled', true);
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-developer-mode', false);
@@ -113,8 +123,6 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
                 enableEnhancedEmojis: false,
                 enableDeveloperMode: true,
                 enableReactionEmojis: false,
-                emojiSize: 'large',
-                reactionEmojiSize: 'extraLarge',
             }),
         }));
 
@@ -194,8 +202,6 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
                 enableEnhancedEmojis: true,
                 enableDeveloperMode: true,
                 enableReactionEmojis: true,
-                emojiSize: 'default',
-                reactionEmojiSize: 'maxSize',
             }),
         }));
 

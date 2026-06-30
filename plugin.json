@@ -21,72 +21,12 @@
                 "default": true
             },
             {
-                "key": "EmojiSize",
-                "display_name": "Emoji Size",
-                "type": "dropdown",
-                "help_text": "Select the size used for custom emojis in post content.",
-                "placeholder": "",
-                "default": "default",
-                "options": [
-                    {
-                        "display_name": "Small (24px)",
-                        "value": "small"
-                    },
-                    {
-                        "display_name": "Default (32px)",
-                        "value": "default"
-                    },
-                    {
-                        "display_name": "Large (48px)",
-                        "value": "large"
-                    },
-                    {
-                        "display_name": "Extra Large (64px)",
-                        "value": "extraLarge"
-                    },
-                    {
-                        "display_name": "Max Size (128px)",
-                        "value": "maxSize"
-                    }
-                ]
-            },
-            {
                 "key": "EnableReactionEmojis",
                 "display_name": "Enable Reaction Emojis",
                 "type": "bool",
                 "help_text": "Apply Enhanced Emojis sizing to custom emoji reactions.",
                 "placeholder": "",
                 "default": false
-            },
-            {
-                "key": "ReactionEmojiSize",
-                "display_name": "Reaction Emoji Size",
-                "type": "dropdown",
-                "help_text": "Select the size used for custom emoji reactions.",
-                "placeholder": "",
-                "default": "default",
-                "options": [
-                    {
-                        "display_name": "Small (24px)",
-                        "value": "small"
-                    },
-                    {
-                        "display_name": "Default (32px)",
-                        "value": "default"
-                    },
-                    {
-                        "display_name": "Large (48px)",
-                        "value": "large"
-                    },
-                    {
-                        "display_name": "Extra Large (64px)",
-                        "value": "extraLarge"
-                    },
-                    {
-                        "display_name": "Max Size (128px)",
-                        "value": "maxSize"
-                    }
-                ]
             },
             {
                 "key": "EnableDeveloperMode",
