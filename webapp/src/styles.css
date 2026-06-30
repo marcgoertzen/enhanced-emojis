@@ -21,9 +21,15 @@ html.enhanced-emojis-enabled.enhanced-emojis-developer-mode .post-message__text 
 html.enhanced-emojis-enabled.enhanced-emojis-reactions-enabled .Reaction:has(img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"]) {
     display: inline-flex;
     align-items: center;
-    gap: 0.125rem;
-    min-height: var(--enhanced-reaction-emojis-size);
+    justify-content: flex-start;
+    gap: var(--enhanced-reaction-chip-gap);
+    min-height: var(--enhanced-reaction-chip-min-height);
+    padding-block: var(--enhanced-reaction-chip-padding-block);
+    padding-inline: var(--enhanced-reaction-chip-padding-inline);
+    box-sizing: border-box;
     white-space: nowrap;
+    line-height: 1;
+    vertical-align: middle;
 }
 
 html.enhanced-emojis-enabled.enhanced-emojis-reactions-enabled .Reaction:has(img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"]) img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"] {
@@ -31,6 +37,7 @@ html.enhanced-emojis-enabled.enhanced-emojis-reactions-enabled .Reaction:has(img
     height: var(--enhanced-reaction-emojis-size) !important;
     min-width: var(--enhanced-reaction-emojis-size) !important;
     min-height: var(--enhanced-reaction-emojis-size) !important;
+    flex: 0 0 auto;
     vertical-align: text-bottom;
 }
 

@@ -7,6 +7,7 @@ Version `0.2.0` is the current release. It uses a minimal server component only 
 ## Current Features
 
 - Larger custom emojis in Mattermost post content
+- Custom emoji reactions with size-aware chip layout
 - CSS-first WebApp styling
 - Reliable admin configuration through a minimal server endpoint
 - User-level size preferences for post and reaction emojis
@@ -46,17 +47,23 @@ The plugin adds a user settings section called `Enhanced Emojis` with:
 - `Post Emoji Size`
 - `Reaction Emoji Size`
 
-Both default to `Default (32px)` and only affect the corresponding feature when the admin has enabled it.
+Both default to `Default (32px)` for posts and `Default (20px)` for reactions, and only affect the corresponding feature when the admin has enabled it.
 
-User settings never enable a feature on their own. They only customize the size of features that the admin has already enabled.
+Post emoji presets:
 
-Size mapping:
-
-- `Small` = `24px`
 - `Default` = `32px`
 - `Large` = `48px`
 - `Extra Large` = `64px`
-- `Max Size` = `128px`
+- `Max` = `128px`
+
+Reaction emoji presets:
+
+- `Default` = `20px`
+- `Medium` = `32px`
+- `Large` = `64px`
+- `Max` = `128px`
+
+User settings never enable a feature on their own. They only customize the size of features that the admin has already enabled.
 
 ## Installation
 
@@ -143,8 +150,9 @@ These files are retained temporarily during the migration, but they are no longe
 ## Known Limitations
 
 - Only custom emojis in post content are enlarged.
+- Custom emoji reactions are enlarged only when enabled and use a size-aware chip layout.
 - Unicode emojis are unchanged.
-- Reactions and the emoji picker are unchanged.
+- The emoji picker is unchanged.
 - Developer Mode is intended for visual debugging and should stay disabled in normal use.
 - User preferences only affect size, not whether a feature is enabled.
 

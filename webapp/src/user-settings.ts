@@ -1,4 +1,4 @@
-import {DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES, normalizeEnhancedEmojisUserPreferences, type EnhancedEmojisUserPreferences} from 'config';
+import {DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES, normalizeEnhancedEmojisUserPreferences, type EnhancedEmojisUserPreferences, type PostEmojiSize, type ReactionEmojiSize} from 'config';
 import manifest from 'manifest';
 
 import type {GlobalState} from '@mattermost/types/store';
@@ -7,11 +7,17 @@ import type {PluginConfiguration, PluginRegistry} from 'types/mattermost-webapp'
 
 const USER_PREFERENCES_CATEGORY = `pp_${manifest.id}`;
 
-const EMOJI_SIZE_OPTIONS = [
+const POST_EMOJI_SIZE_OPTIONS: Array<{text: string; value: PostEmojiSize}> = [
     {text: 'Default (32px)', value: 'default'},
-    {text: 'Small (24px)', value: 'small'},
-    {text: 'Large (40px)', value: 'large'},
-    {text: 'Extra Large (48px)', value: 'extraLarge'},
+    {text: 'Large (48px)', value: 'large'},
+    {text: 'Extra Large (64px)', value: 'extraLarge'},
+    {text: 'Max (128px)', value: 'maxSize'},
+];
+
+const REACTION_EMOJI_SIZE_OPTIONS: Array<{text: string; value: ReactionEmojiSize}> = [
+    {text: 'Default (20px)', value: 'default'},
+    {text: 'Medium (32px)', value: 'medium'},
+    {text: 'Large (64px)', value: 'large'},
     {text: 'Max (128px)', value: 'maxSize'},
 ];
 
@@ -29,7 +35,7 @@ export function registerEnhancedEmojisUserSettings(registry: PluginRegistry): vo
                         title: 'Post Emoji Size',
                         helpText: 'Select the size used for custom emojis in post content.',
                         default: DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.postEmojiSize,
-                        options: EMOJI_SIZE_OPTIONS,
+                        options: POST_EMOJI_SIZE_OPTIONS,
                     },
                 ],
             },
@@ -42,7 +48,7 @@ export function registerEnhancedEmojisUserSettings(registry: PluginRegistry): vo
                         title: 'Reaction Emoji Size',
                         helpText: 'Select the size used for custom emoji reactions.',
                         default: DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.reactionEmojiSize,
-                        options: EMOJI_SIZE_OPTIONS,
+                        options: REACTION_EMOJI_SIZE_OPTIONS,
                     },
                 ],
             },
