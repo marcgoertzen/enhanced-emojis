@@ -3,10 +3,10 @@
  */
 
 html.enhanced-emojis-enabled .post-message__text span.emoticon[style*="/api/v4/emoji/"] {
-    width: var(--enhanced-emojis-size) !important;
-    height: var(--enhanced-emojis-size) !important;
-    min-width: var(--enhanced-emojis-size) !important;
-    min-height: var(--enhanced-emojis-size) !important;
+    width: var(--enhanced-post-emojis-size) !important;
+    height: var(--enhanced-post-emojis-size) !important;
+    min-width: var(--enhanced-post-emojis-size) !important;
+    min-height: var(--enhanced-post-emojis-size) !important;
     vertical-align: text-bottom;
 }
 

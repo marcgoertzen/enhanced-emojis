@@ -8,7 +8,7 @@ The format is based on Keep a Changelog and the project uses Semantic Versioning
 
 ### Added
 
-- Separate configurable size for custom emoji reactions.
+- User-level size preferences for custom emojis in posts and reactions.
 
 ## [0.2.0] - 2026-06-30
 

@@ -9,11 +9,11 @@ Version `0.2.0` is the current release. It uses a minimal server component only 
 - Larger custom emojis in Mattermost post content
 - CSS-first WebApp styling
 - Reliable admin configuration through a minimal server endpoint
+- User-level size preferences for post and reaction emojis
 - Node-based build, test, and packaging workflow
 
 Current non-goals for `v0.2.0`:
 
-- No user-specific settings yet
 - No reaction or emoji picker styling yet
 - No Unicode emoji styling yet
 
@@ -35,11 +35,24 @@ The plugin currently exposes five admin settings:
 
 `Emoji Size` accepts `Small`, `Default`, `Large`, `Extra Large`, and `Max Size`.
 
-Developer Mode overrides the configured emoji size for visual debugging and enables a red outline around targeted custom emojis.
+Developer Mode is admin-controlled, overrides both configured emoji sizes, and enables a red outline around targeted custom emojis.
 
 `Enable Reaction Emojis` is off by default and only affects custom emoji reactions under posts.
 
+`Emoji Size` and `Reaction Emoji Size` are legacy admin defaults for backwards compatibility. User preferences control the effective sizes for enabled features.
+
 `Reaction Emoji Size` controls custom emoji reactions independently from post emojis.
+
+## User Settings
+
+The plugin adds a user settings section called `Enhanced Emojis` with:
+
+- `Post Emoji Size`
+- `Reaction Emoji Size`
+
+Both default to `Default (32px)` and only affect the corresponding feature when the admin has enabled it.
+
+User settings never enable a feature on their own. They only customize the size of features that the admin has already enabled.
 
 Size mapping:
 
@@ -110,11 +123,12 @@ The package contains:
 
 1. Run `npm run package`.
 2. Upload `dist/de.dakosy.enhanced-emojis.tar.gz` in the Mattermost System Console.
-3. Configure `Enable Enhanced Emojis`, `Enable Developer Mode`, `Emoji Size`, and `Reaction Emoji Size` as needed.
+3. Configure `Enable Enhanced Emojis`, `Enable Developer Mode`, `Emoji Size`, `Enable Reaction Emojis`, and `Reaction Emoji Size` as needed.
 4. Enable the plugin.
-5. Create or use an existing custom emoji.
-6. Post a message containing that custom emoji and confirm it renders larger in post content.
-7. Turn on Developer Mode to verify the 64px debug size and red outline.
+5. Open your user settings and set `Post Emoji Size` and `Reaction Emoji Size` if you want custom sizes.
+6. Create or use an existing custom emoji.
+7. Post a message containing that custom emoji and confirm it renders larger in post content.
+8. Turn on Developer Mode to verify the 64px debug size and red outline.
 
 ## Repository Structure
 
@@ -136,6 +150,7 @@ These files are retained temporarily during the migration, but they are no longe
 - Unicode emojis are unchanged.
 - Reactions and the emoji picker are unchanged.
 - Developer Mode is intended for visual debugging and should stay disabled in normal use.
+- User preferences only affect size, not whether a feature is enabled.
 
 ## Future Work
 

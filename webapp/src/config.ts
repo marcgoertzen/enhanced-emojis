@@ -8,11 +8,29 @@ export interface EnhancedEmojisConfig {
     reactionEmojiSize: EmojiSize;
 }
 
+export interface EnhancedEmojisUserPreferences {
+    postEmojiSize: EmojiSize;
+    reactionEmojiSize: EmojiSize;
+}
+
+export interface EnhancedEmojisEffectiveConfig {
+    enableEnhancedEmojis: boolean;
+    enableDeveloperMode: boolean;
+    enableReactionEmojis: boolean;
+    postEmojiSize: string;
+    reactionEmojiSize: string;
+}
+
 export const DEFAULT_ENHANCED_EMOJIS_CONFIG: EnhancedEmojisConfig = {
     enableEnhancedEmojis: true,
     enableDeveloperMode: false,
     enableReactionEmojis: false,
     emojiSize: 'default',
+    reactionEmojiSize: 'default',
+};
+
+export const DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES: EnhancedEmojisUserPreferences = {
+    postEmojiSize: 'default',
     reactionEmojiSize: 'default',
 };
 
@@ -48,22 +66,38 @@ export function normalizeEnhancedEmojisConfig(config: Partial<EnhancedEmojisConf
     };
 }
 
-export interface EnhancedEmojisSizes {
-    emojiSize: string;
-    reactionEmojiSize: string;
+export function normalizeEnhancedEmojisUserPreferences(preferences: Partial<EnhancedEmojisUserPreferences> | null | undefined): EnhancedEmojisUserPreferences {
+    const postEmojiSizeValue = preferences?.postEmojiSize;
+    const reactionEmojiSizeValue = preferences?.reactionEmojiSize;
+
+    return {
+        postEmojiSize: isEmojiSize(postEmojiSizeValue) ? postEmojiSizeValue : DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.postEmojiSize,
+        reactionEmojiSize: isEmojiSize(reactionEmojiSizeValue) ? reactionEmojiSizeValue : DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.reactionEmojiSize,
+    };
 }
 
-export function resolveEnhancedEmojisSizes(config: EnhancedEmojisConfig): EnhancedEmojisSizes {
-    if (config.enableDeveloperMode) {
+export function resolveEnhancedEmojisEffectiveConfig(
+    adminConfig: EnhancedEmojisConfig,
+    userPreferences: Partial<EnhancedEmojisUserPreferences> | null | undefined,
+): EnhancedEmojisEffectiveConfig {
+    const normalizedUserPreferences = normalizeEnhancedEmojisUserPreferences(userPreferences);
+
+    if (adminConfig.enableDeveloperMode) {
         return {
-            emojiSize: '64px',
+            enableEnhancedEmojis: adminConfig.enableEnhancedEmojis,
+            enableDeveloperMode: adminConfig.enableDeveloperMode,
+            enableReactionEmojis: adminConfig.enableReactionEmojis,
+            postEmojiSize: '64px',
             reactionEmojiSize: '64px',
         };
     }
 
     return {
-        emojiSize: `${EMOJI_SIZE_TO_PIXELS[config.emojiSize]}px`,
-        reactionEmojiSize: `${EMOJI_SIZE_TO_PIXELS[config.reactionEmojiSize]}px`,
+        enableEnhancedEmojis: adminConfig.enableEnhancedEmojis,
+        enableDeveloperMode: adminConfig.enableDeveloperMode,
+        enableReactionEmojis: adminConfig.enableReactionEmojis,
+        postEmojiSize: `${EMOJI_SIZE_TO_PIXELS[normalizedUserPreferences.postEmojiSize]}px`,
+        reactionEmojiSize: `${EMOJI_SIZE_TO_PIXELS[normalizedUserPreferences.reactionEmojiSize]}px`,
     };
 }
 
@@ -71,19 +105,18 @@ export function isEmojiSize(value: unknown): value is EmojiSize {
     return typeof value === 'string' && VALID_EMOJI_SIZES.includes(value as EmojiSize);
 }
 
-export function applyEnhancedEmojisConfig(rootElement: HTMLElement, config: EnhancedEmojisConfig): void {
-    const sizes = resolveEnhancedEmojisSizes(config);
+export function applyEnhancedEmojisConfig(rootElement: HTMLElement, config: EnhancedEmojisEffectiveConfig): void {
     rootElement.classList.toggle('enhanced-emojis-enabled', config.enableEnhancedEmojis);
     rootElement.classList.toggle('enhanced-emojis-developer-mode', config.enableDeveloperMode);
     rootElement.classList.toggle('enhanced-emojis-reactions-enabled', config.enableReactionEmojis);
-    rootElement.style.setProperty('--enhanced-emojis-size', sizes.emojiSize);
-    rootElement.style.setProperty('--enhanced-reaction-emojis-size', sizes.reactionEmojiSize);
+    rootElement.style.setProperty('--enhanced-post-emojis-size', config.postEmojiSize);
+    rootElement.style.setProperty('--enhanced-reaction-emojis-size', config.reactionEmojiSize);
 }
 
 export function clearEnhancedEmojisConfig(rootElement: HTMLElement): void {
     rootElement.classList.remove('enhanced-emojis-enabled');
     rootElement.classList.remove('enhanced-emojis-developer-mode');
     rootElement.classList.remove('enhanced-emojis-reactions-enabled');
-    rootElement.style.removeProperty('--enhanced-emojis-size');
+    rootElement.style.removeProperty('--enhanced-post-emojis-size');
     rootElement.style.removeProperty('--enhanced-reaction-emojis-size');
 }
