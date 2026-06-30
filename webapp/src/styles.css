@@ -1,4 +1,8 @@
-html {
+html.enhanced-emojis-enabled {
+    --enhanced-emojis-size: 32px;
+}
+
+html.enhanced-emojis-enabled.enhanced-emojis-developer-mode {
     --enhanced-emojis-size: 64px;
 }
 
@@ -12,6 +16,9 @@ html.enhanced-emojis-enabled .post-message__text span.emoticon[style*="/api/v4/e
     min-width: var(--enhanced-emojis-size) !important;
     min-height: var(--enhanced-emojis-size) !important;
     vertical-align: text-bottom;
+}
+
+html.enhanced-emojis-enabled.enhanced-emojis-developer-mode .post-message__text span.emoticon[style*="/api/v4/emoji/"] {
     outline: 2px solid red;
 }
 

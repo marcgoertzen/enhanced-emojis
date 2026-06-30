@@ -18,6 +18,14 @@
                 "help_text": "Enable larger custom emojis in Mattermost post content.",
                 "placeholder": "",
                 "default": true
+            },
+            {
+                "key": "EnableDeveloperMode",
+                "display_name": "Enable Developer Mode",
+                "type": "bool",
+                "help_text": "Enables visual debugging features for Enhanced Emojis.",
+                "placeholder": "",
+                "default": false
             }
         ]
     },

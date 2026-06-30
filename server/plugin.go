@@ -40,6 +40,7 @@ func (p *EnhancedEmojisPlugin) ServeHTTP(_ *plugin.Context, w http.ResponseWrite
     w.Header().Set("Content-Type", "application/json")
     if err := json.NewEncoder(w).Encode(configResponse{
         EnableEnhancedEmojis: p.getConfiguration().isEnhancedEmojisEnabled(),
+        EnableDeveloperMode:   p.getConfiguration().isDeveloperModeEnabled(),
     }); err != nil {
         http.Error(w, "failed to encode config response", http.StatusInternalServerError)
     }
