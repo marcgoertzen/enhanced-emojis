@@ -11,6 +11,7 @@ const manifestSource = [
     'const manifest = {',
     `    id: ${JSON.stringify(pluginManifest.id)},`,
     `    name: ${JSON.stringify(pluginManifest.name)},`,
+    `    version: ${JSON.stringify(pluginManifest.version)},`,
     `    description: ${JSON.stringify(pluginManifest.description)},`,
     `    min_server_version: ${JSON.stringify(pluginManifest.min_server_version)},`,
     '    webapp: {',

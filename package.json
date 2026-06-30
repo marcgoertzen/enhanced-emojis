@@ -1,6 +1,17 @@
 {
   "name": "enhanced-emojis",
+  "version": "0.1.0",
+  "description": "Mattermost WebApp plugin for improving custom and standard emoji rendering.",
   "private": true,
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcgoertzen/enhanced-emojis.git"
+  },
+  "homepage": "https://github.com/marcgoertzen/enhanced-emojis",
+  "bugs": {
+    "url": "https://github.com/marcgoertzen/enhanced-emojis/issues"
+  },
   "scripts": {
     "check-manifest": "node scripts/update-webapp-manifest.js --check",
     "sync-manifest": "node scripts/update-webapp-manifest.js",

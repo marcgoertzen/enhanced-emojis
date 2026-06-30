@@ -1,18 +1,30 @@
 # Enhanced Emojis
 
-Enhanced Emojis is a Mattermost WebApp plugin that will improve the display of custom and standard emojis.
+Enhanced Emojis is a Mattermost WebApp plugin for improving the display of custom and standard emojis in Mattermost.
 
-This repository is intentionally set up as a WebApp-only plugin foundation. No plugin features are implemented yet, and there is no server-side plugin code.
+Version `0.1.0` is the first public MVP release. It is intentionally WebApp-only and does not include server-side plugin functionality.
 
-## Current Scope
+## Current Features
 
-- WebApp plugin scaffold
-- Plugin manifest for `de.dakosy.enhanced-emojis`
-- Minimal build and test setup
+- Larger custom emojis in Mattermost post content
+- WebApp-only implementation with CSS-first styling
+- Minimal build, test, and packaging workflow
+
+Current non-goals for `v0.1.0`:
+
+- No admin or user settings yet
+- No reaction or emoji picker styling yet
+- No server-side functionality
+
+## Compatibility
+
+- Mattermost plugin ID: `de.dakosy.enhanced-emojis`
+- Minimum server version: `10.0.0`
+- Plugin archive output: `dist/de.dakosy.enhanced-emojis.tar.gz`
 
 ## Development
 
-The primary workflow is now Node-based and does not depend on Go helper binaries.
+The primary workflow is Node-based. The WebApp source lives in `webapp/src/` and automated tests live in `webapp/tests/`.
 
 Useful root commands:
 
@@ -57,6 +69,22 @@ The package contains:
 - `assets/` when present
 - `public/` when present
 
+## Local Testing In Mattermost
+
+1. Run `npm run package`.
+2. Upload `dist/de.dakosy.enhanced-emojis.tar.gz` in the Mattermost System Console.
+3. Enable the plugin.
+4. Create or use an existing custom emoji.
+5. Post a message containing that custom emoji and confirm it renders larger in post content.
+
+## Repository Structure
+
+- `plugin.json` contains the plugin manifest used for packaging
+- `webapp/src/` contains the WebApp implementation
+- `webapp/tests/` contains Jest setup and WebApp tests
+- `assets/` contains plugin assets
+- `scripts/` contains repository build and packaging helpers
+
 ## Legacy Tooling
 
 The repository still contains Mattermost starter-template Go build files under `build/` as well as `go.mod`, `go.sum`, and `.golangci.yml`.
@@ -67,7 +95,11 @@ These files are retained temporarily during the migration, but they are no longe
 
 Planned work for later steps includes:
 
-- emoji display improvements in posts
+- Unicode emoji improvements in posts
 - reaction rendering improvements
 - emoji picker styling
 - optional plugin configuration
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development notes and the expected contribution workflow.

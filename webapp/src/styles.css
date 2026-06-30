@@ -1,0 +1,18 @@
+/*
+ * Posts
+ */
+
+.post-message__text img.emoticon[src*="/api/v4/emoji/"],
+.post-message__text img.emoticon--custom {
+    width: 32px;
+    height: 32px;
+    vertical-align: text-bottom;
+}
+
+/*
+ * Reactions
+ */
+
+/*
+ * Emoji Picker
+ */
