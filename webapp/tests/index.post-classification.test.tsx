@@ -2,42 +2,10 @@
 
 export {};
 
+import {makePreference, makeStore} from './helpers';
+
 const PLUGIN_ID = 'de.dakosy.enhanced-emojis';
 const USER_PREFERENCES_PREFIX = `pp_${PLUGIN_ID}`;
-
-function makePreference(name: string, value: string) {
-    return {
-        category: USER_PREFERENCES_PREFIX,
-        name,
-        user_id: 'user-id',
-        value,
-    };
-}
-
-function makeStore(
-    preferences: Record<string, {category: string; name: string; user_id: string; value: string}>,
-    locale: string,
-) {
-    const currentUserId = 'user-id';
-    return {
-        getState: jest.fn(() => ({
-            entities: {
-                preferences: {
-                    myPreferences: preferences,
-                },
-                users: {
-                    currentUserId,
-                    profiles: {
-                        [currentUserId]: {
-                            locale,
-                        },
-                    },
-                },
-            },
-        })),
-        subscribe: jest.fn(() => jest.fn()),
-    };
-}
 
 describe('EnhancedEmojisPlugin post classification', () => {
     beforeEach(() => {
@@ -73,7 +41,7 @@ describe('EnhancedEmojisPlugin post classification', () => {
 
         Object.assign(global, {fetch});
 
-        const {default: EnhancedEmojisPlugin} = require('../src/index');
+        const {default: EnhancedEmojisPlugin} = require('../src/plugin');
         const plugin = new EnhancedEmojisPlugin();
         const store = makeStore({
             [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('EnableEnhancedEmojis', 'true'),
@@ -101,7 +69,7 @@ describe('EnhancedEmojisPlugin post classification', () => {
 
         Object.assign(global, {fetch});
 
-        const {default: EnhancedEmojisPlugin} = require('../src/index');
+        const {default: EnhancedEmojisPlugin} = require('../src/plugin');
         const plugin = new EnhancedEmojisPlugin();
         const store = makeStore({
             [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('EnableEnhancedEmojis', 'true'),

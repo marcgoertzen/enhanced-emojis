@@ -26,11 +26,11 @@ test('includes inline post emoji size translations for English and German', () =
     expect(getEnhancedEmojisTranslations('en')).toMatchObject({
         'enhanced_emojis.settings.posts.inline.title': 'Inline Post Emojis',
         'enhanced_emojis.settings.posts.inline.size': 'Inline Post Emoji Size',
-        'enhanced_emojis.settings.posts.inline.option.default': 'Default / normal text size',
+        'enhanced_emojis.settings.posts.inline.option.default': 'Default',
     });
     expect(getEnhancedEmojisTranslations('de')).toMatchObject({
         'enhanced_emojis.settings.posts.inline.title': 'Inline-Beitrags-Emojis',
         'enhanced_emojis.settings.posts.inline.size': 'Inline-Emoji-Größe in Beiträgen',
-        'enhanced_emojis.settings.posts.inline.option.default': 'Standard / normale Textgröße',
+        'enhanced_emojis.settings.posts.inline.option.default': 'Standard',
     });
 });

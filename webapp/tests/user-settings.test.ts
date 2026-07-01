@@ -1,7 +1,8 @@
+import {getEnhancedEmojisUserPreferences} from 'config';
 import {getEnhancedEmojisTranslations} from 'i18n';
 import React from 'react';
 import {useSelector} from 'react-redux';
-import {createEnableEnhancedEmojisSettingComponent, getEnhancedEmojisUserPreferences, registerEnhancedEmojisUserSettings} from 'user-settings';
+import {createEnableEnhancedEmojisSettingComponent, registerEnhancedEmojisUserSettings} from 'settings';
 
 jest.mock('react-redux', () => ({
     useSelector: jest.fn(),

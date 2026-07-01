@@ -1,75 +1,9 @@
 import {getEnhancedEmojisTranslations, type EnhancedEmojisTranslationKey} from 'i18n';
 
+import {makeHydratableStore, makePreference, makeStore} from './helpers';
+
 const PLUGIN_ID = 'de.dakosy.enhanced-emojis';
 const USER_PREFERENCES_PREFIX = `pp_${PLUGIN_ID}`;
-
-function makePreference(name: string, value: string) {
-    return {
-        category: USER_PREFERENCES_PREFIX,
-        name,
-        user_id: 'user-id',
-        value,
-    };
-}
-
-function makeStore(
-    preferences: Record<string, {category: string; name: string; user_id: string; value: string}>,
-    locale: string,
-) {
-    const currentUserId = 'user-id';
-    return {
-        getState: jest.fn(() => ({
-            entities: {
-                preferences: {
-                    myPreferences: preferences,
-                },
-                users: {
-                    currentUserId,
-                    profiles: {
-                        [currentUserId]: {
-                            locale,
-                        },
-                    },
-                },
-            },
-        })),
-        subscribe: jest.fn(() => jest.fn()),
-    };
-}
-
-function makeHydratableStore(locale: string) {
-    const currentUserId = 'user-id';
-    let currentPreferences: Record<string, {category: string; name: string; user_id: string; value: string}> = {};
-    let subscriber: (() => void) | undefined;
-
-    return {
-        emitChange(): void {
-            subscriber?.();
-        },
-        getState: jest.fn(() => ({
-            entities: {
-                preferences: {
-                    myPreferences: currentPreferences,
-                },
-                users: {
-                    currentUserId,
-                    profiles: {
-                        [currentUserId]: {
-                            locale,
-                        },
-                    },
-                },
-            },
-        })),
-        setPreferences(preferences: Record<string, {category: string; name: string; user_id: string; value: string}>): void {
-            currentPreferences = preferences;
-        },
-        subscribe: jest.fn((listener: () => void) => {
-            subscriber = listener;
-            return jest.fn();
-        }),
-    };
-}
 
 describe('EnhancedEmojisPlugin entrypoint', () => {
     beforeEach(() => {
@@ -141,7 +75,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             },
         });
 
-        const {default: EnhancedEmojisPlugin} = require('../src/index');
+        const {default: EnhancedEmojisPlugin} = require('../src/plugin');
         const plugin = new EnhancedEmojisPlugin();
 
         registerUserSettings.mockImplementation(() => {
@@ -201,7 +135,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             },
         });
 
-        const {default: EnhancedEmojisPlugin} = require('../src/index');
+        const {default: EnhancedEmojisPlugin} = require('../src/plugin');
         const plugin = new EnhancedEmojisPlugin();
 
         await plugin.initialize({registerUserSettings, registerTranslations} as never, store as never);
@@ -256,7 +190,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             },
         });
 
-        const {default: EnhancedEmojisPlugin} = require('../src/index');
+        const {default: EnhancedEmojisPlugin} = require('../src/plugin');
         const plugin = new EnhancedEmojisPlugin();
 
         await plugin.initialize({registerUserSettings, registerTranslations} as never, store as never);
@@ -395,7 +329,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             },
         });
 
-        const {default: EnhancedEmojisPlugin} = require('../src/index');
+        const {default: EnhancedEmojisPlugin} = require('../src/plugin');
         const plugin = new EnhancedEmojisPlugin();
         const store = makeStore({
             [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('EnableEnhancedEmojis', userPreferences.EnableEnhancedEmojis),
@@ -453,7 +387,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             },
         });
 
-        const {default: EnhancedEmojisPlugin} = require('../src/index');
+        const {default: EnhancedEmojisPlugin} = require('../src/plugin');
         const plugin = new EnhancedEmojisPlugin();
         const store = makeStore({
             [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('EnableEnhancedEmojis', 'true'),
@@ -507,7 +441,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             },
         });
 
-        const {default: EnhancedEmojisPlugin} = require('../src/index');
+        const {default: EnhancedEmojisPlugin} = require('../src/plugin');
         const plugin = new EnhancedEmojisPlugin();
         const store = makeStore({
             [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('EnableEnhancedEmojis', 'true'),
@@ -557,7 +491,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             },
         });
 
-        const {default: EnhancedEmojisPlugin} = require('../src/index');
+        const {default: EnhancedEmojisPlugin} = require('../src/plugin');
         const plugin = new EnhancedEmojisPlugin();
         const store = makeStore({
             [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('EnableEnhancedEmojis', 'false'),

@@ -1,6 +1,6 @@
 /** @jest-environment jsdom */
 
-import {classifyAllPostEmojiContainers, classifyPostEmojiMutations, clearPostEmojiClassification} from 'post-emoji-classification';
+import {classifyAllPostEmojiContainers, classifyPostEmojiMutations, clearPostEmojiClassification} from 'features/posts/post-emoji-classifier';
 
 function createPostMessageHtml(content: string): HTMLElement {
     const wrapper = document.createElement('div');

@@ -1,24 +1,29 @@
-import {DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES, normalizeEnhancedEmojisUserPreferences, type EnhancedEmojisConfig, type EnhancedEmojisUserPreferences, type InlinePostEmojiSize, type PostEmojiSize, type ReactionEmojiSize} from 'config';
+import {
+    DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES,
+    INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME,
+    POST_EMOJI_SIZE_PREFERENCE_NAME,
+    REACTION_EMOJI_SIZE_PREFERENCE_NAME,
+    USER_ENABLE_PREFERENCE_NAME,
+    getEnhancedEmojisUserPreferences,
+    normalizeEnhancedEmojisUserPreferences,
+    type EnhancedEmojisConfig,
+    type EnhancedEmojisUserPreferences,
+    type InlinePostEmojiSize,
+    type PostEmojiSize,
+    type ReactionEmojiSize,
+} from 'config';
 import {getEnhancedEmojisTranslations, type EnhancedEmojisTranslations} from 'i18n';
 import manifest from 'manifest';
 import React from 'react';
 import {useSelector} from 'react-redux';
 
-import type {GlobalState} from '@mattermost/types/store';
+import {createEmojiPreferenceSection} from './components/emoji-preference-setting';
+import renderToggleSetting from './components/toggle-setting';
 
-import type {PluginConfiguration, PluginConfigurationSetting, PluginRegistry} from 'types/mattermost-webapp';
-
-const USER_PREFERENCES_CATEGORY = `pp_${manifest.id}`;
-const USER_ENABLE_PREFERENCE_NAME = 'EnableEnhancedEmojis';
-
-interface EmojiPreferenceSectionDescriptor<ValueType extends string> {
-    sectionTitle: string;
-    settingName: string;
-    settingTitle: string;
-    helpText: string;
-    defaultValue: ValueType;
-    options: Array<{text: string; value: ValueType}>;
-}
+type GlobalState = import('@mattermost/types/store').GlobalState;
+type PluginConfiguration = import('types/mattermost-webapp').PluginConfiguration;
+type PluginConfigurationSetting = import('types/mattermost-webapp').PluginConfigurationSetting;
+type PluginRegistry = import('types/mattermost-webapp').PluginRegistry;
 
 function getPostEmojiSizeOptions(translations: EnhancedEmojisTranslations): Array<{text: string; value: PostEmojiSize}> {
     return [
@@ -48,27 +53,9 @@ function getInlinePostEmojiSizeOptions(translations: EnhancedEmojisTranslations)
     ];
 }
 
-function createMessageSettingComponent(message: string): (props: {informChange: (name: string, value: string) => void}) => React.ReactElement {
+function createMessageSettingComponent(message: string): () => React.ReactElement {
     return function MessageSetting(): React.ReactElement {
         return React.createElement('div', null, message);
-    };
-}
-
-function createEmojiPreferenceSection<ValueType extends string>(
-    descriptor: EmojiPreferenceSectionDescriptor<ValueType>,
-): PluginConfiguration['sections'][number] {
-    return {
-        title: descriptor.sectionTitle,
-        settings: [
-            {
-                type: 'radio',
-                name: descriptor.settingName,
-                title: descriptor.settingTitle,
-                helpText: descriptor.helpText,
-                default: descriptor.defaultValue,
-                options: descriptor.options,
-            },
-        ],
     };
 }
 
@@ -89,67 +76,13 @@ export function createEnableEnhancedEmojisSettingComponent(
             informChange(USER_ENABLE_PREFERENCE_NAME, nextEnabled ? 'true' : 'false');
         };
 
-        return React.createElement('button', {
-            'aria-checked': enabled,
-            'aria-label': translations['enhanced_emojis.settings.enable.title'],
-            onClick: toggleEnabled,
-            onKeyDown: (event: React.KeyboardEvent<HTMLButtonElement>) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    toggleEnabled();
-                }
-            },
-            role: 'switch',
-            style: {
-                backgroundColor: enabled ? '#1c58d9' : '#d9dbdd',
-                border: 0,
-                borderRadius: '999px',
-                boxShadow: enabled ? 'inset 0 0 0 1px rgba(0, 0, 0, 0.08)' : 'inset 0 0 0 1px rgba(63, 67, 80, 0.16)',
-                cursor: 'pointer',
-                display: 'inline-block',
-                height: '32px',
-                padding: '4px',
-                position: 'relative',
-                transition: 'background-color 120ms ease',
-                width: '96px',
-            },
-            type: 'button',
-        }, React.createElement('span', {
-            'aria-hidden': 'true',
-            style: {
-                color: enabled ? '#ffffff' : '#3f4350',
-                display: 'flex',
-                fontSize: '12px',
-                fontWeight: 600,
-                height: '100%',
-                justifyContent: enabled ? 'flex-start' : 'flex-end',
-                letterSpacing: '0.01em',
-                lineHeight: '24px',
-                paddingLeft: enabled ? '14px' : '0',
-                paddingRight: enabled ? '0' : '14px',
-                textTransform: 'uppercase',
-                width: '100%',
-            },
-        }, enabled ?
-            translations['enhanced_emojis.settings.enable.state.on'] :
-            translations['enhanced_emojis.settings.enable.state.off'],
-        ),
-        React.createElement('span', {
-            'aria-hidden': 'true',
-            style: {
-                backgroundColor: '#ffffff',
-                borderRadius: '50%',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.25)',
-                display: 'block',
-                height: '24px',
-                left: '4px',
-                position: 'absolute',
-                top: '4px',
-                transform: enabled ? 'translateX(64px)' : 'translateX(0)',
-                transition: 'transform 120ms ease',
-                width: '24px',
-            },
-        }));
+        return renderToggleSetting({
+            checked: enabled,
+            label: translations['enhanced_emojis.settings.enable.title'],
+            offText: translations['enhanced_emojis.settings.enable.state.off'],
+            onText: translations['enhanced_emojis.settings.enable.state.on'],
+            onToggle: toggleEnabled,
+        });
     };
 }
 
@@ -195,7 +128,7 @@ export function createEnhancedEmojisUserSettingsConfig(
     if (normalizedUserPreferences.enableEnhancedEmojis && adminConfig.enableEnhancedPostEmojis) {
         sections.push(createEmojiPreferenceSection({
             sectionTitle: translations['enhanced_emojis.settings.posts.title'],
-            settingName: 'postEmojiSize',
+            settingName: POST_EMOJI_SIZE_PREFERENCE_NAME,
             settingTitle: translations['enhanced_emojis.settings.posts.size'],
             helpText: translations['enhanced_emojis.settings.posts.help_text'],
             defaultValue: DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.postEmojiSize,
@@ -204,7 +137,7 @@ export function createEnhancedEmojisUserSettingsConfig(
 
         sections.push(createEmojiPreferenceSection({
             sectionTitle: translations['enhanced_emojis.settings.posts.inline.title'],
-            settingName: 'InlinePostEmojiSize',
+            settingName: INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME,
             settingTitle: translations['enhanced_emojis.settings.posts.inline.size'],
             helpText: translations['enhanced_emojis.settings.posts.inline.help_text'],
             defaultValue: DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.inlinePostEmojiSize,
@@ -215,7 +148,7 @@ export function createEnhancedEmojisUserSettingsConfig(
     if (normalizedUserPreferences.enableEnhancedEmojis && adminConfig.enableEnhancedReactionEmojis) {
         sections.push(createEmojiPreferenceSection({
             sectionTitle: translations['enhanced_emojis.settings.reactions.title'],
-            settingName: 'reactionEmojiSize',
+            settingName: REACTION_EMOJI_SIZE_PREFERENCE_NAME,
             settingTitle: translations['enhanced_emojis.settings.reactions.size'],
             helpText: translations['enhanced_emojis.settings.reactions.help_text'],
             defaultValue: DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.reactionEmojiSize,
@@ -237,16 +170,4 @@ export function registerEnhancedEmojisUserSettings(
     userPreferences: Partial<EnhancedEmojisUserPreferences> | null | undefined,
 ): void {
     registry.registerUserSettings(createEnhancedEmojisUserSettingsConfig(adminConfig, locale, userPreferences));
-}
-
-export function getEnhancedEmojisUserPreferences(state: GlobalState): EnhancedEmojisUserPreferences {
-    const preferences = Object.values(state?.entities?.preferences?.myPreferences ?? {}).filter((preference) => preference.category === USER_PREFERENCES_CATEGORY);
-    const preferencesByName = new Map(preferences.map((preference) => [preference.name, preference.value]));
-
-    return normalizeEnhancedEmojisUserPreferences({
-        enableEnhancedEmojis: preferencesByName.get(USER_ENABLE_PREFERENCE_NAME) === 'true',
-        postEmojiSize: preferencesByName.get('postEmojiSize') as EnhancedEmojisUserPreferences['postEmojiSize'] | undefined,
-        inlinePostEmojiSize: preferencesByName.get('InlinePostEmojiSize') as EnhancedEmojisUserPreferences['inlinePostEmojiSize'] | undefined,
-        reactionEmojiSize: preferencesByName.get('reactionEmojiSize') as EnhancedEmojisUserPreferences['reactionEmojiSize'] | undefined,
-    });
 }
