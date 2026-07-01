@@ -59,6 +59,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
                 enableDeveloperMode: false,
                 enableReactionEmojis: false,
             },
+            expectedSectionTitles: ['Post Emojis'],
             expectedClasses: {
                 posts: true,
                 reactions: false,
@@ -72,6 +73,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
                 enableDeveloperMode: false,
                 enableReactionEmojis: true,
             },
+            expectedSectionTitles: ['Reaction Emojis'],
             expectedClasses: {
                 posts: false,
                 reactions: true,
@@ -85,6 +87,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
                 enableDeveloperMode: false,
                 enableReactionEmojis: false,
             },
+            expectedSectionTitles: ['Enhanced Emojis'],
             expectedClasses: {
                 posts: false,
                 reactions: false,
@@ -98,13 +101,14 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
                 enableDeveloperMode: false,
                 enableReactionEmojis: true,
             },
+            expectedSectionTitles: ['Post Emojis', 'Reaction Emojis'],
             expectedClasses: {
                 posts: true,
                 reactions: true,
                 developer: false,
             },
         },
-    ])('applies independent feature classes for $name', async ({adminConfig, expectedClasses}) => {
+    ])('applies independent feature classes for $name', async ({adminConfig, expectedClasses, expectedSectionTitles}) => {
         const classList = {
             remove: jest.fn(),
             toggle: jest.fn(),
@@ -139,6 +143,11 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         await plugin.initialize({registerUserSettings} as never, store as never);
 
         expect(registerUserSettings).toHaveBeenCalledTimes(1);
+        expect(registerUserSettings).toHaveBeenCalledWith(expect.objectContaining({
+            id: PLUGIN_ID,
+            uiName: 'Enhanced Emojis',
+            sections: expect.arrayContaining(expectedSectionTitles.map((title: string) => expect.objectContaining({title}))),
+        }));
         expect(fetch).toHaveBeenCalledWith(`/plugins/${PLUGIN_ID}/config`);
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-posts-enabled', expectedClasses.posts);
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-reactions-enabled', expectedClasses.reactions);

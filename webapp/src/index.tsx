@@ -28,7 +28,8 @@ export default class EnhancedEmojisPlugin {
     private lastAppliedConfigSignature?: string;
 
     public async initialize(registry: PluginRegistry, store: Store<GlobalState>): Promise<void> {
-        registerEnhancedEmojisUserSettings(registry);
+        this.adminConfig = await this.fetchPluginConfig();
+        registerEnhancedEmojisUserSettings(registry, this.adminConfig);
 
         const rootElement = globalThis.document?.documentElement;
         if (!rootElement) {
@@ -37,7 +38,6 @@ export default class EnhancedEmojisPlugin {
 
         this.rootElement = rootElement;
         this.store = store;
-        this.adminConfig = await this.fetchPluginConfig();
         this.unsubscribe = store.subscribe(() => {
             this.applyCurrentConfig();
         });

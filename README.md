@@ -49,6 +49,15 @@ The plugin adds a user settings section called `Enhanced Emojis` with:
 
 Both default to `Default (32px)` for posts and `Default (20px)` for reactions, and only affect the corresponding feature when the admin has enabled it.
 
+The user settings UI only shows sections for features that the administrator has enabled:
+
+- `Enable Enhanced Emojis` on: show `Post Emoji Size`
+- `Enable Enhanced Emojis` off: hide `Post Emoji Size`
+- `Enable Reaction Emojis` on: show `Reaction Emoji Size`
+- `Enable Reaction Emojis` off: hide `Reaction Emoji Size`
+
+If both features are disabled, the settings UI shows a short informational message instead of empty sections.
+
 Post emoji presets:
 
 - `Default` = `32px`
@@ -63,7 +72,7 @@ Reaction emoji presets:
 - `Large` = `64px`
 - `Max` = `128px`
 
-User settings never enable a feature on their own. They only customize the size of features that the admin has already enabled.
+User settings never enable a feature on their own. Hidden preferences remain stored and will apply again if the administrator later re-enables the feature.
 
 Current release: `v0.3.0`.
 
@@ -130,11 +139,12 @@ The package contains:
 2. Upload `dist/de.dakosy.enhanced-emojis.tar.gz` in the Mattermost System Console.
 3. Configure `Enable Enhanced Emojis`, `Enable Reaction Emojis`, and `Enable Developer Mode` as needed.
 4. Enable the plugin.
-5. Open your user settings and set `Post Emoji Size` and `Reaction Emoji Size` if you want custom sizes.
-6. Create or use an existing custom emoji.
-7. Post a message containing that custom emoji and confirm it renders larger only when `Enable Enhanced Emojis` is enabled.
-8. Add the same custom emoji as a reaction and confirm it renders larger only when `Enable Reaction Emojis` is enabled.
-9. Turn on Developer Mode to verify the 64px debug size and red outline for whichever feature is enabled.
+5. Open your user settings and confirm that only the sections for enabled admin features are visible.
+6. Set `Post Emoji Size` and `Reaction Emoji Size` only for the visible sections.
+7. Create or use an existing custom emoji.
+8. Post a message containing that custom emoji and confirm it renders larger only when `Enable Enhanced Emojis` is enabled.
+9. Add the same custom emoji as a reaction and confirm it renders larger only when `Enable Reaction Emojis` is enabled.
+10. Turn on Developer Mode to verify the 64px debug size and red outline for whichever feature is enabled.
 
 ## Repository Structure
 
