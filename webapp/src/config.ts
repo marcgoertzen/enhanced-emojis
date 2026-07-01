@@ -13,7 +13,7 @@ export interface EnhancedEmojisUserPreferences {
 }
 
 export interface EnhancedEmojisEffectiveConfig {
-    enableEnhancedEmojis: boolean;
+    enablePostEmojis: boolean;
     enableDeveloperMode: boolean;
     enableReactionEmojis: boolean;
     postEmojiSize: string;
@@ -71,21 +71,23 @@ export function resolveEnhancedEmojisEffectiveConfig(
     userPreferences: Partial<EnhancedEmojisUserPreferences> | null | undefined,
 ): EnhancedEmojisEffectiveConfig {
     const normalizedUserPreferences = normalizeEnhancedEmojisUserPreferences(userPreferences);
+    const enablePostEmojis = adminConfig.enableEnhancedEmojis;
+    const enableReactionEmojis = adminConfig.enableReactionEmojis;
 
     if (adminConfig.enableDeveloperMode) {
         return {
-            enableEnhancedEmojis: adminConfig.enableEnhancedEmojis,
+            enablePostEmojis,
             enableDeveloperMode: adminConfig.enableDeveloperMode,
-            enableReactionEmojis: adminConfig.enableReactionEmojis,
+            enableReactionEmojis,
             postEmojiSize: '64px',
             reactionEmojiSize: '64px',
         };
     }
 
     return {
-        enableEnhancedEmojis: adminConfig.enableEnhancedEmojis,
+        enablePostEmojis,
         enableDeveloperMode: adminConfig.enableDeveloperMode,
-        enableReactionEmojis: adminConfig.enableReactionEmojis,
+        enableReactionEmojis,
         postEmojiSize: `${POST_EMOJI_SIZE_TO_PIXELS[normalizedUserPreferences.postEmojiSize]}px`,
         reactionEmojiSize: `${REACTION_EMOJI_SIZE_TO_PIXELS[normalizedUserPreferences.reactionEmojiSize]}px`,
     };
@@ -100,7 +102,8 @@ export function isReactionEmojiSize(value: unknown): value is ReactionEmojiSize 
 }
 
 export function applyEnhancedEmojisConfig(rootElement: HTMLElement, config: EnhancedEmojisEffectiveConfig): void {
-    rootElement.classList.toggle('enhanced-emojis-enabled', config.enableEnhancedEmojis);
+    rootElement.classList.remove('enhanced-emojis-enabled');
+    rootElement.classList.toggle('enhanced-emojis-posts-enabled', config.enablePostEmojis);
     rootElement.classList.toggle('enhanced-emojis-developer-mode', config.enableDeveloperMode);
     rootElement.classList.toggle('enhanced-emojis-reactions-enabled', config.enableReactionEmojis);
     rootElement.style.setProperty('--enhanced-post-emojis-size', config.postEmojiSize);
@@ -110,6 +113,7 @@ export function applyEnhancedEmojisConfig(rootElement: HTMLElement, config: Enha
 
 export function clearEnhancedEmojisConfig(rootElement: HTMLElement): void {
     rootElement.classList.remove('enhanced-emojis-enabled');
+    rootElement.classList.remove('enhanced-emojis-posts-enabled');
     rootElement.classList.remove('enhanced-emojis-developer-mode');
     rootElement.classList.remove('enhanced-emojis-reactions-enabled');
     rootElement.style.removeProperty('--enhanced-post-emojis-size');

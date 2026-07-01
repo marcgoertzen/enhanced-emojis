@@ -34,11 +34,11 @@ The plugin exposes three admin settings:
 
 Administrators decide which features are available in Mattermost.
 
-`Enable Enhanced Emojis` turns post emoji sizing on or off.
+`Enable Enhanced Emojis` controls custom emoji sizing in post content only.
 
-`Enable Reaction Emojis` turns reaction emoji sizing on or off.
+`Enable Reaction Emojis` controls custom emoji sizing in reactions only.
 
-`Enable Developer Mode` overrides both emoji sizes to `64px` and enables the red outline used for visual debugging.
+`Enable Developer Mode` overrides the size for whichever enabled feature is active to `64px` and enables the red outline used for visual debugging.
 
 ## User Settings
 
@@ -132,8 +132,9 @@ The package contains:
 4. Enable the plugin.
 5. Open your user settings and set `Post Emoji Size` and `Reaction Emoji Size` if you want custom sizes.
 6. Create or use an existing custom emoji.
-7. Post a message containing that custom emoji and confirm it renders larger in post content.
-8. Turn on Developer Mode to verify the 64px debug size and red outline.
+7. Post a message containing that custom emoji and confirm it renders larger only when `Enable Enhanced Emojis` is enabled.
+8. Add the same custom emoji as a reaction and confirm it renders larger only when `Enable Reaction Emojis` is enabled.
+9. Turn on Developer Mode to verify the 64px debug size and red outline for whichever feature is enabled.
 
 ## Repository Structure
 
@@ -151,8 +152,8 @@ These files are retained temporarily during the migration, but they are no longe
 
 ## Known Limitations
 
-- Only custom emojis in post content are enlarged.
-- Custom emoji reactions are enlarged only when enabled and use a size-aware chip layout.
+- Custom emojis in post content are enlarged only when `Enable Enhanced Emojis` is enabled.
+- Custom emoji reactions are enlarged only when `Enable Reaction Emojis` is enabled and use a size-aware chip layout.
 - Unicode emojis are unchanged.
 - The emoji picker is unchanged.
 - Developer Mode is intended for visual debugging and should stay disabled in normal use.

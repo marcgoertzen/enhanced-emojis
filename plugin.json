@@ -16,7 +16,7 @@
                 "key": "EnableEnhancedEmojis",
                 "display_name": "Enable Enhanced Emojis",
                 "type": "bool",
-                "help_text": "Enable larger custom emojis in Mattermost post content.",
+                "help_text": "Controls larger custom emojis in Mattermost post content.",
                 "placeholder": "",
                 "default": true
             },
@@ -24,7 +24,7 @@
                 "key": "EnableReactionEmojis",
                 "display_name": "Enable Reaction Emojis",
                 "type": "bool",
-                "help_text": "Apply Enhanced Emojis sizing to custom emoji reactions.",
+                "help_text": "Controls Enhanced Emojis sizing for custom emoji reactions.",
                 "placeholder": "",
                 "default": false
             },
