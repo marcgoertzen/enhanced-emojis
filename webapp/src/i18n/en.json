@@ -1,0 +1,18 @@
+{
+    "enhanced_emojis.settings.title": "Enhanced Emojis",
+    "enhanced_emojis.settings.posts.title": "Post Emojis",
+    "enhanced_emojis.settings.posts.size": "Post Emoji Size",
+    "enhanced_emojis.settings.posts.help_text": "Select the size used for custom emojis in post content.",
+    "enhanced_emojis.settings.posts.option.default": "Default",
+    "enhanced_emojis.settings.posts.option.large": "Large",
+    "enhanced_emojis.settings.posts.option.extra_large": "Extra Large",
+    "enhanced_emojis.settings.posts.option.max": "Max",
+    "enhanced_emojis.settings.reactions.title": "Reaction Emojis",
+    "enhanced_emojis.settings.reactions.size": "Reaction Emoji Size",
+    "enhanced_emojis.settings.reactions.help_text": "Select the size used for custom emoji reactions.",
+    "enhanced_emojis.settings.reactions.option.default": "Default",
+    "enhanced_emojis.settings.reactions.option.medium": "Medium",
+    "enhanced_emojis.settings.reactions.option.large": "Large",
+    "enhanced_emojis.settings.reactions.option.max": "Max",
+    "enhanced_emojis.settings.no_features_enabled": "No Enhanced Emojis features are currently enabled by your administrator."
+}

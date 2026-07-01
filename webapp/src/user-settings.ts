@@ -1,4 +1,5 @@
 import {DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES, normalizeEnhancedEmojisUserPreferences, type EnhancedEmojisConfig, type EnhancedEmojisUserPreferences, type PostEmojiSize, type ReactionEmojiSize} from 'config';
+import {getEnhancedEmojisTranslations, type EnhancedEmojisTranslations} from 'i18n';
 import manifest from 'manifest';
 import React from 'react';
 
@@ -8,58 +9,61 @@ import type {PluginConfiguration, PluginRegistry} from 'types/mattermost-webapp'
 
 const USER_PREFERENCES_CATEGORY = `pp_${manifest.id}`;
 
-const POST_EMOJI_SIZE_OPTIONS: Array<{text: string; value: PostEmojiSize}> = [
-    {text: 'Default (32px)', value: 'default'},
-    {text: 'Large (48px)', value: 'large'},
-    {text: 'Extra Large (64px)', value: 'extraLarge'},
-    {text: 'Max (128px)', value: 'maxSize'},
-];
-
-const REACTION_EMOJI_SIZE_OPTIONS: Array<{text: string; value: ReactionEmojiSize}> = [
-    {text: 'Default (20px)', value: 'default'},
-    {text: 'Medium (32px)', value: 'medium'},
-    {text: 'Large (64px)', value: 'large'},
-    {text: 'Max (128px)', value: 'maxSize'},
-];
-
-function NoEnabledFeaturesSection(): React.ReactElement {
-    return React.createElement(
-        'div',
-        null,
-        'No Enhanced Emojis features are currently enabled by your administrator.',
-    );
+function getPostEmojiSizeOptions(translations: EnhancedEmojisTranslations): Array<{text: string; value: PostEmojiSize}> {
+    return [
+        {text: translations['enhanced_emojis.settings.posts.option.default'], value: 'default'},
+        {text: translations['enhanced_emojis.settings.posts.option.large'], value: 'large'},
+        {text: translations['enhanced_emojis.settings.posts.option.extra_large'], value: 'extraLarge'},
+        {text: translations['enhanced_emojis.settings.posts.option.max'], value: 'maxSize'},
+    ];
 }
 
-export function registerEnhancedEmojisUserSettings(registry: PluginRegistry, adminConfig: EnhancedEmojisConfig): void {
+function getReactionEmojiSizeOptions(translations: EnhancedEmojisTranslations): Array<{text: string; value: ReactionEmojiSize}> {
+    return [
+        {text: translations['enhanced_emojis.settings.reactions.option.default'], value: 'default'},
+        {text: translations['enhanced_emojis.settings.reactions.option.medium'], value: 'medium'},
+        {text: translations['enhanced_emojis.settings.reactions.option.large'], value: 'large'},
+        {text: translations['enhanced_emojis.settings.reactions.option.max'], value: 'maxSize'},
+    ];
+}
+
+function createNoEnabledFeaturesSection(message: string): React.ComponentType {
+    return function NoEnabledFeaturesSection(): React.ReactElement {
+        return React.createElement('div', null, message);
+    };
+}
+
+export function registerEnhancedEmojisUserSettings(registry: PluginRegistry, adminConfig: EnhancedEmojisConfig, locale: string): void {
+    const translations = getEnhancedEmojisTranslations(locale);
     const sections: PluginConfiguration['sections'] = [];
 
-    if (adminConfig.enableEnhancedEmojis) {
+    if (adminConfig.enableEnhancedPostEmojis) {
         sections.push({
-            title: 'Post Emojis',
+            title: translations['enhanced_emojis.settings.posts.title'],
             settings: [
                 {
                     type: 'radio',
                     name: 'postEmojiSize',
-                    title: 'Post Emoji Size',
-                    helpText: 'Select the size used for custom emojis in post content.',
+                    title: translations['enhanced_emojis.settings.posts.size'],
+                    helpText: translations['enhanced_emojis.settings.posts.help_text'],
                     default: DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.postEmojiSize,
-                    options: POST_EMOJI_SIZE_OPTIONS,
+                    options: getPostEmojiSizeOptions(translations),
                 },
             ],
         });
     }
 
-    if (adminConfig.enableReactionEmojis) {
+    if (adminConfig.enableEnhancedReactionEmojis) {
         sections.push({
-            title: 'Reaction Emojis',
+            title: translations['enhanced_emojis.settings.reactions.title'],
             settings: [
                 {
                     type: 'radio',
                     name: 'reactionEmojiSize',
-                    title: 'Reaction Emoji Size',
-                    helpText: 'Select the size used for custom emoji reactions.',
+                    title: translations['enhanced_emojis.settings.reactions.size'],
+                    helpText: translations['enhanced_emojis.settings.reactions.help_text'],
                     default: DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.reactionEmojiSize,
-                    options: REACTION_EMOJI_SIZE_OPTIONS,
+                    options: getReactionEmojiSizeOptions(translations),
                 },
             ],
         });
@@ -67,14 +71,14 @@ export function registerEnhancedEmojisUserSettings(registry: PluginRegistry, adm
 
     if (sections.length === 0) {
         sections.push({
-            title: 'Enhanced Emojis',
-            component: NoEnabledFeaturesSection,
+            title: translations['enhanced_emojis.settings.title'],
+            component: createNoEnabledFeaturesSection(translations['enhanced_emojis.settings.no_features_enabled']),
         });
     }
 
     const pluginSettings: PluginConfiguration = {
         id: manifest.id,
-        uiName: manifest.name,
+        uiName: translations['enhanced_emojis.settings.title'],
         sections,
     };
 

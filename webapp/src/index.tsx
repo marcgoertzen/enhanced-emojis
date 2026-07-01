@@ -6,6 +6,7 @@ import {
     resolveEnhancedEmojisEffectiveConfig,
     type EnhancedEmojisConfig,
 } from 'config';
+import {registerEnhancedEmojisTranslations} from 'i18n';
 import manifest from 'manifest';
 import type {Store} from 'redux';
 import {getEnhancedEmojisUserPreferences, registerEnhancedEmojisUserSettings} from 'user-settings';
@@ -16,8 +17,15 @@ import type {PluginRegistry} from 'types/mattermost-webapp';
 
 import './styles.css';
 
+function getCurrentUserLocale(state: GlobalState): string {
+    const currentUserId = state.entities.users.currentUserId;
+    return state.entities.users.profiles[currentUserId]?.locale ?? 'en';
+}
+
 export default class EnhancedEmojisPlugin {
     private adminConfig: EnhancedEmojisConfig = DEFAULT_ENHANCED_EMOJIS_CONFIG;
+
+    private registry?: PluginRegistry;
 
     private rootElement?: HTMLElement;
 
@@ -27,18 +35,24 @@ export default class EnhancedEmojisPlugin {
 
     private lastAppliedConfigSignature?: string;
 
+    private lastRegisteredLocale?: string;
+
     public async initialize(registry: PluginRegistry, store: Store<GlobalState>): Promise<void> {
+        this.registry = registry;
         this.adminConfig = await this.fetchPluginConfig();
-        registerEnhancedEmojisUserSettings(registry, this.adminConfig);
+        registerEnhancedEmojisTranslations(registry);
 
         const rootElement = globalThis.document?.documentElement;
+        this.store = store;
+        this.registerUserSettingsForCurrentLocale(store);
+
         if (!rootElement) {
             return;
         }
 
         this.rootElement = rootElement;
-        this.store = store;
         this.unsubscribe = store.subscribe(() => {
+            this.registerUserSettingsForCurrentLocale(store);
             this.applyCurrentConfig();
         });
         this.applyCurrentConfig();
@@ -55,7 +69,9 @@ export default class EnhancedEmojisPlugin {
 
         this.rootElement = undefined;
         this.store = undefined;
+        this.registry = undefined;
         this.lastAppliedConfigSignature = undefined;
+        this.lastRegisteredLocale = undefined;
     }
 
     private async fetchPluginConfig(): Promise<EnhancedEmojisConfig> {
@@ -90,6 +106,20 @@ export default class EnhancedEmojisPlugin {
 
         this.lastAppliedConfigSignature = signature;
         applyEnhancedEmojisConfig(this.rootElement, effectiveConfig);
+    }
+
+    private registerUserSettingsForCurrentLocale(store: Store<GlobalState>): void {
+        if (!this.registry) {
+            return;
+        }
+
+        const locale = getCurrentUserLocale(store.getState());
+        if (locale === this.lastRegisteredLocale) {
+            return;
+        }
+
+        this.lastRegisteredLocale = locale;
+        registerEnhancedEmojisUserSettings(this.registry, this.adminConfig, locale);
     }
 }
 

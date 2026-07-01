@@ -2,9 +2,9 @@ export type PostEmojiSize = 'default' | 'large' | 'extraLarge' | 'maxSize';
 export type ReactionEmojiSize = 'default' | 'medium' | 'large' | 'maxSize';
 
 export interface EnhancedEmojisConfig {
-    enableEnhancedEmojis: boolean;
+    enableEnhancedPostEmojis: boolean;
+    enableEnhancedReactionEmojis: boolean;
     enableDeveloperMode: boolean;
-    enableReactionEmojis: boolean;
 }
 
 export interface EnhancedEmojisUserPreferences {
@@ -14,16 +14,16 @@ export interface EnhancedEmojisUserPreferences {
 
 export interface EnhancedEmojisEffectiveConfig {
     enablePostEmojis: boolean;
-    enableDeveloperMode: boolean;
     enableReactionEmojis: boolean;
+    enableDeveloperMode: boolean;
     postEmojiSize: string;
     reactionEmojiSize: string;
 }
 
 export const DEFAULT_ENHANCED_EMOJIS_CONFIG: EnhancedEmojisConfig = {
-    enableEnhancedEmojis: true,
+    enableEnhancedPostEmojis: true,
+    enableEnhancedReactionEmojis: false,
     enableDeveloperMode: false,
-    enableReactionEmojis: false,
 };
 
 export const DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES: EnhancedEmojisUserPreferences = {
@@ -50,9 +50,9 @@ const VALID_REACTION_EMOJI_SIZES: ReactionEmojiSize[] = ['default', 'medium', 'l
 
 export function normalizeEnhancedEmojisConfig(config: Partial<EnhancedEmojisConfig> | null | undefined): EnhancedEmojisConfig {
     return {
-        enableEnhancedEmojis: typeof config?.enableEnhancedEmojis === 'boolean' ? config.enableEnhancedEmojis : DEFAULT_ENHANCED_EMOJIS_CONFIG.enableEnhancedEmojis,
+        enableEnhancedPostEmojis: typeof config?.enableEnhancedPostEmojis === 'boolean' ? config.enableEnhancedPostEmojis : DEFAULT_ENHANCED_EMOJIS_CONFIG.enableEnhancedPostEmojis,
+        enableEnhancedReactionEmojis: typeof config?.enableEnhancedReactionEmojis === 'boolean' ? config.enableEnhancedReactionEmojis : DEFAULT_ENHANCED_EMOJIS_CONFIG.enableEnhancedReactionEmojis,
         enableDeveloperMode: typeof config?.enableDeveloperMode === 'boolean' ? config.enableDeveloperMode : DEFAULT_ENHANCED_EMOJIS_CONFIG.enableDeveloperMode,
-        enableReactionEmojis: typeof config?.enableReactionEmojis === 'boolean' ? config.enableReactionEmojis : DEFAULT_ENHANCED_EMOJIS_CONFIG.enableReactionEmojis,
     };
 }
 
@@ -71,8 +71,8 @@ export function resolveEnhancedEmojisEffectiveConfig(
     userPreferences: Partial<EnhancedEmojisUserPreferences> | null | undefined,
 ): EnhancedEmojisEffectiveConfig {
     const normalizedUserPreferences = normalizeEnhancedEmojisUserPreferences(userPreferences);
-    const enablePostEmojis = adminConfig.enableEnhancedEmojis;
-    const enableReactionEmojis = adminConfig.enableReactionEmojis;
+    const enablePostEmojis = adminConfig.enableEnhancedPostEmojis;
+    const enableReactionEmojis = adminConfig.enableEnhancedReactionEmojis;
 
     if (adminConfig.enableDeveloperMode) {
         return {

@@ -1,0 +1,18 @@
+{
+    "enhanced_emojis.settings.title": "Erweiterte Emojis",
+    "enhanced_emojis.settings.posts.title": "Beitrags-Emojis",
+    "enhanced_emojis.settings.posts.size": "Gr\u00f6\u00dfe der Beitrags-Emojis",
+    "enhanced_emojis.settings.posts.help_text": "W\u00e4hle die Gr\u00f6\u00dfe f\u00fcr benutzerdefinierte Emojis in Beitr\u00e4gen.",
+    "enhanced_emojis.settings.posts.option.default": "Standard",
+    "enhanced_emojis.settings.posts.option.large": "Gro\u00df",
+    "enhanced_emojis.settings.posts.option.extra_large": "Sehr gro\u00df",
+    "enhanced_emojis.settings.posts.option.max": "Maximal",
+    "enhanced_emojis.settings.reactions.title": "Reaktions-Emojis",
+    "enhanced_emojis.settings.reactions.size": "Gr\u00f6\u00dfe der Reaktions-Emojis",
+    "enhanced_emojis.settings.reactions.help_text": "W\u00e4hle die Gr\u00f6\u00dfe f\u00fcr benutzerdefinierte Emoji-Reaktionen.",
+    "enhanced_emojis.settings.reactions.option.default": "Standard",
+    "enhanced_emojis.settings.reactions.option.medium": "Mittel",
+    "enhanced_emojis.settings.reactions.option.large": "Gro\u00df",
+    "enhanced_emojis.settings.reactions.option.max": "Maximal",
+    "enhanced_emojis.settings.no_features_enabled": "Der Administrator hat derzeit keine Enhanced-Emojis-Funktionen aktiviert."
+}

@@ -13,18 +13,18 @@
         "footer": "",
         "settings": [
             {
-                "key": "EnableEnhancedEmojis",
-                "display_name": "Enable Enhanced Emojis",
+                "key": "EnableEnhancedPostEmojis",
+                "display_name": "Enable Enhanced Post Emojis",
                 "type": "bool",
                 "help_text": "Controls larger custom emojis in Mattermost post content.",
                 "placeholder": "",
                 "default": true
             },
             {
-                "key": "EnableReactionEmojis",
-                "display_name": "Enable Reaction Emojis",
+                "key": "EnableEnhancedReactionEmojis",
+                "display_name": "Enable Enhanced Reaction Emojis",
                 "type": "bool",
-                "help_text": "Controls Enhanced Emojis sizing for custom emoji reactions.",
+                "help_text": "Controls larger custom emojis in emoji reactions.",
                 "placeholder": "",
                 "default": false
             },

@@ -28,15 +28,15 @@ Current non-goals for `v0.3.0`:
 
 The plugin exposes three admin settings:
 
-- `Enable Enhanced Emojis`
-- `Enable Reaction Emojis`
+- `Enable Enhanced Post Emojis`
+- `Enable Enhanced Reaction Emojis`
 - `Enable Developer Mode`
 
 Administrators decide which features are available in Mattermost.
 
-`Enable Enhanced Emojis` controls custom emoji sizing in post content only.
+`Enable Enhanced Post Emojis` controls custom emoji sizing in post content only.
 
-`Enable Reaction Emojis` controls custom emoji sizing in reactions only.
+`Enable Enhanced Reaction Emojis` controls custom emoji sizing in reactions only.
 
 `Enable Developer Mode` overrides the size for whichever enabled feature is active to `64px` and enables the red outline used for visual debugging.
 
@@ -51,10 +51,10 @@ Both default to `Default (32px)` for posts and `Default (20px)` for reactions, a
 
 The user settings UI only shows sections for features that the administrator has enabled:
 
-- `Enable Enhanced Emojis` on: show `Post Emoji Size`
-- `Enable Enhanced Emojis` off: hide `Post Emoji Size`
-- `Enable Reaction Emojis` on: show `Reaction Emoji Size`
-- `Enable Reaction Emojis` off: hide `Reaction Emoji Size`
+- `Enable Enhanced Post Emojis` on: show `Post Emoji Size`
+- `Enable Enhanced Post Emojis` off: hide `Post Emoji Size`
+- `Enable Enhanced Reaction Emojis` on: show `Reaction Emoji Size`
+- `Enable Enhanced Reaction Emojis` off: hide `Reaction Emoji Size`
 
 If both features are disabled, the settings UI shows a short informational message instead of empty sections.
 
@@ -73,6 +73,29 @@ Reaction emoji presets:
 - `Max` = `128px`
 
 User settings never enable a feature on their own. Hidden preferences remain stored and will apply again if the administrator later re-enables the feature.
+
+## Localization
+
+The WebApp user settings are localized automatically based on the current Mattermost user language.
+
+Supported languages:
+
+- English
+- German
+
+Language selection follows the Mattermost UI locale for the current user:
+
+- `de` or any `de-*` locale uses German translations
+- `en` or any `en-*` locale uses English translations
+- any other locale falls back to English
+
+To add another language later:
+
+1. Add a new translation file under `webapp/src/i18n/`.
+2. Register the locale in `webapp/src/i18n/index.ts`.
+3. Add tests for the new locale.
+
+The administrator settings in `plugin.json` remain English-only by design so the System Console configuration stays stable and unambiguous.
 
 Current release: `v0.3.0`.
 
@@ -137,13 +160,13 @@ The package contains:
 
 1. Run `npm run package`.
 2. Upload `dist/de.dakosy.enhanced-emojis.tar.gz` in the Mattermost System Console.
-3. Configure `Enable Enhanced Emojis`, `Enable Reaction Emojis`, and `Enable Developer Mode` as needed.
+3. Configure `Enable Enhanced Post Emojis`, `Enable Enhanced Reaction Emojis`, and `Enable Developer Mode` as needed.
 4. Enable the plugin.
-5. Open your user settings and confirm that only the sections for enabled admin features are visible.
+5. Open your user settings and confirm that only the sections for enabled admin features are visible and translated to your current Mattermost language.
 6. Set `Post Emoji Size` and `Reaction Emoji Size` only for the visible sections.
 7. Create or use an existing custom emoji.
-8. Post a message containing that custom emoji and confirm it renders larger only when `Enable Enhanced Emojis` is enabled.
-9. Add the same custom emoji as a reaction and confirm it renders larger only when `Enable Reaction Emojis` is enabled.
+8. Post a message containing that custom emoji and confirm it renders larger only when `Enable Enhanced Post Emojis` is enabled.
+9. Add the same custom emoji as a reaction and confirm it renders larger only when `Enable Enhanced Reaction Emojis` is enabled.
 10. Turn on Developer Mode to verify the 64px debug size and red outline for whichever feature is enabled.
 
 ## Repository Structure
@@ -162,8 +185,8 @@ These files are retained temporarily during the migration, but they are no longe
 
 ## Known Limitations
 
-- Custom emojis in post content are enlarged only when `Enable Enhanced Emojis` is enabled.
-- Custom emoji reactions are enlarged only when `Enable Reaction Emojis` is enabled and use a size-aware chip layout.
+- Custom emojis in post content are enlarged only when `Enable Enhanced Post Emojis` is enabled.
+- Custom emoji reactions are enlarged only when `Enable Enhanced Reaction Emojis` is enabled and use a size-aware chip layout.
 - Unicode emojis are unchanged.
 - The emoji picker is unchanged.
 - Developer Mode is intended for visual debugging and should stay disabled in normal use.
