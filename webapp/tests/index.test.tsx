@@ -2,7 +2,7 @@ import {getEnhancedEmojisTranslations, type EnhancedEmojisTranslationKey} from '
 
 import {makeHydratableStore, makePreference, makeStore} from './helpers';
 
-const PLUGIN_ID = 'de.dakosy.enhanced-emojis';
+const PLUGIN_ID = 'io.github.marcgoertzen.enhanced-emojis';
 const USER_PREFERENCES_PREFIX = `pp_${PLUGIN_ID}`;
 
 describe('EnhancedEmojisPlugin entrypoint', () => {

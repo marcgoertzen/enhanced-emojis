@@ -10,6 +10,29 @@ The format is based on Keep a Changelog and the project uses Semantic Versioning
 
 - User-level size preferences for custom emojis in posts and reactions.
 
+## [0.4.0]
+
+### Added
+
+- Context-aware post emoji sizing.
+- Separate Inline Post Emoji setting.
+- User-level plugin enable/disable.
+- German and English localization.
+
+### Changed
+
+- Refactored WebApp architecture into lifecycle, config, features, and settings modules.
+- Improved post/reaction feature separation.
+- Improved project structure and maintainability.
+- Removed DAKOSY-specific branding.
+- Renamed plugin identifier to a generic identifier.
+
+### Fixed
+
+- Fixed post emoji initialization after page reload.
+- Improved post emoji classification lifecycle.
+- Various internal cleanup and stability improvements.
+
 ## [0.3.0]
 
 ### Added

@@ -1,4 +1,4 @@
-module de.dakosy/enhanced-emojis
+module github.com/marcgoertzen/enhanced-emojis
 
 go 1.25
 

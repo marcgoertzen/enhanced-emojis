@@ -117,7 +117,7 @@ describe('registerEnhancedEmojisUserSettings', () => {
         registerEnhancedEmojisUserSettings(registry as never, adminConfig, locale, userPreferences);
 
         const settings = getRegisteredSettings(registry);
-        expect(settings.id).toBe('de.dakosy.enhanced-emojis');
+        expect(settings.id).toBe('io.github.marcgoertzen.enhanced-emojis');
         expect(settings.uiName).toBe(translations['enhanced_emojis.settings.title']);
         expect(settings.sections).toHaveLength(expectedSectionKeys.length);
         expect(settings.sections.map((section: {title: string}) => section.title)).toEqual(
@@ -340,25 +340,25 @@ describe('getEnhancedEmojisUserPreferences', () => {
                 preferences: {
                     myPreferences: {
                         enable: {
-                            category: 'pp_de.dakosy.enhanced-emojis',
+                            category: 'pp_io.github.marcgoertzen.enhanced-emojis',
                             name: 'EnableEnhancedEmojis',
                             user_id: 'user-id',
                             value: 'true',
                         },
                         post: {
-                            category: 'pp_de.dakosy.enhanced-emojis',
+                            category: 'pp_io.github.marcgoertzen.enhanced-emojis',
                             name: 'postEmojiSize',
                             user_id: 'user-id',
                             value: 'extraLarge',
                         },
                         inline: {
-                            category: 'pp_de.dakosy.enhanced-emojis',
+                            category: 'pp_io.github.marcgoertzen.enhanced-emojis',
                             name: 'InlinePostEmojiSize',
                             user_id: 'user-id',
                             value: 'medium',
                         },
                         reaction: {
-                            category: 'pp_de.dakosy.enhanced-emojis',
+                            category: 'pp_io.github.marcgoertzen.enhanced-emojis',
                             name: 'reactionEmojiSize',
                             user_id: 'user-id',
                             value: 'maxSize',
