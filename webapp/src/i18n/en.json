@@ -1,5 +1,10 @@
 {
     "enhanced_emojis.settings.title": "Enhanced Emojis",
+    "enhanced_emojis.settings.enable.title": "Enable Enhanced Emojis",
+    "enhanced_emojis.settings.enable.help_text": "Enable Enhanced Emojis for your account.",
+    "enhanced_emojis.settings.enable.state.on": "On",
+    "enhanced_emojis.settings.enable.state.off": "Off",
+    "enhanced_emojis.settings.enable.disabled_message": "Enable Enhanced Emojis to customize your emoji appearance.",
     "enhanced_emojis.settings.posts.title": "Post Emojis",
     "enhanced_emojis.settings.posts.size": "Post Emoji Size",
     "enhanced_emojis.settings.posts.help_text": "Select the size used for custom emojis in post content.",

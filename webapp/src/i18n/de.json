@@ -1,5 +1,10 @@
 {
-    "enhanced_emojis.settings.title": "Erweiterte Emojis",
+    "enhanced_emojis.settings.title": "Enhanced Emojis",
+    "enhanced_emojis.settings.enable.title": "Enhanced Emojis aktivieren",
+    "enhanced_emojis.settings.enable.help_text": "Aktiviert Enhanced Emojis f\u00fcr dein Konto.",
+    "enhanced_emojis.settings.enable.state.on": "Ein",
+    "enhanced_emojis.settings.enable.state.off": "Aus",
+    "enhanced_emojis.settings.enable.disabled_message": "Aktiviere Enhanced Emojis, um das Erscheinungsbild deiner Emojis anzupassen.",
     "enhanced_emojis.settings.posts.title": "Beitrags-Emojis",
     "enhanced_emojis.settings.posts.size": "Gr\u00f6\u00dfe der Beitrags-Emojis",
     "enhanced_emojis.settings.posts.help_text": "W\u00e4hle die Gr\u00f6\u00dfe f\u00fcr benutzerdefinierte Emojis in Beitr\u00e4gen.",

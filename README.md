@@ -10,7 +10,7 @@ Version `0.3.0` is the current release. It uses a minimal server component only 
 - Custom emoji reactions with size-aware chip layout
 - CSS-first WebApp styling
 - Reliable admin configuration through a minimal server endpoint
-- User-level size preferences for post and reaction emojis
+- User-level opt-in plus size preferences for post and reaction emojis
 - Node-based build, test, and packaging workflow
 
 Current non-goals for `v0.3.0`:
@@ -44,19 +44,49 @@ Administrators decide which features are available in Mattermost.
 
 The plugin adds a user settings section called `Enhanced Emojis` with:
 
+- `Enable Enhanced Emojis`
 - `Post Emoji Size`
 - `Reaction Emoji Size`
 
-Both default to `Default (32px)` for posts and `Default (20px)` for reactions, and only affect the corresponding feature when the admin has enabled it.
+The plugin is disabled by default for every user. After installation or update, nothing changes visually until each user explicitly enables `Enable Enhanced Emojis` for their own account.
 
-The user settings UI only shows sections for features that the administrator has enabled:
+Administrators control which features are available:
+
+- `Enable Enhanced Post Emojis`
+- `Enable Enhanced Reaction Emojis`
+- `Enable Developer Mode`
+
+Users control whether the plugin is active for their account and, if active, which size presets should apply.
+
+`Enable Enhanced Emojis` is stored as a normal user preference and defaults to off.
+
+When the user leaves the plugin disabled:
+
+- no enhanced post emojis are applied
+- no enhanced reaction emojis are applied
+- saved size preferences remain stored and are ignored
+
+When the user enables the plugin, the stored size preferences apply immediately again for whichever admin-enabled features are available.
+
+The size presets default to `Default (32px)` for posts and `Default (20px)` for reactions, and only affect the corresponding feature when both the administrator and the user have enabled it.
+
+The user settings UI always shows the master switch at the top.
+
+Below that, feature-specific sections only appear when:
+
+- the user enabled `Enable Enhanced Emojis`
+- the corresponding admin feature is enabled
+
+Visibility rules:
 
 - `Enable Enhanced Post Emojis` on: show `Post Emoji Size`
 - `Enable Enhanced Post Emojis` off: hide `Post Emoji Size`
 - `Enable Enhanced Reaction Emojis` on: show `Reaction Emoji Size`
 - `Enable Enhanced Reaction Emojis` off: hide `Reaction Emoji Size`
 
-If both features are disabled, the settings UI shows a short informational message instead of empty sections.
+If the user has not enabled the plugin, the size settings stay hidden and the settings UI shows `Enable Enhanced Emojis to customize your emoji appearance.`
+
+If both admin features are disabled, the settings UI shows `No Enhanced Emojis features are currently enabled by your administrator.` and keeps the master switch visible.
 
 Post emoji presets:
 
@@ -72,7 +102,7 @@ Reaction emoji presets:
 - `Large` = `64px`
 - `Max` = `128px`
 
-User settings never enable a feature on their own. Hidden preferences remain stored and will apply again if the administrator later re-enables the feature.
+User settings never enable an admin-disabled feature on their own. Hidden preferences remain stored and will apply again if the user re-enables the plugin or if the administrator later re-enables the feature.
 
 ## Localization
 
@@ -163,11 +193,14 @@ The package contains:
 3. Configure `Enable Enhanced Post Emojis`, `Enable Enhanced Reaction Emojis`, and `Enable Developer Mode` as needed.
 4. Enable the plugin.
 5. Open your user settings and confirm that only the sections for enabled admin features are visible and translated to your current Mattermost language.
-6. Set `Post Emoji Size` and `Reaction Emoji Size` only for the visible sections.
-7. Create or use an existing custom emoji.
-8. Post a message containing that custom emoji and confirm it renders larger only when `Enable Enhanced Post Emojis` is enabled.
-9. Add the same custom emoji as a reaction and confirm it renders larger only when `Enable Enhanced Reaction Emojis` is enabled.
-10. Turn on Developer Mode to verify the 64px debug size and red outline for whichever feature is enabled.
+6. Leave `Enable Enhanced Emojis` disabled and confirm there is no visual change in posts or reactions.
+7. Enable `Enable Enhanced Emojis` and confirm the visible size settings match the enabled admin features.
+8. Set `Post Emoji Size` and `Reaction Emoji Size` only for the visible sections.
+9. Create or use an existing custom emoji.
+10. Post a message containing that custom emoji and confirm it renders larger only when both `Enable Enhanced Post Emojis` and the user master switch are enabled.
+11. Add the same custom emoji as a reaction and confirm it renders larger only when both `Enable Enhanced Reaction Emojis` and the user master switch are enabled.
+12. Disable `Enable Enhanced Emojis` again and confirm the visual enhancement stops while the saved size preferences remain stored.
+13. Turn on Developer Mode to verify the 64px debug size and red outline only when the user master switch is enabled and the corresponding feature is enabled.
 
 ## Repository Structure
 
@@ -190,7 +223,7 @@ These files are retained temporarily during the migration, but they are no longe
 - Unicode emojis are unchanged.
 - The emoji picker is unchanged.
 - Developer Mode is intended for visual debugging and should stay disabled in normal use.
-- User preferences only affect size, not whether a feature is enabled.
+- User preferences control both opt-in and size, but cannot override admin-disabled features.
 
 ## Future Work
 

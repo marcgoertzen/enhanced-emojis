@@ -1,5 +1,11 @@
 import {getEnhancedEmojisTranslations} from 'i18n';
-import {registerEnhancedEmojisUserSettings} from 'user-settings';
+import React from 'react';
+import {useSelector} from 'react-redux';
+import {createEnableEnhancedEmojisSettingComponent, getEnhancedEmojisUserPreferences, registerEnhancedEmojisUserSettings} from 'user-settings';
+
+jest.mock('react-redux', () => ({
+    useSelector: jest.fn(),
+}));
 
 function makeRegistry() {
     return {
@@ -15,53 +21,89 @@ function getRegisteredSettings(registry: ReturnType<typeof makeRegistry>) {
 describe('registerEnhancedEmojisUserSettings', () => {
     test.each([
         {
-            name: 'post enabled / reactions enabled',
+            name: 'post enabled / reactions enabled / user enabled',
             locale: 'en',
             adminConfig: {
                 enableEnhancedPostEmojis: true,
                 enableEnhancedReactionEmojis: true,
                 enableDeveloperMode: false,
             },
+            userPreferences: {
+                enableEnhancedEmojis: true,
+                postEmojiSize: 'default' as const,
+                reactionEmojiSize: 'default' as const,
+            },
             expectedSectionKeys: [
+                'enhanced_emojis.settings.title',
                 'enhanced_emojis.settings.posts.title',
                 'enhanced_emojis.settings.reactions.title',
             ],
         },
         {
-            name: 'post enabled / reactions disabled',
+            name: 'post enabled / reactions disabled / user enabled',
             locale: 'de',
             adminConfig: {
                 enableEnhancedPostEmojis: true,
                 enableEnhancedReactionEmojis: false,
                 enableDeveloperMode: false,
             },
-            expectedSectionKeys: ['enhanced_emojis.settings.posts.title'],
+            userPreferences: {
+                enableEnhancedEmojis: true,
+                postEmojiSize: 'default' as const,
+                reactionEmojiSize: 'default' as const,
+            },
+            expectedSectionKeys: ['enhanced_emojis.settings.title', 'enhanced_emojis.settings.posts.title'],
         },
         {
-            name: 'post disabled / reactions enabled',
+            name: 'post disabled / reactions enabled / user enabled',
             locale: 'fr',
             adminConfig: {
                 enableEnhancedPostEmojis: false,
                 enableEnhancedReactionEmojis: true,
                 enableDeveloperMode: false,
             },
-            expectedSectionKeys: ['enhanced_emojis.settings.reactions.title'],
+            userPreferences: {
+                enableEnhancedEmojis: true,
+                postEmojiSize: 'default' as const,
+                reactionEmojiSize: 'default' as const,
+            },
+            expectedSectionKeys: ['enhanced_emojis.settings.title', 'enhanced_emojis.settings.reactions.title'],
         },
         {
-            name: 'both disabled',
+            name: 'admin enabled / user disabled',
+            locale: 'en',
+            adminConfig: {
+                enableEnhancedPostEmojis: true,
+                enableEnhancedReactionEmojis: true,
+                enableDeveloperMode: false,
+            },
+            userPreferences: {
+                enableEnhancedEmojis: false,
+                postEmojiSize: 'default' as const,
+                reactionEmojiSize: 'default' as const,
+            },
+            expectedSectionKeys: ['enhanced_emojis.settings.title'],
+        },
+        {
+            name: 'both disabled / user enabled',
             locale: 'de',
             adminConfig: {
                 enableEnhancedPostEmojis: false,
                 enableEnhancedReactionEmojis: false,
                 enableDeveloperMode: false,
             },
+            userPreferences: {
+                enableEnhancedEmojis: true,
+                postEmojiSize: 'default' as const,
+                reactionEmojiSize: 'default' as const,
+            },
             expectedSectionKeys: ['enhanced_emojis.settings.title'],
         },
-    ])('shows the correct sections for $name', ({adminConfig, expectedSectionKeys, locale}) => {
+    ])('shows the correct sections for $name', ({adminConfig, expectedSectionKeys, locale, userPreferences}) => {
         const translations = getEnhancedEmojisTranslations(locale);
         const registry = makeRegistry();
 
-        registerEnhancedEmojisUserSettings(registry as never, adminConfig, locale);
+        registerEnhancedEmojisUserSettings(registry as never, adminConfig, locale, userPreferences);
 
         const settings = getRegisteredSettings(registry);
         expect(settings.id).toBe('de.dakosy.enhanced-emojis');
@@ -71,7 +113,17 @@ describe('registerEnhancedEmojisUserSettings', () => {
             expectedSectionKeys.map((key) => translations[key as keyof typeof translations]),
         );
 
-        if (adminConfig.enableEnhancedPostEmojis) {
+        expect(settings.sections[0]).toEqual(expect.objectContaining({
+            title: translations['enhanced_emojis.settings.title'],
+            settings: expect.arrayContaining([
+                expect.objectContaining({
+                    title: translations['enhanced_emojis.settings.enable.title'],
+                    helpText: translations['enhanced_emojis.settings.enable.help_text'],
+                }),
+            ]),
+        }));
+
+        if (userPreferences.enableEnhancedEmojis && adminConfig.enableEnhancedPostEmojis) {
             const postSection = settings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.posts.title']);
             expect(postSection).toMatchObject({
                 title: translations['enhanced_emojis.settings.posts.title'],
@@ -90,7 +142,7 @@ describe('registerEnhancedEmojisUserSettings', () => {
             });
         }
 
-        if (adminConfig.enableEnhancedReactionEmojis) {
+        if (userPreferences.enableEnhancedEmojis && adminConfig.enableEnhancedReactionEmojis) {
             const reactionSection = settings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.reactions.title']);
             expect(reactionSection).toMatchObject({
                 title: translations['enhanced_emojis.settings.reactions.title'],
@@ -110,7 +162,7 @@ describe('registerEnhancedEmojisUserSettings', () => {
         }
     });
 
-    test('renders the informational message when both features are disabled', () => {
+    test('renders the administrator informational message when both features are disabled for an enabled user', () => {
         const locale = 'de';
         const translations = getEnhancedEmojisTranslations(locale);
         const registry = makeRegistry();
@@ -119,12 +171,167 @@ describe('registerEnhancedEmojisUserSettings', () => {
             enableEnhancedPostEmojis: false,
             enableEnhancedReactionEmojis: false,
             enableDeveloperMode: false,
-        }, locale);
+        }, locale, {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'default',
+            reactionEmojiSize: 'default',
+        });
 
         const settings = getRegisteredSettings(registry);
-        const section = settings.sections[0] as {component: () => {props: {children: string}}};
-        const rendered = section.component();
+        const messageSetting = settings.sections[0].settings[1] as {component: () => {props: {children: string}}};
+        const rendered = messageSetting.component();
 
         expect(rendered.props.children).toBe(translations['enhanced_emojis.settings.no_features_enabled']);
+    });
+
+    test('renders the opt-in prompt when the user has not enabled the plugin', () => {
+        const locale = 'en';
+        const translations = getEnhancedEmojisTranslations(locale);
+        const registry = makeRegistry();
+
+        registerEnhancedEmojisUserSettings(registry as never, {
+            enableEnhancedPostEmojis: true,
+            enableEnhancedReactionEmojis: true,
+            enableDeveloperMode: false,
+        }, locale, {
+            enableEnhancedEmojis: false,
+            postEmojiSize: 'default',
+            reactionEmojiSize: 'default',
+        });
+
+        const settings = getRegisteredSettings(registry);
+        const messageSetting = settings.sections[0].settings[1] as {component: () => {props: {children: string}}};
+        const rendered = messageSetting.component();
+
+        expect(rendered.props.children).toBe(translations['enhanced_emojis.settings.enable.disabled_message']);
+    });
+});
+
+describe('getEnhancedEmojisUserPreferences', () => {
+    test('defaults the master switch to disabled', () => {
+        const state = {
+            entities: {
+                preferences: {
+                    myPreferences: {},
+                },
+            },
+        };
+
+        expect(getEnhancedEmojisUserPreferences(state as never)).toMatchObject({
+            enableEnhancedEmojis: false,
+            postEmojiSize: 'default',
+            reactionEmojiSize: 'default',
+        });
+    });
+
+    test('reads the stored master switch and keeps saved size preferences', () => {
+        const state = {
+            entities: {
+                preferences: {
+                    myPreferences: {
+                        enable: {
+                            category: 'pp_de.dakosy.enhanced-emojis',
+                            name: 'EnableEnhancedEmojis',
+                            user_id: 'user-id',
+                            value: 'true',
+                        },
+                        post: {
+                            category: 'pp_de.dakosy.enhanced-emojis',
+                            name: 'postEmojiSize',
+                            user_id: 'user-id',
+                            value: 'extraLarge',
+                        },
+                        reaction: {
+                            category: 'pp_de.dakosy.enhanced-emojis',
+                            name: 'reactionEmojiSize',
+                            user_id: 'user-id',
+                            value: 'maxSize',
+                        },
+                    },
+                },
+            },
+        };
+
+        expect(getEnhancedEmojisUserPreferences(state as never)).toMatchObject({
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'extraLarge',
+            reactionEmojiSize: 'maxSize',
+        });
+    });
+});
+
+describe('createEnableEnhancedEmojisSettingComponent', () => {
+    const mockedUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
+
+    afterEach(() => {
+        jest.restoreAllMocks();
+        mockedUseSelector.mockReset();
+    });
+
+    test('defaults the toggle to off', () => {
+        const translations = getEnhancedEmojisTranslations('en');
+        mockedUseSelector.mockReturnValue(false);
+        jest.spyOn(React, 'useState').mockReturnValue([false, jest.fn()]);
+        jest.spyOn(React, 'useEffect').mockImplementation(() => undefined);
+
+        const Component = createEnableEnhancedEmojisSettingComponent(translations);
+        const rendered = Component({informChange: jest.fn()});
+
+        expect(rendered.props.role).toBe('switch');
+        expect(rendered.props['aria-checked']).toBe(false);
+        expect(rendered.props.children[0].props.children).toBe(translations['enhanced_emojis.settings.enable.state.off']);
+        expect(rendered.props.style.width).toBe('96px');
+    });
+
+    test('toggle can be switched on and updates local settings state immediately', () => {
+        const translations = getEnhancedEmojisTranslations('en');
+        const setEnabled = jest.fn();
+        const informChange = jest.fn();
+
+        mockedUseSelector.mockReturnValue(false);
+        jest.spyOn(React, 'useState').mockReturnValue([false, setEnabled]);
+        jest.spyOn(React, 'useEffect').mockImplementation(() => undefined);
+
+        const Component = createEnableEnhancedEmojisSettingComponent(translations);
+        const rendered = Component({informChange});
+        rendered.props.onClick();
+
+        expect(setEnabled).toHaveBeenCalledWith(true);
+        expect(informChange).toHaveBeenCalledWith('EnableEnhancedEmojis', 'true');
+        expect(rendered.props.children[1].props.style.transform).toBe('translateX(0)');
+    });
+
+    test('keyboard toggle also updates the pending enabled state', () => {
+        const translations = getEnhancedEmojisTranslations('de');
+        const setEnabled = jest.fn();
+        const informChange = jest.fn();
+        const preventDefault = jest.fn();
+
+        mockedUseSelector.mockReturnValue(false);
+        jest.spyOn(React, 'useState').mockReturnValue([false, setEnabled]);
+        jest.spyOn(React, 'useEffect').mockImplementation(() => undefined);
+
+        const Component = createEnableEnhancedEmojisSettingComponent(translations);
+        const rendered = Component({informChange});
+        rendered.props.onKeyDown({key: ' ', preventDefault});
+
+        expect(preventDefault).toHaveBeenCalledTimes(1);
+        expect(setEnabled).toHaveBeenCalledWith(true);
+        expect(informChange).toHaveBeenCalledWith('EnableEnhancedEmojis', 'true');
+    });
+
+    test('enabled state positions the knob on the right and shows the localized on label', () => {
+        const translations = getEnhancedEmojisTranslations('de');
+
+        mockedUseSelector.mockReturnValue(true);
+        jest.spyOn(React, 'useState').mockReturnValue([true, jest.fn()]);
+        jest.spyOn(React, 'useEffect').mockImplementation(() => undefined);
+
+        const Component = createEnableEnhancedEmojisSettingComponent(translations);
+        const rendered = Component({informChange: jest.fn()});
+
+        expect(rendered.props['aria-checked']).toBe(true);
+        expect(rendered.props.children[0].props.children).toBe(translations['enhanced_emojis.settings.enable.state.on']);
+        expect(rendered.props.children[1].props.style.transform).toBe('translateX(64px)');
     });
 });

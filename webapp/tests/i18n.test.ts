@@ -14,7 +14,7 @@ test('falls back to English translations for unsupported locales', () => {
 
 test('returns German translations for German locales', () => {
     expect(getEnhancedEmojisTranslations('de')).toMatchObject({
-        'enhanced_emojis.settings.title': 'Erweiterte Emojis',
+        'enhanced_emojis.settings.title': 'Enhanced Emojis',
         'enhanced_emojis.settings.posts.title': 'Beitrags-Emojis',
         'enhanced_emojis.settings.reactions.title': 'Reaktions-Emojis',
     });

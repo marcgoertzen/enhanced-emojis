@@ -35,7 +35,7 @@ export default class EnhancedEmojisPlugin {
 
     private lastAppliedConfigSignature?: string;
 
-    private lastRegisteredLocale?: string;
+    private lastRegisteredUserSettingsSignature?: string;
 
     public async initialize(registry: PluginRegistry, store: Store<GlobalState>): Promise<void> {
         this.registry = registry;
@@ -71,7 +71,7 @@ export default class EnhancedEmojisPlugin {
         this.store = undefined;
         this.registry = undefined;
         this.lastAppliedConfigSignature = undefined;
-        this.lastRegisteredLocale = undefined;
+        this.lastRegisteredUserSettingsSignature = undefined;
     }
 
     private async fetchPluginConfig(): Promise<EnhancedEmojisConfig> {
@@ -113,13 +113,22 @@ export default class EnhancedEmojisPlugin {
             return;
         }
 
-        const locale = getCurrentUserLocale(store.getState());
-        if (locale === this.lastRegisteredLocale) {
+        const state = store.getState();
+        const locale = getCurrentUserLocale(state);
+        const userPreferences = getEnhancedEmojisUserPreferences(state);
+        const signature = JSON.stringify({
+            locale,
+            enableEnhancedPostEmojis: this.adminConfig.enableEnhancedPostEmojis,
+            enableEnhancedReactionEmojis: this.adminConfig.enableEnhancedReactionEmojis,
+            enableEnhancedEmojis: userPreferences.enableEnhancedEmojis,
+        });
+
+        if (signature === this.lastRegisteredUserSettingsSignature) {
             return;
         }
 
-        this.lastRegisteredLocale = locale;
-        registerEnhancedEmojisUserSettings(this.registry, this.adminConfig, locale);
+        this.lastRegisteredUserSettingsSignature = signature;
+        registerEnhancedEmojisUserSettings(this.registry, this.adminConfig, locale, userPreferences);
     }
 }
 

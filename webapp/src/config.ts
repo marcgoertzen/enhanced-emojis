@@ -8,6 +8,7 @@ export interface EnhancedEmojisConfig {
 }
 
 export interface EnhancedEmojisUserPreferences {
+    enableEnhancedEmojis: boolean;
     postEmojiSize: PostEmojiSize;
     reactionEmojiSize: ReactionEmojiSize;
 }
@@ -27,6 +28,7 @@ export const DEFAULT_ENHANCED_EMOJIS_CONFIG: EnhancedEmojisConfig = {
 };
 
 export const DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES: EnhancedEmojisUserPreferences = {
+    enableEnhancedEmojis: false,
     postEmojiSize: 'default',
     reactionEmojiSize: 'default',
 };
@@ -61,6 +63,7 @@ export function normalizeEnhancedEmojisUserPreferences(preferences: Partial<Enha
     const reactionEmojiSizeValue = preferences?.reactionEmojiSize;
 
     return {
+        enableEnhancedEmojis: typeof preferences?.enableEnhancedEmojis === 'boolean' ? preferences.enableEnhancedEmojis : DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.enableEnhancedEmojis,
         postEmojiSize: isPostEmojiSize(postEmojiSizeValue) ? postEmojiSizeValue : DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.postEmojiSize,
         reactionEmojiSize: isReactionEmojiSize(reactionEmojiSizeValue) ? reactionEmojiSizeValue : DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.reactionEmojiSize,
     };
@@ -71,13 +74,14 @@ export function resolveEnhancedEmojisEffectiveConfig(
     userPreferences: Partial<EnhancedEmojisUserPreferences> | null | undefined,
 ): EnhancedEmojisEffectiveConfig {
     const normalizedUserPreferences = normalizeEnhancedEmojisUserPreferences(userPreferences);
-    const enablePostEmojis = adminConfig.enableEnhancedPostEmojis;
-    const enableReactionEmojis = adminConfig.enableEnhancedReactionEmojis;
+    const enablePostEmojis = adminConfig.enableEnhancedPostEmojis && normalizedUserPreferences.enableEnhancedEmojis;
+    const enableReactionEmojis = adminConfig.enableEnhancedReactionEmojis && normalizedUserPreferences.enableEnhancedEmojis;
+    const enableDeveloperMode = adminConfig.enableDeveloperMode && (enablePostEmojis || enableReactionEmojis);
 
-    if (adminConfig.enableDeveloperMode) {
+    if (enableDeveloperMode) {
         return {
             enablePostEmojis,
-            enableDeveloperMode: adminConfig.enableDeveloperMode,
+            enableDeveloperMode,
             enableReactionEmojis,
             postEmojiSize: '64px',
             reactionEmojiSize: '64px',
@@ -86,7 +90,7 @@ export function resolveEnhancedEmojisEffectiveConfig(
 
     return {
         enablePostEmojis,
-        enableDeveloperMode: adminConfig.enableDeveloperMode,
+        enableDeveloperMode,
         enableReactionEmojis,
         postEmojiSize: `${POST_EMOJI_SIZE_TO_PIXELS[normalizedUserPreferences.postEmojiSize]}px`,
         reactionEmojiSize: `${REACTION_EMOJI_SIZE_TO_PIXELS[normalizedUserPreferences.reactionEmojiSize]}px`,

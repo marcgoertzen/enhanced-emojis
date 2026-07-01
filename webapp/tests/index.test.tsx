@@ -65,16 +65,21 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
 
     test.each([
         {
-            name: 'posts only',
+            name: 'admin enabled / user disabled',
             locale: 'en',
             adminConfig: {
                 enableEnhancedPostEmojis: true,
-                enableEnhancedReactionEmojis: false,
+                enableEnhancedReactionEmojis: true,
                 enableDeveloperMode: false,
             },
-            expectedSectionTitles: ['enhanced_emojis.settings.posts.title'] as EnhancedEmojisTranslationKey[],
+            userPreferences: {
+                EnableEnhancedEmojis: 'false',
+                postEmojiSize: 'large',
+                reactionEmojiSize: 'medium',
+            },
+            expectedSectionTitles: ['enhanced_emojis.settings.title'] as EnhancedEmojisTranslationKey[],
             expectedClasses: {
-                posts: true,
+                posts: false,
                 reactions: false,
                 developer: false,
             },
@@ -87,7 +92,12 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
                 enableEnhancedReactionEmojis: true,
                 enableDeveloperMode: false,
             },
-            expectedSectionTitles: ['enhanced_emojis.settings.reactions.title'] as EnhancedEmojisTranslationKey[],
+            userPreferences: {
+                EnableEnhancedEmojis: 'true',
+                postEmojiSize: 'large',
+                reactionEmojiSize: 'medium',
+            },
+            expectedSectionTitles: ['enhanced_emojis.settings.title', 'enhanced_emojis.settings.reactions.title'] as EnhancedEmojisTranslationKey[],
             expectedClasses: {
                 posts: false,
                 reactions: true,
@@ -95,12 +105,17 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             },
         },
         {
-            name: 'disabled',
+            name: 'admin disabled / user enabled',
             locale: 'en',
             adminConfig: {
                 enableEnhancedPostEmojis: false,
                 enableEnhancedReactionEmojis: false,
                 enableDeveloperMode: false,
+            },
+            userPreferences: {
+                EnableEnhancedEmojis: 'true',
+                postEmojiSize: 'large',
+                reactionEmojiSize: 'medium',
             },
             expectedSectionTitles: ['enhanced_emojis.settings.title'] as EnhancedEmojisTranslationKey[],
             expectedClasses: {
@@ -117,7 +132,13 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
                 enableEnhancedReactionEmojis: true,
                 enableDeveloperMode: false,
             },
+            userPreferences: {
+                EnableEnhancedEmojis: 'true',
+                postEmojiSize: 'large',
+                reactionEmojiSize: 'medium',
+            },
             expectedSectionTitles: [
+                'enhanced_emojis.settings.title',
                 'enhanced_emojis.settings.posts.title',
                 'enhanced_emojis.settings.reactions.title',
             ] as EnhancedEmojisTranslationKey[],
@@ -127,7 +148,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
                 developer: false,
             },
         },
-    ])('applies independent feature classes for $name', async ({adminConfig, expectedClasses, expectedSectionTitles, locale}) => {
+    ])('applies independent feature classes for $name', async ({adminConfig, expectedClasses, expectedSectionTitles, locale, userPreferences}) => {
         const classList = {
             remove: jest.fn(),
             toggle: jest.fn(),
@@ -157,8 +178,9 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         const {default: EnhancedEmojisPlugin} = require('../src/index');
         const plugin = new EnhancedEmojisPlugin();
         const store = makeStore({
-            [`${USER_PREFERENCES_PREFIX}--postEmojiSize`]: makePreference('postEmojiSize', 'large'),
-            [`${USER_PREFERENCES_PREFIX}--reactionEmojiSize`]: makePreference('reactionEmojiSize', 'medium'),
+            [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('EnableEnhancedEmojis', userPreferences.EnableEnhancedEmojis),
+            [`${USER_PREFERENCES_PREFIX}--postEmojiSize`]: makePreference('postEmojiSize', userPreferences.postEmojiSize),
+            [`${USER_PREFERENCES_PREFIX}--reactionEmojiSize`]: makePreference('reactionEmojiSize', userPreferences.reactionEmojiSize),
         }, locale);
 
         await plugin.initialize({registerUserSettings, registerTranslations} as never, store as never);
@@ -211,6 +233,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         const {default: EnhancedEmojisPlugin} = require('../src/index');
         const plugin = new EnhancedEmojisPlugin();
         const store = makeStore({
+            [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('EnableEnhancedEmojis', 'true'),
             [`${USER_PREFERENCES_PREFIX}--postEmojiSize`]: makePreference('postEmojiSize', 'extraLarge'),
             [`${USER_PREFERENCES_PREFIX}--reactionEmojiSize`]: makePreference('reactionEmojiSize', 'large'),
         }, 'de');
@@ -261,6 +284,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         const {default: EnhancedEmojisPlugin} = require('../src/index');
         const plugin = new EnhancedEmojisPlugin();
         const store = makeStore({
+            [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('EnableEnhancedEmojis', 'true'),
             [`${USER_PREFERENCES_PREFIX}--postEmojiSize`]: makePreference('postEmojiSize', 'default'),
             [`${USER_PREFERENCES_PREFIX}--reactionEmojiSize`]: makePreference('reactionEmojiSize', 'maxSize'),
         }, 'en');
@@ -274,5 +298,50 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         expect(classList.remove).toHaveBeenCalledWith('enhanced-emojis-reactions-enabled');
         expect(style.removeProperty).toHaveBeenCalledWith('--enhanced-post-emojis-size');
         expect(style.removeProperty).toHaveBeenCalledWith('--enhanced-reaction-emojis-size');
+    });
+
+    test('developer mode is suppressed when the user has not enabled the plugin', async () => {
+        const classList = {
+            remove: jest.fn(),
+            toggle: jest.fn(),
+        };
+        const style = {
+            setProperty: jest.fn(),
+            removeProperty: jest.fn(),
+        };
+        const fetch = jest.fn(async () => ({
+            ok: true,
+            json: async () => ({
+                enableEnhancedPostEmojis: true,
+                enableEnhancedReactionEmojis: true,
+                enableDeveloperMode: true,
+            }),
+        }));
+
+        Object.assign(global, {
+            fetch,
+            document: {
+                documentElement: {
+                    classList,
+                    style,
+                },
+            },
+        });
+
+        const {default: EnhancedEmojisPlugin} = require('../src/index');
+        const plugin = new EnhancedEmojisPlugin();
+        const store = makeStore({
+            [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('EnableEnhancedEmojis', 'false'),
+            [`${USER_PREFERENCES_PREFIX}--postEmojiSize`]: makePreference('postEmojiSize', 'extraLarge'),
+            [`${USER_PREFERENCES_PREFIX}--reactionEmojiSize`]: makePreference('reactionEmojiSize', 'large'),
+        }, 'en');
+
+        await plugin.initialize({registerUserSettings: jest.fn(), registerTranslations: jest.fn()} as never, store as never);
+
+        expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-posts-enabled', false);
+        expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-reactions-enabled', false);
+        expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-developer-mode', false);
+        expect(style.setProperty).toHaveBeenCalledWith('--enhanced-post-emojis-size', '64px');
+        expect(style.setProperty).toHaveBeenCalledWith('--enhanced-reaction-emojis-size', '64px');
     });
 });

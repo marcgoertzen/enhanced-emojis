@@ -21,6 +21,7 @@ test('recognizes post and reaction size presets independently', () => {
 
 test('normalizes invalid user emoji sizes to default', () => {
     const preferences = normalizeEnhancedEmojisUserPreferences({
+        enableEnhancedEmojis: 'unknown' as never,
         postEmojiSize: 'unknown' as never,
         reactionEmojiSize: 'unknown' as never,
     });
@@ -36,6 +37,7 @@ test('developer mode overrides configured user emoji sizes', () => {
             enableDeveloperMode: true,
         },
         {
+            enableEnhancedEmojis: true,
             postEmojiSize: 'large',
             reactionEmojiSize: 'large',
         },
@@ -52,34 +54,16 @@ test('developer mode overrides configured user emoji sizes', () => {
 
 test.each([
     {
+        name: 'admin enabled / user disabled',
         adminConfig: {
             enableEnhancedPostEmojis: true,
-            enableEnhancedReactionEmojis: false,
-            enableDeveloperMode: false,
-        },
-        expected: {
-            enablePostEmojis: true,
-            enableDeveloperMode: false,
-            enableReactionEmojis: false,
-        },
-    },
-    {
-        adminConfig: {
-            enableEnhancedPostEmojis: false,
             enableEnhancedReactionEmojis: true,
             enableDeveloperMode: false,
         },
-        expected: {
-            enablePostEmojis: false,
-            enableDeveloperMode: false,
-            enableReactionEmojis: true,
-        },
-    },
-    {
-        adminConfig: {
-            enableEnhancedPostEmojis: false,
-            enableEnhancedReactionEmojis: false,
-            enableDeveloperMode: false,
+        userPreferences: {
+            enableEnhancedEmojis: false,
+            postEmojiSize: 'large' as const,
+            reactionEmojiSize: 'large' as const,
         },
         expected: {
             enablePostEmojis: false,
@@ -88,10 +72,52 @@ test.each([
         },
     },
     {
+        name: 'post disabled / reactions enabled / user enabled',
+        adminConfig: {
+            enableEnhancedPostEmojis: false,
+            enableEnhancedReactionEmojis: true,
+            enableDeveloperMode: false,
+        },
+        userPreferences: {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'large' as const,
+            reactionEmojiSize: 'large' as const,
+        },
+        expected: {
+            enablePostEmojis: false,
+            enableDeveloperMode: false,
+            enableReactionEmojis: true,
+        },
+    },
+    {
+        name: 'admin disabled / user enabled',
+        adminConfig: {
+            enableEnhancedPostEmojis: false,
+            enableEnhancedReactionEmojis: false,
+            enableDeveloperMode: false,
+        },
+        userPreferences: {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'large' as const,
+            reactionEmojiSize: 'large' as const,
+        },
+        expected: {
+            enablePostEmojis: false,
+            enableDeveloperMode: false,
+            enableReactionEmojis: false,
+        },
+    },
+    {
+        name: 'admin enabled / user enabled',
         adminConfig: {
             enableEnhancedPostEmojis: true,
             enableEnhancedReactionEmojis: true,
             enableDeveloperMode: false,
+        },
+        userPreferences: {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'large' as const,
+            reactionEmojiSize: 'large' as const,
         },
         expected: {
             enablePostEmojis: true,
@@ -99,8 +125,8 @@ test.each([
             enableReactionEmojis: true,
         },
     },
-])('maps independent admin feature flags', ({adminConfig, expected}) => {
-    const config = resolveEnhancedEmojisEffectiveConfig(adminConfig, DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES);
+])('maps effective feature flags for $name', ({adminConfig, expected, userPreferences}) => {
+    const config = resolveEnhancedEmojisEffectiveConfig(adminConfig, userPreferences);
 
     expect(config).toMatchObject(expected);
 });
@@ -113,6 +139,7 @@ test('maps configured user emoji sizes to css values', () => {
             enableDeveloperMode: false,
         },
         {
+            enableEnhancedEmojis: true,
             postEmojiSize: 'default',
             reactionEmojiSize: 'default',
         },
@@ -131,6 +158,7 @@ test('maps configured user emoji sizes to css values', () => {
             enableDeveloperMode: false,
         },
         {
+            enableEnhancedEmojis: true,
             postEmojiSize: 'large',
             reactionEmojiSize: 'medium',
         },
@@ -149,6 +177,7 @@ test('maps configured user emoji sizes to css values', () => {
             enableDeveloperMode: false,
         },
         {
+            enableEnhancedEmojis: true,
             postEmojiSize: 'extraLarge',
             reactionEmojiSize: 'large',
         },
@@ -167,6 +196,7 @@ test('maps configured user emoji sizes to css values', () => {
             enableDeveloperMode: false,
         },
         {
+            enableEnhancedEmojis: true,
             postEmojiSize: 'maxSize',
             reactionEmojiSize: 'maxSize',
         },
@@ -175,6 +205,29 @@ test('maps configured user emoji sizes to css values', () => {
         enableDeveloperMode: false,
         enableReactionEmojis: false,
         postEmojiSize: '128px',
+        reactionEmojiSize: '128px',
+    });
+});
+
+test('disabling the plugin preserves stored size preferences but disables all enhancements', () => {
+    const config = resolveEnhancedEmojisEffectiveConfig(
+        {
+            enableEnhancedPostEmojis: true,
+            enableEnhancedReactionEmojis: true,
+            enableDeveloperMode: false,
+        },
+        {
+            enableEnhancedEmojis: false,
+            postEmojiSize: 'extraLarge',
+            reactionEmojiSize: 'maxSize',
+        },
+    );
+
+    expect(config).toEqual({
+        enablePostEmojis: false,
+        enableDeveloperMode: false,
+        enableReactionEmojis: false,
+        postEmojiSize: '64px',
         reactionEmojiSize: '128px',
     });
 });
