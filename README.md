@@ -46,6 +46,7 @@ The plugin adds a user settings section called `Enhanced Emojis` with:
 
 - `Enable Enhanced Emojis`
 - `Post Emoji Size`
+- `Inline Post Emoji Size`
 - `Reaction Emoji Size`
 
 The plugin is disabled by default for every user. After installation or update, nothing changes visually until each user explicitly enables `Enable Enhanced Emojis` for their own account.
@@ -70,6 +71,12 @@ When the user enables the plugin, the stored size preferences apply immediately 
 
 The size presets default to `Default (32px)` for posts and `Default (20px)` for reactions, and only affect the corresponding feature when both the administrator and the user have enabled it.
 
+`Post Emoji Size` applies to standalone or emoji-only custom emoji posts.
+
+`Inline Post Emoji Size` applies to custom emojis that appear inside normal post text.
+
+Inline custom emojis default to normal text size so they stay readable inside sentences.
+
 The user settings UI always shows the master switch at the top.
 
 Below that, feature-specific sections only appear when:
@@ -80,7 +87,9 @@ Below that, feature-specific sections only appear when:
 Visibility rules:
 
 - `Enable Enhanced Post Emojis` on: show `Post Emoji Size`
+- `Enable Enhanced Post Emojis` on: show `Inline Post Emoji Size`
 - `Enable Enhanced Post Emojis` off: hide `Post Emoji Size`
+- `Enable Enhanced Post Emojis` off: hide `Inline Post Emoji Size`
 - `Enable Enhanced Reaction Emojis` on: show `Reaction Emoji Size`
 - `Enable Enhanced Reaction Emojis` off: hide `Reaction Emoji Size`
 
@@ -91,6 +100,14 @@ If both admin features are disabled, the settings UI shows `No Enhanced Emojis f
 Post emoji presets:
 
 - `Default` = `32px`
+- `Large` = `48px`
+- `Extra Large` = `64px`
+- `Max` = `128px`
+
+Inline post emoji presets:
+
+- `Default / normal text size` = `20px`
+- `Medium` = `32px`
 - `Large` = `48px`
 - `Extra Large` = `64px`
 - `Max` = `128px`
@@ -195,12 +212,14 @@ The package contains:
 5. Open your user settings and confirm that only the sections for enabled admin features are visible and translated to your current Mattermost language.
 6. Leave `Enable Enhanced Emojis` disabled and confirm there is no visual change in posts or reactions.
 7. Enable `Enable Enhanced Emojis` and confirm the visible size settings match the enabled admin features.
-8. Set `Post Emoji Size` and `Reaction Emoji Size` only for the visible sections.
+8. Set `Post Emoji Size`, `Inline Post Emoji Size`, and `Reaction Emoji Size` only for the visible sections.
 9. Create or use an existing custom emoji.
-10. Post a message containing that custom emoji and confirm it renders larger only when both `Enable Enhanced Post Emojis` and the user master switch are enabled.
-11. Add the same custom emoji as a reaction and confirm it renders larger only when both `Enable Enhanced Reaction Emojis` and the user master switch are enabled.
-12. Disable `Enable Enhanced Emojis` again and confirm the visual enhancement stops while the saved size preferences remain stored.
-13. Turn on Developer Mode to verify the 64px debug size and red outline only when the user master switch is enabled and the corresponding feature is enabled.
+10. Post a message containing only a custom emoji such as `:cat:` and confirm it uses `Post Emoji Size`.
+11. Post a message containing normal text and a custom emoji such as `Hello :cat:` and confirm it uses `Inline Post Emoji Size`.
+12. Post a message containing only multiple custom emojis such as `:cat: :dog:` and confirm they still use `Post Emoji Size`.
+13. Add the same custom emoji as a reaction and confirm it renders larger only when both `Enable Enhanced Reaction Emojis` and the user master switch are enabled.
+14. Disable `Enable Enhanced Emojis` again and confirm the visual enhancement stops while the saved size preferences remain stored.
+15. Turn on Developer Mode to verify the standalone post emoji debug size, inline post emoji debug size, and reaction debug size only when the user master switch is enabled and the corresponding feature is enabled.
 
 ## Repository Structure
 
@@ -219,6 +238,7 @@ These files are retained temporarily during the migration, but they are no longe
 ## Known Limitations
 
 - Custom emojis in post content are enlarged only when `Enable Enhanced Post Emojis` is enabled.
+- Inline custom emojis inside normal post text use `Inline Post Emoji Size`, while emoji-only post content uses `Post Emoji Size`.
 - Custom emoji reactions are enlarged only when `Enable Enhanced Reaction Emojis` is enabled and use a size-aware chip layout.
 - Unicode emojis are unchanged.
 - The emoji picker is unchanged.

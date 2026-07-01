@@ -2,7 +2,7 @@
  * Posts
  */
 
-html.enhanced-emojis-posts-enabled .post-message__text span.emoticon[style*="/api/v4/emoji/"] {
+html.enhanced-emojis-posts-enabled .post-message__text .emoticon.enhanced-emojis-standalone {
     width: var(--enhanced-post-emojis-size) !important;
     height: var(--enhanced-post-emojis-size) !important;
     min-width: var(--enhanced-post-emojis-size) !important;
@@ -10,7 +10,16 @@ html.enhanced-emojis-posts-enabled .post-message__text span.emoticon[style*="/ap
     vertical-align: text-bottom;
 }
 
-html.enhanced-emojis-posts-enabled.enhanced-emojis-developer-mode .post-message__text span.emoticon[style*="/api/v4/emoji/"] {
+html.enhanced-emojis-posts-enabled .post-message__text .emoticon.enhanced-emojis-inline {
+    width: var(--enhanced-inline-post-emojis-size) !important;
+    height: var(--enhanced-inline-post-emojis-size) !important;
+    min-width: var(--enhanced-inline-post-emojis-size) !important;
+    min-height: var(--enhanced-inline-post-emojis-size) !important;
+    vertical-align: text-bottom;
+}
+
+html.enhanced-emojis-posts-enabled.enhanced-emojis-developer-mode .post-message__text .emoticon.enhanced-emojis-standalone,
+html.enhanced-emojis-posts-enabled.enhanced-emojis-developer-mode .post-message__text .emoticon.enhanced-emojis-inline {
     outline: 2px solid red;
 }
 

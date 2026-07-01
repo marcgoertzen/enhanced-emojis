@@ -1,6 +1,7 @@
 import {
     DEFAULT_ENHANCED_EMOJIS_CONFIG,
     DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES,
+    isInlinePostEmojiSize,
     isPostEmojiSize,
     isReactionEmojiSize,
     normalizeEnhancedEmojisConfig,
@@ -15,6 +16,8 @@ test('normalizes missing admin flags to defaults', () => {
 test('recognizes post and reaction size presets independently', () => {
     expect(isPostEmojiSize('large')).toBe(true);
     expect(isPostEmojiSize('medium')).toBe(false);
+    expect(isInlinePostEmojiSize('medium')).toBe(true);
+    expect(isInlinePostEmojiSize('tiny')).toBe(false);
     expect(isReactionEmojiSize('medium')).toBe(true);
     expect(isReactionEmojiSize('extraLarge')).toBe(false);
 });
@@ -23,6 +26,7 @@ test('normalizes invalid user emoji sizes to default', () => {
     const preferences = normalizeEnhancedEmojisUserPreferences({
         enableEnhancedEmojis: 'unknown' as never,
         postEmojiSize: 'unknown' as never,
+        inlinePostEmojiSize: 'unknown' as never,
         reactionEmojiSize: 'unknown' as never,
     });
 
@@ -39,6 +43,7 @@ test('developer mode overrides configured user emoji sizes', () => {
         {
             enableEnhancedEmojis: true,
             postEmojiSize: 'large',
+            inlinePostEmojiSize: 'large',
             reactionEmojiSize: 'large',
         },
     );
@@ -47,6 +52,7 @@ test('developer mode overrides configured user emoji sizes', () => {
         enablePostEmojis: true,
         enableDeveloperMode: true,
         enableReactionEmojis: false,
+        inlinePostEmojiSize: '32px',
         postEmojiSize: '64px',
         reactionEmojiSize: '64px',
     });
@@ -63,6 +69,7 @@ test.each([
         userPreferences: {
             enableEnhancedEmojis: false,
             postEmojiSize: 'large' as const,
+            inlinePostEmojiSize: 'medium' as const,
             reactionEmojiSize: 'large' as const,
         },
         expected: {
@@ -81,6 +88,7 @@ test.each([
         userPreferences: {
             enableEnhancedEmojis: true,
             postEmojiSize: 'large' as const,
+            inlinePostEmojiSize: 'medium' as const,
             reactionEmojiSize: 'large' as const,
         },
         expected: {
@@ -99,6 +107,7 @@ test.each([
         userPreferences: {
             enableEnhancedEmojis: true,
             postEmojiSize: 'large' as const,
+            inlinePostEmojiSize: 'medium' as const,
             reactionEmojiSize: 'large' as const,
         },
         expected: {
@@ -117,6 +126,7 @@ test.each([
         userPreferences: {
             enableEnhancedEmojis: true,
             postEmojiSize: 'large' as const,
+            inlinePostEmojiSize: 'medium' as const,
             reactionEmojiSize: 'large' as const,
         },
         expected: {
@@ -141,12 +151,14 @@ test('maps configured user emoji sizes to css values', () => {
         {
             enableEnhancedEmojis: true,
             postEmojiSize: 'default',
+            inlinePostEmojiSize: 'default',
             reactionEmojiSize: 'default',
         },
     )).toEqual({
         enablePostEmojis: true,
         enableDeveloperMode: false,
         enableReactionEmojis: false,
+        inlinePostEmojiSize: '20px',
         postEmojiSize: '32px',
         reactionEmojiSize: '20px',
     });
@@ -160,12 +172,14 @@ test('maps configured user emoji sizes to css values', () => {
         {
             enableEnhancedEmojis: true,
             postEmojiSize: 'large',
+            inlinePostEmojiSize: 'medium',
             reactionEmojiSize: 'medium',
         },
     )).toEqual({
         enablePostEmojis: true,
         enableDeveloperMode: false,
         enableReactionEmojis: false,
+        inlinePostEmojiSize: '32px',
         postEmojiSize: '48px',
         reactionEmojiSize: '32px',
     });
@@ -179,12 +193,14 @@ test('maps configured user emoji sizes to css values', () => {
         {
             enableEnhancedEmojis: true,
             postEmojiSize: 'extraLarge',
+            inlinePostEmojiSize: 'extraLarge',
             reactionEmojiSize: 'large',
         },
     )).toEqual({
         enablePostEmojis: true,
         enableDeveloperMode: false,
         enableReactionEmojis: false,
+        inlinePostEmojiSize: '64px',
         postEmojiSize: '64px',
         reactionEmojiSize: '64px',
     });
@@ -198,15 +214,36 @@ test('maps configured user emoji sizes to css values', () => {
         {
             enableEnhancedEmojis: true,
             postEmojiSize: 'maxSize',
+            inlinePostEmojiSize: 'maxSize',
             reactionEmojiSize: 'maxSize',
         },
     )).toEqual({
         enablePostEmojis: true,
         enableDeveloperMode: false,
         enableReactionEmojis: false,
+        inlinePostEmojiSize: '128px',
         postEmojiSize: '128px',
         reactionEmojiSize: '128px',
     });
+});
+
+test('inline emoji default remains normal text sized', () => {
+    const config = resolveEnhancedEmojisEffectiveConfig(
+        {
+            enableEnhancedPostEmojis: true,
+            enableEnhancedReactionEmojis: false,
+            enableDeveloperMode: false,
+        },
+        {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'maxSize',
+            inlinePostEmojiSize: 'default',
+            reactionEmojiSize: 'default',
+        },
+    );
+
+    expect(config.inlinePostEmojiSize).toBe('20px');
+    expect(config.postEmojiSize).toBe('128px');
 });
 
 test('disabling the plugin preserves stored size preferences but disables all enhancements', () => {
@@ -219,6 +256,7 @@ test('disabling the plugin preserves stored size preferences but disables all en
         {
             enableEnhancedEmojis: false,
             postEmojiSize: 'extraLarge',
+            inlinePostEmojiSize: 'large',
             reactionEmojiSize: 'maxSize',
         },
     );
@@ -227,6 +265,7 @@ test('disabling the plugin preserves stored size preferences but disables all en
         enablePostEmojis: false,
         enableDeveloperMode: false,
         enableReactionEmojis: false,
+        inlinePostEmojiSize: '48px',
         postEmojiSize: '64px',
         reactionEmojiSize: '128px',
     });

@@ -1,4 +1,5 @@
 export type PostEmojiSize = 'default' | 'large' | 'extraLarge' | 'maxSize';
+export type InlinePostEmojiSize = 'default' | 'medium' | 'large' | 'extraLarge' | 'maxSize';
 export type ReactionEmojiSize = 'default' | 'medium' | 'large' | 'maxSize';
 
 export interface EnhancedEmojisConfig {
@@ -10,6 +11,7 @@ export interface EnhancedEmojisConfig {
 export interface EnhancedEmojisUserPreferences {
     enableEnhancedEmojis: boolean;
     postEmojiSize: PostEmojiSize;
+    inlinePostEmojiSize: InlinePostEmojiSize;
     reactionEmojiSize: ReactionEmojiSize;
 }
 
@@ -18,6 +20,7 @@ export interface EnhancedEmojisEffectiveConfig {
     enableReactionEmojis: boolean;
     enableDeveloperMode: boolean;
     postEmojiSize: string;
+    inlinePostEmojiSize: string;
     reactionEmojiSize: string;
 }
 
@@ -30,6 +33,7 @@ export const DEFAULT_ENHANCED_EMOJIS_CONFIG: EnhancedEmojisConfig = {
 export const DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES: EnhancedEmojisUserPreferences = {
     enableEnhancedEmojis: false,
     postEmojiSize: 'default',
+    inlinePostEmojiSize: 'default',
     reactionEmojiSize: 'default',
 };
 
@@ -47,7 +51,16 @@ const REACTION_EMOJI_SIZE_TO_PIXELS: Record<ReactionEmojiSize, number> = {
     maxSize: 128,
 };
 
+const INLINE_POST_EMOJI_SIZE_TO_PIXELS: Record<InlinePostEmojiSize, number> = {
+    default: 20,
+    medium: 32,
+    large: 48,
+    extraLarge: 64,
+    maxSize: 128,
+};
+
 const VALID_POST_EMOJI_SIZES: PostEmojiSize[] = ['default', 'large', 'extraLarge', 'maxSize'];
+const VALID_INLINE_POST_EMOJI_SIZES: InlinePostEmojiSize[] = ['default', 'medium', 'large', 'extraLarge', 'maxSize'];
 const VALID_REACTION_EMOJI_SIZES: ReactionEmojiSize[] = ['default', 'medium', 'large', 'maxSize'];
 
 export function normalizeEnhancedEmojisConfig(config: Partial<EnhancedEmojisConfig> | null | undefined): EnhancedEmojisConfig {
@@ -60,11 +73,13 @@ export function normalizeEnhancedEmojisConfig(config: Partial<EnhancedEmojisConf
 
 export function normalizeEnhancedEmojisUserPreferences(preferences: Partial<EnhancedEmojisUserPreferences> | null | undefined): EnhancedEmojisUserPreferences {
     const postEmojiSizeValue = preferences?.postEmojiSize;
+    const inlinePostEmojiSizeValue = preferences?.inlinePostEmojiSize;
     const reactionEmojiSizeValue = preferences?.reactionEmojiSize;
 
     return {
         enableEnhancedEmojis: typeof preferences?.enableEnhancedEmojis === 'boolean' ? preferences.enableEnhancedEmojis : DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.enableEnhancedEmojis,
         postEmojiSize: isPostEmojiSize(postEmojiSizeValue) ? postEmojiSizeValue : DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.postEmojiSize,
+        inlinePostEmojiSize: isInlinePostEmojiSize(inlinePostEmojiSizeValue) ? inlinePostEmojiSizeValue : DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.inlinePostEmojiSize,
         reactionEmojiSize: isReactionEmojiSize(reactionEmojiSizeValue) ? reactionEmojiSizeValue : DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.reactionEmojiSize,
     };
 }
@@ -84,6 +99,7 @@ export function resolveEnhancedEmojisEffectiveConfig(
             enableDeveloperMode,
             enableReactionEmojis,
             postEmojiSize: '64px',
+            inlinePostEmojiSize: '32px',
             reactionEmojiSize: '64px',
         };
     }
@@ -93,6 +109,7 @@ export function resolveEnhancedEmojisEffectiveConfig(
         enableDeveloperMode,
         enableReactionEmojis,
         postEmojiSize: `${POST_EMOJI_SIZE_TO_PIXELS[normalizedUserPreferences.postEmojiSize]}px`,
+        inlinePostEmojiSize: `${INLINE_POST_EMOJI_SIZE_TO_PIXELS[normalizedUserPreferences.inlinePostEmojiSize]}px`,
         reactionEmojiSize: `${REACTION_EMOJI_SIZE_TO_PIXELS[normalizedUserPreferences.reactionEmojiSize]}px`,
     };
 }
@@ -105,12 +122,17 @@ export function isReactionEmojiSize(value: unknown): value is ReactionEmojiSize 
     return typeof value === 'string' && VALID_REACTION_EMOJI_SIZES.includes(value as ReactionEmojiSize);
 }
 
+export function isInlinePostEmojiSize(value: unknown): value is InlinePostEmojiSize {
+    return typeof value === 'string' && VALID_INLINE_POST_EMOJI_SIZES.includes(value as InlinePostEmojiSize);
+}
+
 export function applyEnhancedEmojisConfig(rootElement: HTMLElement, config: EnhancedEmojisEffectiveConfig): void {
     rootElement.classList.remove('enhanced-emojis-enabled');
     rootElement.classList.toggle('enhanced-emojis-posts-enabled', config.enablePostEmojis);
     rootElement.classList.toggle('enhanced-emojis-developer-mode', config.enableDeveloperMode);
     rootElement.classList.toggle('enhanced-emojis-reactions-enabled', config.enableReactionEmojis);
     rootElement.style.setProperty('--enhanced-post-emojis-size', config.postEmojiSize);
+    rootElement.style.setProperty('--enhanced-inline-post-emojis-size', config.inlinePostEmojiSize);
     rootElement.style.setProperty('--enhanced-reaction-emojis-size', config.reactionEmojiSize);
     applyEnhancedEmojisReactionLayoutConfig(rootElement, config.reactionEmojiSize);
 }
@@ -121,6 +143,7 @@ export function clearEnhancedEmojisConfig(rootElement: HTMLElement): void {
     rootElement.classList.remove('enhanced-emojis-developer-mode');
     rootElement.classList.remove('enhanced-emojis-reactions-enabled');
     rootElement.style.removeProperty('--enhanced-post-emojis-size');
+    rootElement.style.removeProperty('--enhanced-inline-post-emojis-size');
     rootElement.style.removeProperty('--enhanced-reaction-emojis-size');
     rootElement.style.removeProperty('--enhanced-reaction-chip-padding-inline');
     rootElement.style.removeProperty('--enhanced-reaction-chip-padding-block');

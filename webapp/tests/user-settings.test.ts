@@ -31,11 +31,13 @@ describe('registerEnhancedEmojisUserSettings', () => {
             userPreferences: {
                 enableEnhancedEmojis: true,
                 postEmojiSize: 'default' as const,
+                inlinePostEmojiSize: 'default' as const,
                 reactionEmojiSize: 'default' as const,
             },
             expectedSectionKeys: [
                 'enhanced_emojis.settings.title',
                 'enhanced_emojis.settings.posts.title',
+                'enhanced_emojis.settings.posts.inline.title',
                 'enhanced_emojis.settings.reactions.title',
             ],
         },
@@ -50,9 +52,14 @@ describe('registerEnhancedEmojisUserSettings', () => {
             userPreferences: {
                 enableEnhancedEmojis: true,
                 postEmojiSize: 'default' as const,
+                inlinePostEmojiSize: 'default' as const,
                 reactionEmojiSize: 'default' as const,
             },
-            expectedSectionKeys: ['enhanced_emojis.settings.title', 'enhanced_emojis.settings.posts.title'],
+            expectedSectionKeys: [
+                'enhanced_emojis.settings.title',
+                'enhanced_emojis.settings.posts.title',
+                'enhanced_emojis.settings.posts.inline.title',
+            ],
         },
         {
             name: 'post disabled / reactions enabled / user enabled',
@@ -65,6 +72,7 @@ describe('registerEnhancedEmojisUserSettings', () => {
             userPreferences: {
                 enableEnhancedEmojis: true,
                 postEmojiSize: 'default' as const,
+                inlinePostEmojiSize: 'default' as const,
                 reactionEmojiSize: 'default' as const,
             },
             expectedSectionKeys: ['enhanced_emojis.settings.title', 'enhanced_emojis.settings.reactions.title'],
@@ -80,6 +88,7 @@ describe('registerEnhancedEmojisUserSettings', () => {
             userPreferences: {
                 enableEnhancedEmojis: false,
                 postEmojiSize: 'default' as const,
+                inlinePostEmojiSize: 'default' as const,
                 reactionEmojiSize: 'default' as const,
             },
             expectedSectionKeys: ['enhanced_emojis.settings.title'],
@@ -95,6 +104,7 @@ describe('registerEnhancedEmojisUserSettings', () => {
             userPreferences: {
                 enableEnhancedEmojis: true,
                 postEmojiSize: 'default' as const,
+                inlinePostEmojiSize: 'default' as const,
                 reactionEmojiSize: 'default' as const,
             },
             expectedSectionKeys: ['enhanced_emojis.settings.title'],
@@ -140,6 +150,24 @@ describe('registerEnhancedEmojisUserSettings', () => {
                     }),
                 ],
             });
+
+            const inlinePostSection = settings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.posts.inline.title']);
+            expect(inlinePostSection).toMatchObject({
+                title: translations['enhanced_emojis.settings.posts.inline.title'],
+                settings: [
+                    expect.objectContaining({
+                        title: translations['enhanced_emojis.settings.posts.inline.size'],
+                        helpText: translations['enhanced_emojis.settings.posts.inline.help_text'],
+                        options: [
+                            expect.objectContaining({text: translations['enhanced_emojis.settings.posts.inline.option.default']}),
+                            expect.objectContaining({text: translations['enhanced_emojis.settings.posts.inline.option.medium']}),
+                            expect.objectContaining({text: translations['enhanced_emojis.settings.posts.inline.option.large']}),
+                            expect.objectContaining({text: translations['enhanced_emojis.settings.posts.inline.option.extra_large']}),
+                            expect.objectContaining({text: translations['enhanced_emojis.settings.posts.inline.option.max']}),
+                        ],
+                    }),
+                ],
+            });
         }
 
         if (userPreferences.enableEnhancedEmojis && adminConfig.enableEnhancedReactionEmojis) {
@@ -174,6 +202,7 @@ describe('registerEnhancedEmojisUserSettings', () => {
         }, locale, {
             enableEnhancedEmojis: true,
             postEmojiSize: 'default',
+            inlinePostEmojiSize: 'default',
             reactionEmojiSize: 'default',
         });
 
@@ -196,6 +225,7 @@ describe('registerEnhancedEmojisUserSettings', () => {
         }, locale, {
             enableEnhancedEmojis: false,
             postEmojiSize: 'default',
+            inlinePostEmojiSize: 'default',
             reactionEmojiSize: 'default',
         });
 
@@ -204,6 +234,84 @@ describe('registerEnhancedEmojisUserSettings', () => {
         const rendered = messageSetting.component();
 
         expect(rendered.props.children).toBe(translations['enhanced_emojis.settings.enable.disabled_message']);
+    });
+
+    test('shows the saved inline post emoji size setting again when post emojis are re-enabled', () => {
+        const locale = 'en';
+        const translations = getEnhancedEmojisTranslations(locale);
+        const savedPreferences = {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'large' as const,
+            inlinePostEmojiSize: 'extraLarge' as const,
+            reactionEmojiSize: 'default' as const,
+        };
+
+        const hiddenRegistry = makeRegistry();
+        registerEnhancedEmojisUserSettings(hiddenRegistry as never, {
+            enableEnhancedPostEmojis: false,
+            enableEnhancedReactionEmojis: true,
+            enableDeveloperMode: false,
+        }, locale, savedPreferences);
+
+        const hiddenSettings = getRegisteredSettings(hiddenRegistry);
+        expect(hiddenSettings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.posts.title'])).toBeUndefined();
+
+        const visibleRegistry = makeRegistry();
+        registerEnhancedEmojisUserSettings(visibleRegistry as never, {
+            enableEnhancedPostEmojis: true,
+            enableEnhancedReactionEmojis: true,
+            enableDeveloperMode: false,
+        }, locale, savedPreferences);
+
+        const visibleSettings = getRegisteredSettings(visibleRegistry);
+        const postSection = visibleSettings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.posts.title']);
+
+        expect(postSection).toMatchObject({
+            settings: expect.arrayContaining([
+                expect.objectContaining({
+                    name: 'postEmojiSize',
+                    default: 'default',
+                }),
+            ]),
+        });
+
+        const inlinePostSection = visibleSettings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.posts.inline.title']);
+        expect(inlinePostSection).toMatchObject({
+            settings: expect.arrayContaining([
+                expect.objectContaining({
+                    name: 'InlinePostEmojiSize',
+                    default: 'default',
+                }),
+            ]),
+        });
+    });
+
+    test('post emojis and inline post emojis are separate setting rows', () => {
+        const locale = 'en';
+        const translations = getEnhancedEmojisTranslations(locale);
+        const registry = makeRegistry();
+
+        registerEnhancedEmojisUserSettings(registry as never, {
+            enableEnhancedPostEmojis: true,
+            enableEnhancedReactionEmojis: false,
+            enableDeveloperMode: false,
+        }, locale, {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'large',
+            inlinePostEmojiSize: 'medium',
+            reactionEmojiSize: 'default',
+        });
+
+        const settings = getRegisteredSettings(registry);
+        const postSection = settings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.posts.title']);
+        const inlinePostSection = settings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.posts.inline.title']);
+
+        expect(postSection).toMatchObject({
+            settings: [expect.objectContaining({name: 'postEmojiSize'})],
+        });
+        expect(inlinePostSection).toMatchObject({
+            settings: [expect.objectContaining({name: 'InlinePostEmojiSize'})],
+        });
     });
 });
 
@@ -220,6 +328,7 @@ describe('getEnhancedEmojisUserPreferences', () => {
         expect(getEnhancedEmojisUserPreferences(state as never)).toMatchObject({
             enableEnhancedEmojis: false,
             postEmojiSize: 'default',
+            inlinePostEmojiSize: 'default',
             reactionEmojiSize: 'default',
         });
     });
@@ -241,6 +350,12 @@ describe('getEnhancedEmojisUserPreferences', () => {
                             user_id: 'user-id',
                             value: 'extraLarge',
                         },
+                        inline: {
+                            category: 'pp_de.dakosy.enhanced-emojis',
+                            name: 'InlinePostEmojiSize',
+                            user_id: 'user-id',
+                            value: 'medium',
+                        },
                         reaction: {
                             category: 'pp_de.dakosy.enhanced-emojis',
                             name: 'reactionEmojiSize',
@@ -255,6 +370,7 @@ describe('getEnhancedEmojisUserPreferences', () => {
         expect(getEnhancedEmojisUserPreferences(state as never)).toMatchObject({
             enableEnhancedEmojis: true,
             postEmojiSize: 'extraLarge',
+            inlinePostEmojiSize: 'medium',
             reactionEmojiSize: 'maxSize',
         });
     });
