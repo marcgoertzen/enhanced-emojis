@@ -1,9 +1,10 @@
 {
-  "root": true,
-  "extends": [
-    "plugin:@mattermost/react"
-  ],
-  "rules": {
-    "header/header": "off"
-  }
+    "root": true,
+    "extends": [
+        "plugin:@mattermost/react"
+    ],
+    "rules": {
+        "header/header": "off",
+        "linebreak-style": "off"
+    }
 }
