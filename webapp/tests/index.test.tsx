@@ -521,4 +521,180 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         expect(style.setProperty).toHaveBeenCalledWith('--enhanced-post-emojis-size', '64px');
         expect(style.setProperty).toHaveBeenCalledWith('--enhanced-reaction-emojis-size', '64px');
     });
+
+    test('core debug logs are emitted when admin developer mode is enabled even if the user feature is disabled', async () => {
+        const classList = {
+            remove: jest.fn(),
+            toggle: jest.fn(),
+        };
+        const style = {
+            setProperty: jest.fn(),
+            removeProperty: jest.fn(),
+        };
+        const fetch = jest.fn(async () => ({
+            ok: true,
+            json: async () => ({
+                enableEnhancedPostEmojis: true,
+                enableEnhancedReactionEmojis: true,
+                enableDeveloperMode: true,
+            }),
+        }));
+        const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+
+        Object.assign(global, {
+            fetch,
+            document: {
+                body: null,
+                documentElement: {
+                    classList,
+                    style,
+                },
+            },
+        });
+
+        const {default: EnhancedEmojisPlugin} = require('../src/plugin');
+        const plugin = new EnhancedEmojisPlugin();
+        const store = makeStore({
+            [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('enableEnhancedEmojis', 'false'),
+            [`${USER_PREFERENCES_PREFIX}--inlinePostEmojiSize`]: makePreference('inlinePostEmojiSize', 'extraLarge'),
+            [`${USER_PREFERENCES_PREFIX}--postEmojiSize`]: makePreference('postEmojiSize', 'extraLarge'),
+            [`${USER_PREFERENCES_PREFIX}--reactionEmojiSize`]: makePreference('reactionEmojiSize', 'large'),
+        }, 'en');
+
+        await plugin.initialize({
+            registerUserSettings: jest.fn(),
+            registerTranslations: jest.fn(),
+        } as never, store as never);
+
+        expect(consoleLog.mock.calls.map(([eventName]) => eventName)).toEqual(expect.arrayContaining([
+            '[Enhanced Emojis Debug] admin_config_loaded',
+            '[Enhanced Emojis Debug] preferences_loaded',
+            '[Enhanced Emojis Debug] effective_config_resolved',
+            '[Enhanced Emojis Debug] plugin_runtime_identity',
+        ]));
+
+        const runtimeIdentityLog = consoleLog.mock.calls.find(([eventName]) => eventName === '[Enhanced Emojis Debug] plugin_runtime_identity');
+        expect(runtimeIdentityLog?.[1]).toEqual(expect.objectContaining({
+            pluginId: PLUGIN_ID,
+            pluginVersion: expect.any(String),
+            buildTimestamp: expect.any(String),
+            buildEpoch: expect.any(Number),
+            buildId: expect.stringMatching(/^[a-f0-9]{16}$/),
+            gitCommit: expect.anything(),
+            preferenceCategory: 'enhanced_emojis',
+            bundleFileName: 'main.js',
+        }));
+    });
+
+    test('core debug logs are suppressed when admin developer mode is disabled even if the user feature is enabled', async () => {
+        const classList = {
+            remove: jest.fn(),
+            toggle: jest.fn(),
+        };
+        const style = {
+            setProperty: jest.fn(),
+            removeProperty: jest.fn(),
+        };
+        const fetch = jest.fn(async () => ({
+            ok: true,
+            json: async () => ({
+                enableEnhancedPostEmojis: true,
+                enableEnhancedReactionEmojis: true,
+                enableDeveloperMode: false,
+            }),
+        }));
+        const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+
+        Object.assign(global, {
+            fetch,
+            document: {
+                body: null,
+                documentElement: {
+                    classList,
+                    style,
+                },
+            },
+        });
+
+        const {default: EnhancedEmojisPlugin} = require('../src/plugin');
+        const plugin = new EnhancedEmojisPlugin();
+        const store = makeStore({
+            [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('enableEnhancedEmojis', 'true'),
+            [`${USER_PREFERENCES_PREFIX}--inlinePostEmojiSize`]: makePreference('inlinePostEmojiSize', 'medium'),
+            [`${USER_PREFERENCES_PREFIX}--postEmojiSize`]: makePreference('postEmojiSize', 'large'),
+            [`${USER_PREFERENCES_PREFIX}--reactionEmojiSize`]: makePreference('reactionEmojiSize', 'medium'),
+        }, 'en');
+
+        await plugin.initialize({
+            registerUserSettings: jest.fn(),
+            registerTranslations: jest.fn(),
+        } as never, store as never);
+
+        expect(consoleLog).not.toHaveBeenCalled();
+    });
+
+    test('logs a warning when build info is incomplete in developer mode', async () => {
+        jest.resetModules();
+        const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+        const classList = {
+            remove: jest.fn(),
+            toggle: jest.fn(),
+        };
+        const style = {
+            setProperty: jest.fn(),
+            removeProperty: jest.fn(),
+        };
+        const fetch = jest.fn(async () => ({
+            ok: true,
+            json: async () => ({
+                enableEnhancedPostEmojis: true,
+                enableEnhancedReactionEmojis: true,
+                enableDeveloperMode: true,
+            }),
+        }));
+
+        Object.assign(global, {
+            fetch,
+            document: {
+                body: null,
+                documentElement: {
+                    classList,
+                    style,
+                },
+            },
+        });
+
+        jest.doMock('build-info', () => ({
+            __esModule: true,
+            default: {
+                pluginVersion: '',
+                buildTimestamp: '',
+                buildEpoch: Number.NaN,
+                buildId: '',
+                gitCommit: null,
+            },
+        }));
+
+        const {default: EnhancedEmojisPlugin} = require('../src/plugin');
+        const plugin = new EnhancedEmojisPlugin();
+        const store = makeStore({
+            [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('enableEnhancedEmojis', 'true'),
+            [`${USER_PREFERENCES_PREFIX}--inlinePostEmojiSize`]: makePreference('inlinePostEmojiSize', 'medium'),
+            [`${USER_PREFERENCES_PREFIX}--postEmojiSize`]: makePreference('postEmojiSize', 'large'),
+            [`${USER_PREFERENCES_PREFIX}--reactionEmojiSize`]: makePreference('reactionEmojiSize', 'medium'),
+        }, 'en');
+
+        await plugin.initialize({
+            registerUserSettings: jest.fn(),
+            registerTranslations: jest.fn(),
+        } as never, store as never);
+
+        expect(consoleWarn).toHaveBeenCalledWith('[Enhanced Emojis Debug] plugin_runtime_identity_warning', expect.objectContaining({
+            expectedPluginVersion: '0.4.0.dev.14',
+            missingFields: expect.arrayContaining(['pluginVersion', 'buildTimestamp', 'buildEpoch', 'buildId']),
+            pluginVersionMatches: false,
+        }));
+
+        jest.dontMock('build-info');
+    });
 });

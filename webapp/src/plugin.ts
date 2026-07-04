@@ -1,15 +1,20 @@
+import buildInfo from 'build-info';
 import {
     applyEnhancedEmojisRootState,
     clearEnhancedEmojisRootState,
     DEFAULT_ENHANCED_EMOJIS_CONFIG,
     type EnhancedEmojisConfig,
     fetchEnhancedEmojisAdminConfig,
+    getEnhancedEmojisUserPreferenceDiagnostics,
     getEnhancedEmojisUserPreferences,
     resolveEnhancedEmojisEffectiveConfig,
+    USER_PREFERENCES_CATEGORY,
 } from 'config';
+import * as enhancedEmojisDebug from 'debug/enhanced-emojis-debug';
 import PostEmojiFeature from 'features/posts/post-emoji-feature';
 import ReactionEmojiFeature from 'features/reactions/reaction-emoji-feature';
 import {registerEnhancedEmojisTranslations} from 'i18n';
+import manifest from 'manifest';
 import {registerEnhancedEmojisUserSettings} from 'settings';
 
 type GlobalState = import('@mattermost/types/store').GlobalState;
@@ -29,6 +34,48 @@ function getCurrentUserId(state: GlobalState): string | undefined {
     return state?.entities?.users?.currentUserId;
 }
 
+function getBundleFileName(): string | null {
+    const bundlePath = manifest.webapp?.bundle_path;
+    if (!bundlePath) {
+        return null;
+    }
+
+    const pathSegments = bundlePath.split('/');
+    return pathSegments[pathSegments.length - 1] || null;
+}
+
+function validateBuildInfo(pluginVersion: string): {
+    missingFields: string[];
+    pluginVersionMatches: boolean;
+} {
+    const missingFields: string[] = [];
+
+    if (!buildInfo.pluginVersion) {
+        missingFields.push('pluginVersion');
+    }
+
+    if (!buildInfo.buildTimestamp) {
+        missingFields.push('buildTimestamp');
+    }
+
+    if (!Number.isFinite(buildInfo.buildEpoch)) {
+        missingFields.push('buildEpoch');
+    }
+
+    if (!buildInfo.buildId) {
+        missingFields.push('buildId');
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(buildInfo, 'gitCommit')) {
+        missingFields.push('gitCommit');
+    }
+
+    return {
+        missingFields,
+        pluginVersionMatches: buildInfo.pluginVersion === pluginVersion,
+    };
+}
+
 export default class EnhancedEmojisPlugin {
     private adminConfig: EnhancedEmojisConfig = DEFAULT_ENHANCED_EMOJIS_CONFIG;
 
@@ -46,6 +93,8 @@ export default class EnhancedEmojisPlugin {
 
     private initialConfigSyncTimeoutId?: ReturnType<typeof globalThis.setTimeout>;
 
+    private hasLoggedRuntimeIdentity = false;
+
     private readonly postEmojiFeature = new PostEmojiFeature();
 
     private readonly reactionEmojiFeature = new ReactionEmojiFeature();
@@ -57,6 +106,13 @@ export default class EnhancedEmojisPlugin {
         this.registry = registry;
         this.store = store;
         this.adminConfig = await fetchEnhancedEmojisAdminConfig();
+        enhancedEmojisDebug.debugLog('admin_config_loaded', {
+            adminDeveloperModeEnabled: this.adminConfig.enableDeveloperMode,
+            adminPostFeatureEnabled: this.adminConfig.enableEnhancedPostEmojis,
+            adminReactionFeatureEnabled: this.adminConfig.enableEnhancedReactionEmojis,
+        }, {
+            adminDeveloperModeEnabled: this.adminConfig.enableDeveloperMode,
+        });
         registerEnhancedEmojisTranslations(registry);
 
         const rootElement = globalThis.document?.documentElement;
@@ -94,6 +150,7 @@ export default class EnhancedEmojisPlugin {
         this.registry = undefined;
         this.lastAppliedConfigSignature = undefined;
         this.lastRegisteredUserSettingsSignature = undefined;
+        this.hasLoggedRuntimeIdentity = false;
     }
 
     private applyCurrentConfig(): void {
@@ -112,16 +169,57 @@ export default class EnhancedEmojisPlugin {
         const isInitialApply = this.lastAppliedConfigSignature === undefined;
         this.lastAppliedConfigSignature = signature;
 
+        if (!this.hasLoggedRuntimeIdentity) {
+            const buildInfoValidation = validateBuildInfo(manifest.version);
+            if (buildInfoValidation.missingFields.length > 0 || !buildInfoValidation.pluginVersionMatches) {
+                enhancedEmojisDebug.debugWarn('plugin_runtime_identity_warning', {
+                    expectedPluginVersion: manifest.version,
+                    missingFields: buildInfoValidation.missingFields,
+                    pluginVersionMatches: buildInfoValidation.pluginVersionMatches,
+                    runtimeBuildInfo: buildInfo,
+                }, {
+                    adminDeveloperModeEnabled: this.adminConfig.enableDeveloperMode,
+                });
+            }
+
+            enhancedEmojisDebug.debugLog('plugin_runtime_identity', {
+                buildEpoch: buildInfo.buildEpoch,
+                buildId: buildInfo.buildId,
+                buildTimestamp: buildInfo.buildTimestamp,
+                bundleFileName: getBundleFileName(),
+                gitCommit: buildInfo.gitCommit,
+                pluginId: manifest.id,
+                pluginVersion: buildInfo.pluginVersion,
+                preferenceCategory: USER_PREFERENCES_CATEGORY,
+            }, {
+                adminDeveloperModeEnabled: this.adminConfig.enableDeveloperMode,
+            });
+            this.hasLoggedRuntimeIdentity = true;
+        }
+
+        enhancedEmojisDebug.debugLog('effective_config_resolved', {
+            developerModeActive: effectiveConfig.enableDeveloperMode,
+            effectiveEnableState: {
+                posts: effectiveConfig.enablePostEmojis,
+                reactions: effectiveConfig.enableReactionEmojis,
+            },
+            inlinePostEmojiSize: effectiveConfig.inlinePostEmojiSize,
+            postEmojiSize: effectiveConfig.postEmojiSize,
+            reactionEmojiSize: effectiveConfig.reactionEmojiSize,
+        }, {
+            adminDeveloperModeEnabled: this.adminConfig.enableDeveloperMode,
+        });
+
         applyEnhancedEmojisRootState(this.rootElement, effectiveConfig);
 
         if (isInitialApply) {
-            this.postEmojiFeature.start(this.rootElement, effectiveConfig);
-            this.reactionEmojiFeature.start(this.rootElement, effectiveConfig);
+            this.postEmojiFeature.start(this.rootElement, effectiveConfig, this.adminConfig.enableDeveloperMode);
+            this.reactionEmojiFeature.start(this.rootElement, effectiveConfig, this.adminConfig.enableDeveloperMode);
             return;
         }
 
-        this.postEmojiFeature.update(effectiveConfig);
-        this.reactionEmojiFeature.update(effectiveConfig);
+        this.postEmojiFeature.update(effectiveConfig, this.adminConfig.enableDeveloperMode);
+        this.reactionEmojiFeature.update(effectiveConfig, this.adminConfig.enableDeveloperMode);
     }
 
     private registerUserSettingsForCurrentLocale(store: Store): void {
@@ -132,6 +230,7 @@ export default class EnhancedEmojisPlugin {
         const state = store.getState();
         const locale = getCurrentUserLocale(state);
         const currentUserId = getCurrentUserId(state);
+        const preferenceDiagnostics = getEnhancedEmojisUserPreferenceDiagnostics(state);
         const userPreferences = getEnhancedEmojisUserPreferences(state);
         const signature = JSON.stringify({
             currentUserId,
@@ -149,6 +248,13 @@ export default class EnhancedEmojisPlugin {
         }
 
         this.lastRegisteredUserSettingsSignature = signature;
+        enhancedEmojisDebug.debugLog('preferences_loaded', {
+            defaultsApplied: preferenceDiagnostics.defaultsApplied,
+            normalizedPreferences: preferenceDiagnostics.normalizedPreferences,
+            rawMattermostPreferences: preferenceDiagnostics.rawPreferences,
+        }, {
+            adminDeveloperModeEnabled: this.adminConfig.enableDeveloperMode,
+        });
         registerEnhancedEmojisUserSettings(
             this.registry,
             this.adminConfig,

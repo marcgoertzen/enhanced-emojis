@@ -1,3 +1,4 @@
+import buildInfo from 'build-info';
 import {
     buildEnhancedEmojisPreferenceSavePayload,
     DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES,
@@ -13,7 +14,9 @@ import {
     type ReactionEmojiSize,
     saveEnhancedEmojisUserPreferences,
     USER_ENABLE_PREFERENCE_NAME,
+    USER_PREFERENCES_CATEGORY,
 } from 'config';
+import * as enhancedEmojisDebug from 'debug/enhanced-emojis-debug';
 import {type EnhancedEmojisTranslations, getEnhancedEmojisTranslations} from 'i18n';
 import manifest from 'manifest';
 import React from 'react';
@@ -70,22 +73,27 @@ function createMessageSettingComponent(message: string): () => React.ReactElemen
     };
 }
 
-function logEnhancedEmojisDebugInfo(enableDeveloperMode: boolean, message: string, data: unknown): void {
-    if (!enableDeveloperMode) {
-        return;
-    }
+function createDeveloperBuildInfoComponent(): () => React.ReactElement {
+    return function DeveloperBuildInfo(): React.ReactElement {
+        const rows = [
+            ['Plugin Version', buildInfo.pluginVersion],
+            ['Build Timestamp', buildInfo.buildTimestamp],
+            ['Build ID', buildInfo.buildId],
+            ['Git Commit', buildInfo.gitCommit ?? 'null'],
+            ['Preference Category', USER_PREFERENCES_CATEGORY],
+        ];
 
-    // eslint-disable-next-line no-console
-    console.debug(`[Enhanced Emojis Debug] ${message}`, data);
-}
-
-function logEnhancedEmojisDebugError(enableDeveloperMode: boolean, error: unknown): void {
-    if (!enableDeveloperMode) {
-        return;
-    }
-
-    // eslint-disable-next-line no-console
-    console.error('[Enhanced Emojis Debug] Failed to save user preferences', error);
+        return React.createElement(
+            'div',
+            null,
+            rows.map(([label, value]) => React.createElement(
+                'div',
+                {key: label},
+                React.createElement('strong', null, `${label}: `),
+                value,
+            )),
+        );
+    };
 }
 
 function createUserPreferencesSubmitHandler(
@@ -109,21 +117,42 @@ function createUserPreferencesSubmitHandler(
             value: changedEntry[1],
         });
 
-        logEnhancedEmojisDebugInfo(enableDeveloperMode, 'Saving preference change', {
+        enhancedEmojisDebug.debugLog('settings_change', {
             changedKey: savePlan.changedKey,
-            oldNormalizedPreferences: savePlan.previousPreferences,
+            newValue: changedEntry[1],
+            oldValue: savePlan.previousPreferences[savePlan.changedKey],
+        }, {
+            adminDeveloperModeEnabled: enableDeveloperMode,
+        });
+
+        enhancedEmojisDebug.debugLog('settings_save_attempt', {
+            changedKey: savePlan.changedKey,
             newNormalizedPreferences: savePlan.nextPreferences,
+            oldNormalizedPreferences: savePlan.previousPreferences,
             payload: savePlan.payload,
             unchangedValues: {
                 enableEnhancedEmojis: savePlan.changedKey === USER_ENABLE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.enableEnhancedEmojis,
-                postEmojiSize: savePlan.changedKey === POST_EMOJI_SIZE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.postEmojiSize,
                 inlinePostEmojiSize: savePlan.changedKey === INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.inlinePostEmojiSize,
+                postEmojiSize: savePlan.changedKey === POST_EMOJI_SIZE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.postEmojiSize,
                 reactionEmojiSize: savePlan.changedKey === REACTION_EMOJI_SIZE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.reactionEmojiSize,
             },
+        }, {
+            adminDeveloperModeEnabled: enableDeveloperMode,
         });
 
-        saveEnhancedEmojisUserPreferences(currentUserId, savePlan.payload).catch((error: unknown) => {
-            logEnhancedEmojisDebugError(enableDeveloperMode, error);
+        saveEnhancedEmojisUserPreferences(currentUserId, savePlan.payload).then(() => {
+            enhancedEmojisDebug.debugLog('settings_save_success', {
+                savedPreferences: savePlan.nextPreferences,
+            }, {
+                adminDeveloperModeEnabled: enableDeveloperMode,
+            });
+        }).catch((error: unknown) => {
+            enhancedEmojisDebug.debugError('settings_save_failed', error, {
+                changedKey: savePlan.changedKey,
+                payload: savePlan.payload,
+            }, {
+                adminDeveloperModeEnabled: enableDeveloperMode,
+            });
         });
     };
 }
@@ -194,6 +223,15 @@ export function createEnhancedEmojisUserSettingsConfig(
         });
     }
 
+    if (adminConfig.enableDeveloperMode) {
+        generalSettings.push({
+            type: 'custom' as const,
+            name: 'developerBuildInfo',
+            title: 'Debug Build Info',
+            component: createDeveloperBuildInfoComponent(),
+        });
+    }
+
     sections.push({
         title: translations['enhanced_emojis.settings.title'],
         onSubmit,
@@ -233,6 +271,19 @@ export function createEnhancedEmojisUserSettingsConfig(
             onSubmit,
         }));
     }
+
+    enhancedEmojisDebug.debugLog('settings_render', {
+        currentValues: normalizedUserPreferences,
+        visibleSettings: sections.flatMap((section) => {
+            if (!('settings' in section)) {
+                return [];
+            }
+
+            return section.settings.map((setting) => setting.name);
+        }),
+    }, {
+        adminDeveloperModeEnabled: adminConfig.enableDeveloperMode,
+    });
 
     return {
         id: manifest.id,

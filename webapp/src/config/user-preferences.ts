@@ -25,6 +25,12 @@ export interface MattermostUserPreference {
     value: string;
 }
 
+export interface EnhancedEmojisUserPreferenceDiagnostics {
+    defaultsApplied: Array<keyof EnhancedEmojisUserPreferences>;
+    normalizedPreferences: EnhancedEmojisUserPreferences;
+    rawPreferences: MattermostUserPreference[];
+}
+
 export interface EnhancedEmojisPreferenceSavePlan {
     changedKey: (typeof ENHANCED_EMOJIS_PREFERENCE_NAMES)[number];
     previousPreferences: EnhancedEmojisUserPreferences;
@@ -73,6 +79,41 @@ export function normalizeEnhancedEmojisUserPreferences(preferences: Partial<Enha
         postEmojiSize: isPostEmojiSize(postEmojiSizeValue) ? postEmojiSizeValue : DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.postEmojiSize,
         inlinePostEmojiSize: isInlinePostEmojiSize(inlinePostEmojiSizeValue) ? inlinePostEmojiSizeValue : DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.inlinePostEmojiSize,
         reactionEmojiSize: isReactionEmojiSize(reactionEmojiSizeValue) ? reactionEmojiSizeValue : DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.reactionEmojiSize,
+    };
+}
+
+export function getRawEnhancedEmojisUserPreferences(state: GlobalState): MattermostUserPreference[] {
+    return Object.values(state?.entities?.preferences?.myPreferences ?? {}).filter((preference): preference is MattermostUserPreference => {
+        return preference.category === USER_PREFERENCES_CATEGORY;
+    });
+}
+
+export function getEnhancedEmojisUserPreferenceDiagnostics(state: GlobalState): EnhancedEmojisUserPreferenceDiagnostics {
+    const rawPreferences = getRawEnhancedEmojisUserPreferences(state);
+    const normalizedPreferences = getEnhancedEmojisUserPreferences(state);
+    const defaultsApplied: Array<keyof EnhancedEmojisUserPreferences> = [];
+    const rawPreferenceNames = new Set(rawPreferences.map((preference) => preference.name));
+
+    if (!rawPreferenceNames.has(USER_ENABLE_PREFERENCE_NAME)) {
+        defaultsApplied.push('enableEnhancedEmojis');
+    }
+
+    if (!rawPreferenceNames.has(POST_EMOJI_SIZE_PREFERENCE_NAME)) {
+        defaultsApplied.push('postEmojiSize');
+    }
+
+    if (!rawPreferenceNames.has(INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME)) {
+        defaultsApplied.push('inlinePostEmojiSize');
+    }
+
+    if (!rawPreferenceNames.has(REACTION_EMOJI_SIZE_PREFERENCE_NAME)) {
+        defaultsApplied.push('reactionEmojiSize');
+    }
+
+    return {
+        defaultsApplied,
+        normalizedPreferences,
+        rawPreferences,
     };
 }
 

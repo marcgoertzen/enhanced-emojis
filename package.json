@@ -1,28 +1,29 @@
 {
-  "name": "enhanced-emojis",
-  "version": "0.4.0",
-  "description": "Mattermost WebApp plugin for improving custom and standard emoji rendering.",
-  "private": true,
-  "license": "Apache-2.0",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/marcgoertzen/enhanced-emojis.git"
-  },
-  "homepage": "https://github.com/marcgoertzen/enhanced-emojis",
-  "bugs": {
-    "url": "https://github.com/marcgoertzen/enhanced-emojis/issues"
-  },
-  "scripts": {
-    "check-manifest": "node scripts/update-webapp-manifest.js --check",
-    "sync-manifest": "node scripts/update-webapp-manifest.js",
-    "lint": "npm --prefix webapp run lint",
-    "typecheck": "npm run check-manifest && npm --prefix webapp run check-types",
-    "test": "npm run check-manifest && npm --prefix webapp run test -- --runInBand",
-    "build:webapp": "npm run check-manifest && npm --prefix webapp run build",
-    "build:server": "node scripts/build-server.js",
-    "package:plugin": "node scripts/package-plugin.js",
-    "package": "npm run build:webapp && npm run build:server && npm run package:plugin",
-    "verify": "npm run lint && npm run typecheck && npm run test && npm run package",
-    "clean": "node scripts/clean.js"
-  }
+    "name": "enhanced-emojis",
+    "version": "0.4.0",
+    "description": "Mattermost WebApp plugin for improving custom and standard emoji rendering.",
+    "private": true,
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/marcgoertzen/enhanced-emojis.git"
+    },
+    "homepage": "https://github.com/marcgoertzen/enhanced-emojis",
+    "bugs": {
+        "url": "https://github.com/marcgoertzen/enhanced-emojis/issues"
+    },
+    "scripts": {
+        "sync-build-info": "node scripts/generate-build-info.js",
+        "check-manifest": "node scripts/update-webapp-manifest.js --check",
+        "sync-manifest": "node scripts/update-webapp-manifest.js",
+        "lint": "npm --prefix webapp run lint",
+        "typecheck": "npm run sync-build-info && npm run check-manifest && npm --prefix webapp run check-types",
+        "test": "npm run sync-build-info && npm run check-manifest && npm --prefix webapp run test -- --runInBand",
+        "build:webapp": "npm run sync-build-info && npm run check-manifest && npm --prefix webapp run build",
+        "build:server": "node scripts/build-server.js",
+        "package:plugin": "node scripts/package-plugin.js",
+        "package": "npm run build:webapp && npm run build:server && npm run package:plugin",
+        "verify": "npm run lint && npm run typecheck && npm run test && npm run package",
+        "clean": "node scripts/clean.js"
+    }
 }

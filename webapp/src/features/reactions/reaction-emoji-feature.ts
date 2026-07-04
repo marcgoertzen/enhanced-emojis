@@ -1,18 +1,25 @@
 import type {EnhancedEmojisEffectiveConfig} from 'config';
+import * as enhancedEmojisDebug from 'debug/enhanced-emojis-debug';
 
 export default class ReactionEmojiFeature {
     private rootElement?: HTMLElement;
 
-    public start(rootElement: HTMLElement, config: EnhancedEmojisEffectiveConfig): void {
+    private currentConfig?: EnhancedEmojisEffectiveConfig;
+
+    private debugLoggingEnabled = false;
+
+    public start(rootElement: HTMLElement, config: EnhancedEmojisEffectiveConfig, debugLoggingEnabled = false): void {
         this.rootElement = rootElement;
+        this.debugLoggingEnabled = debugLoggingEnabled;
         this.applyConfig(config);
     }
 
-    public update(config: EnhancedEmojisEffectiveConfig): void {
+    public update(config: EnhancedEmojisEffectiveConfig, debugLoggingEnabled = false): void {
         if (!this.rootElement) {
             return;
         }
 
+        this.debugLoggingEnabled = debugLoggingEnabled;
         this.applyConfig(config);
     }
 
@@ -26,6 +33,8 @@ export default class ReactionEmojiFeature {
             this.rootElement.style.removeProperty('--enhanced-reaction-chip-min-height');
         }
 
+        this.debugLoggingEnabled = false;
+        this.currentConfig = undefined;
         this.rootElement = undefined;
     }
 
@@ -34,9 +43,11 @@ export default class ReactionEmojiFeature {
             return;
         }
 
+        this.currentConfig = config;
         this.rootElement.classList.toggle('enhanced-emojis-reactions-enabled', config.enableReactionEmojis);
         this.rootElement.style.setProperty('--enhanced-reaction-emojis-size', config.reactionEmojiSize);
         this.applyReactionLayoutConfig(config.reactionEmojiSize);
+        this.logReactionEmojiApplication();
     }
 
     private applyReactionLayoutConfig(reactionEmojiSize: string): void {
@@ -54,5 +65,16 @@ export default class ReactionEmojiFeature {
         this.rootElement.style.setProperty('--enhanced-reaction-chip-padding-block', `${reactionChipPaddingBlock}px`);
         this.rootElement.style.setProperty('--enhanced-reaction-chip-gap', `${reactionChipGap}px`);
         this.rootElement.style.setProperty('--enhanced-reaction-chip-min-height', `${reactionChipMinHeight}px`);
+    }
+
+    private logReactionEmojiApplication(): void {
+        const reactionCount = globalThis.document?.body?.querySelectorAll('img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"]').length ?? 0;
+
+        enhancedEmojisDebug.debugLog('reaction_emojis_applied', {
+            affectedReactionCount: reactionCount,
+            selectedSize: this.currentConfig?.reactionEmojiSize,
+        }, {
+            adminDeveloperModeEnabled: this.debugLoggingEnabled,
+        });
     }
 }

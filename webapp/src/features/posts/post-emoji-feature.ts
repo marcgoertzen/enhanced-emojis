@@ -1,6 +1,11 @@
 import type {EnhancedEmojisEffectiveConfig} from 'config';
+import * as enhancedEmojisDebug from 'debug/enhanced-emojis-debug';
 
-import {classifyAllPostEmojiContainers, classifyPostEmojiMutations, clearPostEmojiClassification} from './post-emoji-classifier';
+import {
+    classifyAllPostEmojiContainers,
+    classifyPostEmojiMutations,
+    clearPostEmojiClassification,
+} from './post-emoji-classifier';
 
 const POST_EMOJI_INITIAL_SCAN_INTERVAL_MS = 250;
 const POST_EMOJI_INITIAL_SCAN_ATTEMPTS = 8;
@@ -16,16 +21,22 @@ export default class PostEmojiFeature {
 
     private postEmojiInitialScanAttemptsRemaining = 0;
 
-    public start(rootElement: HTMLElement, config: EnhancedEmojisEffectiveConfig): void {
+    private currentConfig?: EnhancedEmojisEffectiveConfig;
+
+    private debugLoggingEnabled = false;
+
+    public start(rootElement: HTMLElement, config: EnhancedEmojisEffectiveConfig, debugLoggingEnabled = false): void {
         this.rootElement = rootElement;
+        this.debugLoggingEnabled = debugLoggingEnabled;
         this.applyConfig(config);
     }
 
-    public update(config: EnhancedEmojisEffectiveConfig): void {
+    public update(config: EnhancedEmojisEffectiveConfig, debugLoggingEnabled = false): void {
         if (!this.rootElement) {
             return;
         }
 
+        this.debugLoggingEnabled = debugLoggingEnabled;
         this.applyConfig(config);
     }
 
@@ -41,6 +52,7 @@ export default class PostEmojiFeature {
             this.rootElement.style.removeProperty('--enhanced-inline-post-emojis-size');
         }
 
+        this.debugLoggingEnabled = false;
         this.rootElement = undefined;
     }
 
@@ -49,6 +61,7 @@ export default class PostEmojiFeature {
             return;
         }
 
+        this.currentConfig = config;
         this.rootElement.classList.toggle('enhanced-emojis-posts-enabled', config.enablePostEmojis);
         this.rootElement.style.setProperty('--enhanced-post-emojis-size', config.postEmojiSize);
         this.rootElement.style.setProperty('--enhanced-inline-post-emojis-size', config.inlinePostEmojiSize);
@@ -82,7 +95,7 @@ export default class PostEmojiFeature {
         }
 
         this.stopPostEmojiBodyObserver();
-        classifyAllPostEmojiContainers(body);
+        this.logPostEmojiClassification(classifyAllPostEmojiContainers(body));
         this.startPostEmojiInitialScans();
 
         if (!this.hasMutationObserver() || this.postEmojiObserver) {
@@ -92,7 +105,7 @@ export default class PostEmojiFeature {
         this.postEmojiObserver = new MutationObserver((mutationRecords) => {
             const containers = classifyPostEmojiMutations(mutationRecords);
             containers.forEach((container) => {
-                classifyAllPostEmojiContainers(container);
+                this.logPostEmojiClassification(classifyAllPostEmojiContainers(container));
             });
         });
         this.postEmojiObserver.observe(body, {
@@ -159,7 +172,7 @@ export default class PostEmojiFeature {
 
             const body = globalThis.document?.body;
             if (body) {
-                classifyAllPostEmojiContainers(body);
+                this.logPostEmojiClassification(classifyAllPostEmojiContainers(body));
             }
 
             this.scheduleNextPostEmojiInitialScan();
@@ -174,5 +187,30 @@ export default class PostEmojiFeature {
         globalThis.clearTimeout(this.postEmojiInitialScanTimeoutId);
         this.postEmojiInitialScanTimeoutId = undefined;
         this.postEmojiInitialScanAttemptsRemaining = 0;
+    }
+
+    private logPostEmojiClassification(counts: {
+        inline: number;
+        matched: number;
+        standalone: number;
+    }): void {
+        let postMode: 'inline' | 'mixed' | 'none' | 'standalone' = 'none';
+        if (counts.matched > 0) {
+            if (counts.inline > 0 && counts.standalone > 0) {
+                postMode = 'mixed';
+            } else if (counts.inline > 0) {
+                postMode = 'inline';
+            } else {
+                postMode = 'standalone';
+            }
+        }
+
+        enhancedEmojisDebug.debugLog('post_emojis_applied', {
+            affectedElementCount: counts.matched,
+            postMode,
+            selectedSize: this.currentConfig?.postEmojiSize,
+        }, {
+            adminDeveloperModeEnabled: this.debugLoggingEnabled,
+        });
     }
 }

@@ -3,6 +3,7 @@ import {
     createEnhancedEmojisPreferenceSavePayload,
     getEnhancedEmojisUserPreferences,
 } from 'config';
+import * as enhancedEmojisDebug from 'debug/enhanced-emojis-debug';
 import {getEnhancedEmojisTranslations} from 'i18n';
 import React from 'react';
 import {useSelector} from 'react-redux';
@@ -36,6 +37,8 @@ function getRegisteredSettings(registry: ReturnType<typeof makeRegistry>) {
 }
 
 const mockedSavePreferences = Client4.savePreferences as jest.MockedFunction<typeof Client4.savePreferences>;
+const mockedDebugLog = jest.spyOn(enhancedEmojisDebug, 'debugLog');
+const mockedDebugError = jest.spyOn(enhancedEmojisDebug, 'debugError');
 
 describe('registerEnhancedEmojisUserSettings', () => {
     test.each([
@@ -375,6 +378,17 @@ describe('registerEnhancedEmojisUserSettings', () => {
             {user_id: 'user-id', category: 'enhanced_emojis', name: 'inlinePostEmojiSize', value: 'extraLarge'},
             {user_id: 'user-id', category: 'enhanced_emojis', name: 'reactionEmojiSize', value: 'default'},
         ]);
+        await Promise.resolve();
+        expect(mockedDebugLog.mock.calls).toContainEqual(['settings_save_success', {
+            savedPreferences: {
+                enableEnhancedEmojis: true,
+                postEmojiSize: 'large',
+                inlinePostEmojiSize: 'extraLarge',
+                reactionEmojiSize: 'default',
+            },
+        }, {
+            adminDeveloperModeEnabled: false,
+        }]);
     });
 
     test('uses the latest stored preferences as merge base for single-setting saves', async () => {
@@ -419,7 +433,6 @@ describe('registerEnhancedEmojisUserSettings', () => {
     });
 
     test('logs save errors only in developer mode', async () => {
-        const consoleDebug = jest.spyOn(console, 'debug').mockImplementation(() => undefined);
         const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
         mockedSavePreferences.mockRejectedValue(new Error('401 Unauthorized'));
 
@@ -437,29 +450,24 @@ describe('registerEnhancedEmojisUserSettings', () => {
         (settings.sections[0] as {
             onSubmit?: (changes: { [name: string]: string }) => void;
         }).onSubmit?.({enableEnhancedEmojis: 'false'});
-        await Promise.resolve();
-        await Promise.resolve();
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(consoleDebug).toHaveBeenCalledWith('[Enhanced Emojis Debug] Saving preference change', expect.objectContaining({
+        expect(mockedDebugLog).toHaveBeenCalledWith('settings_change', {
             changedKey: 'enableEnhancedEmojis',
-            oldNormalizedPreferences: expect.objectContaining({
-                enableEnhancedEmojis: true,
-                postEmojiSize: 'large',
-                inlinePostEmojiSize: 'medium',
-                reactionEmojiSize: 'default',
-            }),
-            newNormalizedPreferences: expect.objectContaining({
-                enableEnhancedEmojis: false,
-                postEmojiSize: 'large',
-                inlinePostEmojiSize: 'medium',
-                reactionEmojiSize: 'default',
-            }),
+            newValue: 'false',
+            oldValue: true,
+        }, {
+            adminDeveloperModeEnabled: true,
+        });
+        expect(consoleError).toHaveBeenCalledWith('[Enhanced Emojis Debug] settings_save_failed', expect.objectContaining({
+            changedKey: 'enableEnhancedEmojis',
+            message: '401 Unauthorized',
             payload: expect.any(Array),
         }));
-        expect(consoleError).toHaveBeenCalledWith('[Enhanced Emojis Debug] Failed to save user preferences', expect.any(Error));
 
+        mockedDebugError.mockClear();
+        mockedDebugLog.mockClear();
         consoleError.mockClear();
-        consoleDebug.mockClear();
         mockedSavePreferences.mockRejectedValue(new Error('401 Unauthorized'));
 
         const productionSettings = createEnhancedEmojisUserSettingsConfig({
@@ -476,11 +484,39 @@ describe('registerEnhancedEmojisUserSettings', () => {
         (productionSettings.sections[0] as {
             onSubmit?: (changes: { [name: string]: string }) => void;
         }).onSubmit?.({enableEnhancedEmojis: 'false'});
-        await Promise.resolve();
-        await Promise.resolve();
+        await new Promise((resolve) => setTimeout(resolve, 0));
 
-        expect(consoleDebug).not.toHaveBeenCalled();
         expect(consoleError).not.toHaveBeenCalled();
+    });
+
+    test('settings render uses the central debug helper', () => {
+        createEnhancedEmojisUserSettingsConfig({
+            enableEnhancedPostEmojis: true,
+            enableEnhancedReactionEmojis: true,
+            enableDeveloperMode: true,
+        }, 'en', {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'large',
+            inlinePostEmojiSize: 'medium',
+            reactionEmojiSize: 'default',
+        }, 'user-id');
+
+        expect(mockedDebugLog).toHaveBeenCalledWith('settings_render', expect.objectContaining({
+            currentValues: {
+                enableEnhancedEmojis: true,
+                postEmojiSize: 'large',
+                inlinePostEmojiSize: 'medium',
+                reactionEmojiSize: 'default',
+            },
+            visibleSettings: expect.arrayContaining([
+                'enableEnhancedEmojis',
+                'postEmojiSize',
+                'inlinePostEmojiSize',
+                'reactionEmojiSize',
+            ]),
+        }), {
+            adminDeveloperModeEnabled: true,
+        });
     });
 });
 
@@ -653,6 +689,8 @@ describe('createEnableEnhancedEmojisSettingComponent', () => {
         jest.restoreAllMocks();
         mockedUseSelector.mockReset();
         mockedSavePreferences.mockReset();
+        mockedDebugError.mockClear();
+        mockedDebugLog.mockClear();
     });
 
     test('defaults the toggle to off', () => {
