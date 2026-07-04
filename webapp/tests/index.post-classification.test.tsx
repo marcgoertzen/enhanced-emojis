@@ -4,8 +4,7 @@ export {};
 
 import {makePreference, makeStore} from './helpers';
 
-const PLUGIN_ID = 'io.github.marcgoertzen.enhanced-emojis';
-const USER_PREFERENCES_PREFIX = `pp_${PLUGIN_ID}`;
+const USER_PREFERENCES_PREFIX = 'enhanced_emojis';
 
 describe('EnhancedEmojisPlugin post classification', () => {
     beforeEach(() => {
@@ -44,12 +43,15 @@ describe('EnhancedEmojisPlugin post classification', () => {
         const {default: EnhancedEmojisPlugin} = require('../src/plugin');
         const plugin = new EnhancedEmojisPlugin();
         const store = makeStore({
-            [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('EnableEnhancedEmojis', 'true'),
+            [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('enableEnhancedEmojis', 'true'),
             [`${USER_PREFERENCES_PREFIX}--postEmojiSize`]: makePreference('postEmojiSize', 'large'),
-            [`${USER_PREFERENCES_PREFIX}--inlinePostEmojiSize`]: makePreference('InlinePostEmojiSize', 'medium'),
+            [`${USER_PREFERENCES_PREFIX}--inlinePostEmojiSize`]: makePreference('inlinePostEmojiSize', 'medium'),
         }, 'en');
 
-        await plugin.initialize({registerUserSettings: jest.fn(), registerTranslations: jest.fn()} as never, store as never);
+        await plugin.initialize({
+            registerUserSettings: jest.fn(),
+            registerTranslations: jest.fn(),
+        } as never, store as never);
 
         const emoji = document.body.querySelector('.emoticon') as HTMLElement;
         expect(emoji.classList.contains('enhanced-emojis-inline')).toBe(true);
@@ -72,16 +74,56 @@ describe('EnhancedEmojisPlugin post classification', () => {
         const {default: EnhancedEmojisPlugin} = require('../src/plugin');
         const plugin = new EnhancedEmojisPlugin();
         const store = makeStore({
-            [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('EnableEnhancedEmojis', 'true'),
+            [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('enableEnhancedEmojis', 'true'),
         }, 'en');
 
-        await plugin.initialize({registerUserSettings: jest.fn(), registerTranslations: jest.fn()} as never, store as never);
+        await plugin.initialize({
+            registerUserSettings: jest.fn(),
+            registerTranslations: jest.fn(),
+        } as never, store as never);
 
         const emoji = document.body.querySelector('.emoticon') as HTMLElement;
         emoji.setAttribute('style', 'background-image:url(/api/v4/emoji/cat)');
         await Promise.resolve();
 
         expect(emoji.classList.contains('enhanced-emojis-inline')).toBe(true);
+        plugin.uninitialize();
+    });
+
+    test('runtime logs use the central helper and do not include message contents', async () => {
+        document.body.innerHTML = '<div class="post-message__text">Secret message <span class="emoticon" style="background-image:url(/api/v4/emoji/cat)"></span></div>';
+        const fetch = jest.fn(async () => ({
+            ok: true,
+            json: async () => ({
+                enableEnhancedPostEmojis: true,
+                enableEnhancedReactionEmojis: false,
+                enableDeveloperMode: true,
+            }),
+        }));
+        const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => undefined);
+
+        Object.assign(global, {fetch});
+
+        const {default: EnhancedEmojisPlugin} = require('../src/plugin');
+        const plugin = new EnhancedEmojisPlugin();
+        const store = makeStore({
+            [`${USER_PREFERENCES_PREFIX}--enableEnhancedEmojis`]: makePreference('enableEnhancedEmojis', 'true'),
+            [`${USER_PREFERENCES_PREFIX}--postEmojiSize`]: makePreference('postEmojiSize', 'large'),
+            [`${USER_PREFERENCES_PREFIX}--inlinePostEmojiSize`]: makePreference('inlinePostEmojiSize', 'medium'),
+        }, 'en');
+
+        await plugin.initialize({
+            registerUserSettings: jest.fn(),
+            registerTranslations: jest.fn(),
+        } as never, store as never);
+
+        const postLog = consoleLog.mock.calls.find(([eventName]) => eventName === '[Enhanced Emojis Debug] post_emojis_applied');
+        expect(postLog?.[1]).toEqual(expect.objectContaining({
+            affectedElementCount: 1,
+            postMode: 'inline',
+            selectedSize: '64px',
+        }));
+        expect(JSON.stringify(postLog?.[1])).not.toContain('Secret message');
         plugin.uninitialize();
     });
 });

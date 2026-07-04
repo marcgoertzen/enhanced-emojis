@@ -6,7 +6,8 @@ export interface EmojiPreferenceSectionDescriptor<ValueType extends string> {
     settingTitle: string;
     helpText: string;
     defaultValue: ValueType;
-    options: Array<{text: string; value: ValueType}>;
+    options: Array<{ text: string; value: ValueType }>;
+    onSubmit?: (changes: { [name: string]: string }) => void;
 }
 
 export function createEmojiPreferenceSection<ValueType extends string>(
@@ -14,6 +15,7 @@ export function createEmojiPreferenceSection<ValueType extends string>(
 ): PluginConfiguration['sections'][number] {
     return {
         title: descriptor.sectionTitle,
+        onSubmit: descriptor.onSubmit,
         settings: [
             {
                 type: 'radio',
