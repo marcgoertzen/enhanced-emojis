@@ -18,7 +18,7 @@ type EnhancedEmojisConfig struct {
 func defaultEnhancedEmojisConfig() EnhancedEmojisConfig {
 	return EnhancedEmojisConfig{
 		EnableEnhancedPostEmojis:     true,
-		EnableEnhancedReactionEmojis: false,
+		EnableEnhancedReactionEmojis: true,
 		EnableDeveloperMode:          false,
 	}
 }
