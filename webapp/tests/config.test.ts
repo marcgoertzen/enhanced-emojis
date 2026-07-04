@@ -13,6 +13,17 @@ test('normalizes missing admin flags to defaults', () => {
     expect(normalizeEnhancedEmojisConfig({})).toEqual(DEFAULT_ENHANCED_EMOJIS_CONFIG);
 });
 
+test('new installations default reaction emojis to enabled', () => {
+    expect(DEFAULT_ENHANCED_EMOJIS_CONFIG.enableEnhancedReactionEmojis).toBe(true);
+    expect(normalizeEnhancedEmojisConfig({}).enableEnhancedReactionEmojis).toBe(true);
+});
+
+test('existing admin configs keep an explicit false reaction setting', () => {
+    expect(normalizeEnhancedEmojisConfig({
+        enableEnhancedReactionEmojis: false,
+    }).enableEnhancedReactionEmojis).toBe(false);
+});
+
 test('recognizes post and reaction size presets independently', () => {
     expect(isPostEmojiSize('large')).toBe(true);
     expect(isPostEmojiSize('medium')).toBe(false);

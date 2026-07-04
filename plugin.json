@@ -25,7 +25,7 @@
                 "type": "bool",
                 "help_text": "Controls larger custom emojis in emoji reactions.",
                 "placeholder": "",
-                "default": false
+                "default": true
             },
             {
                 "key": "EnableDeveloperMode",

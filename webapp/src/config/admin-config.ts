@@ -8,7 +8,7 @@ export interface EnhancedEmojisConfig {
 
 export const DEFAULT_ENHANCED_EMOJIS_CONFIG: EnhancedEmojisConfig = {
     enableEnhancedPostEmojis: true,
-    enableEnhancedReactionEmojis: false,
+    enableEnhancedReactionEmojis: true,
     enableDeveloperMode: false,
 };
 
