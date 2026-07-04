@@ -4,12 +4,6 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and the project uses Semantic Versioning.
 
-## [Unreleased]
-
-### Added
-
-- User-level size preferences for custom emojis in posts and reactions.
-
 ## [0.4.0]
 
 ### Added
@@ -18,6 +12,8 @@ The format is based on Keep a Changelog and the project uses Semantic Versioning
 - Separate Inline Post Emoji setting.
 - User-level plugin enable/disable.
 - German and English localization.
+- Build identity metadata in `webapp/src/build-info.ts` for runtime and cache verification.
+- Developer Mode build information in user settings.
 
 ### Changed
 
@@ -26,10 +22,14 @@ The format is based on Keep a Changelog and the project uses Semantic Versioning
 - Improved project structure and maintainability.
 - Removed DAKOSY-specific branding.
 - Renamed plugin identifier to a generic identifier.
+- `Enable Enhanced Reaction Emojis` is now enabled by default.
 
 ### Fixed
 
 - Fixed post emoji initialization after page reload.
+- Fixed persistence and restore behavior for user settings stored in the Mattermost preference category
+  `enhanced_emojis`.
+- Fixed Developer Mode so debug logs are emitted only while the admin setting is enabled.
 - Improved post emoji classification lifecycle.
 - Various internal cleanup and stability improvements.
 

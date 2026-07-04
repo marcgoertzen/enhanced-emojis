@@ -12,6 +12,7 @@ Current release: `v0.4.0`.
 - User-level opt-in with saved size preferences
 - Admin-controlled post, reaction, and developer-mode availability
 - WebApp user settings localized to English and German
+- Build identity metadata for runtime and cache verification
 
 ## Compatibility
 
@@ -29,9 +30,10 @@ The plugin exposes three admin settings:
 
 `Enable Enhanced Post Emojis` controls post custom emojis only.
 
-`Enable Enhanced Reaction Emojis` controls custom emoji reactions only.
+`Enable Enhanced Reaction Emojis` controls custom emoji reactions only and is enabled by default.
 
-`Enable Developer Mode` enables visual debug styling for whichever admin-enabled feature is active for the user.
+`Enable Developer Mode` enables debug logging and developer-facing build information. Debug logs appear only while this
+admin setting is enabled.
 
 ## User Settings
 
@@ -48,6 +50,7 @@ Behavior:
 - Users must explicitly enable `Enable Enhanced Emojis` before any visual changes apply.
 - User preferences never override admin-disabled features.
 - Hidden preferences remain stored and apply again when the related feature becomes available.
+- Preferences are stored in the Mattermost preference category `enhanced_emojis`.
 
 Post sizing:
 
@@ -58,16 +61,30 @@ Post sizing:
 Visibility:
 
 - The master switch is always visible.
-- `Post Emoji Size` and `Inline Post Emoji Size` are shown only when the user enabled the plugin and the admin post feature is enabled.
+- `Post Emoji Size` and `Inline Post Emoji Size` are shown only when the user enabled the plugin and the admin post
+  feature is enabled.
 - `Reaction Emoji Size` is shown only when the user enabled the plugin and the admin reaction feature is enabled.
-- If the user has not enabled the plugin, the size settings stay hidden and the UI shows `Enable Enhanced Emojis to customize your emoji appearance.`
-- If both admin features are disabled, the UI shows `No Enhanced Emojis features are currently enabled by your administrator.`
+- If the user has not enabled the plugin, the size settings stay hidden and the UI shows
+  `Enable Enhanced Emojis to customize your emoji appearance.`
+- If both admin features are disabled, the UI shows
+  `No Enhanced Emojis features are currently enabled by your administrator.`
 
 Presets:
 
 - Post emojis: `Default` = `32px`, `Large` = `48px`, `Extra Large` = `64px`, `Max` = `128px`
 - Inline post emojis: `Default` = `20px`, `Medium` = `32px`, `Large` = `48px`, `Extra Large` = `64px`, `Max` = `128px`
 - Reaction emojis: `Default` = `20px`, `Medium` = `32px`, `Large` = `64px`, `Max` = `128px`
+
+## Developer Mode
+
+When `Enable Developer Mode` is enabled by an administrator, the plugin:
+
+- emits debug logs in the browser console
+- shows a `Debug Build Info` block in the plugin user settings
+- logs runtime identity data including plugin version, build timestamp, build ID, git commit, bundle file name, and the
+  preference category
+
+Developer Mode does not bypass admin feature flags or the user opt-in toggle.
 
 ## Localization
 
@@ -99,7 +116,7 @@ Source layout:
 - `plugin.json` for plugin metadata
 - `webapp/src/` for the WebApp implementation
 - `webapp/tests/` for Jest tests
-- `server/` for the minimal config endpoint
+- `server/` for the minimal config endpoint used by the WebApp
 - `scripts/` for build and packaging helpers
 
 Useful commands:
@@ -121,6 +138,9 @@ npm run verify
 dist/io.github.marcgoertzen.enhanced-emojis.tar.gz
 ```
 
+`webapp/src/build-info.ts` is generated automatically during `typecheck`, `test`, `build:webapp`, `package`, and
+`verify`. It contains the build identity used for runtime verification and should not be edited manually.
+
 ## Manual Testing
 
 1. Run `npm run package`.
@@ -131,12 +151,16 @@ dist/io.github.marcgoertzen.enhanced-emojis.tar.gz
 6. Verify inline custom emoji posts use `Inline Post Emoji Size`.
 7. Verify reactions use `Reaction Emoji Size` only when the reaction feature is enabled.
 8. Hard reload Mattermost and confirm post and inline emoji sizes still apply without saving settings again.
+9. Verify saved preferences are still read from the Mattermost preference category `enhanced_emojis`.
+10. If `Enable Developer Mode` is enabled, verify console debug logs and the `Debug Build Info` block are visible.
 
 ## Known Limitations
 
 - Unicode emojis are unchanged.
 - The emoji picker is unchanged.
-- Developer Mode is intended for visual debugging and should stay disabled in normal use.
+- The plugin depends on the server config endpoint. If configuration cannot be loaded, the WebApp falls back to built-in
+  defaults.
+- Packaging requires the Go toolchain plus `tar` and `gzip` on the build machine.
 
 ## Contributing
 
