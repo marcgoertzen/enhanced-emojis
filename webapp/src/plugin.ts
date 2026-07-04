@@ -1,11 +1,11 @@
 import {
-    DEFAULT_ENHANCED_EMOJIS_CONFIG,
     applyEnhancedEmojisRootState,
     clearEnhancedEmojisRootState,
+    DEFAULT_ENHANCED_EMOJIS_CONFIG,
+    type EnhancedEmojisConfig,
     fetchEnhancedEmojisAdminConfig,
     getEnhancedEmojisUserPreferences,
     resolveEnhancedEmojisEffectiveConfig,
-    type EnhancedEmojisConfig,
 } from 'config';
 import PostEmojiFeature from 'features/posts/post-emoji-feature';
 import ReactionEmojiFeature from 'features/reactions/reaction-emoji-feature';
@@ -23,6 +23,10 @@ function getCurrentUserLocale(state: GlobalState): string {
     }
 
     return state.entities.users.profiles[currentUserId]?.locale ?? 'en';
+}
+
+function getCurrentUserId(state: GlobalState): string | undefined {
+    return state?.entities?.users?.currentUserId;
 }
 
 export default class EnhancedEmojisPlugin {
@@ -127,12 +131,17 @@ export default class EnhancedEmojisPlugin {
 
         const state = store.getState();
         const locale = getCurrentUserLocale(state);
+        const currentUserId = getCurrentUserId(state);
         const userPreferences = getEnhancedEmojisUserPreferences(state);
         const signature = JSON.stringify({
+            currentUserId,
             locale,
             enableEnhancedPostEmojis: this.adminConfig.enableEnhancedPostEmojis,
             enableEnhancedReactionEmojis: this.adminConfig.enableEnhancedReactionEmojis,
             enableEnhancedEmojis: userPreferences.enableEnhancedEmojis,
+            postEmojiSize: userPreferences.postEmojiSize,
+            inlinePostEmojiSize: userPreferences.inlinePostEmojiSize,
+            reactionEmojiSize: userPreferences.reactionEmojiSize,
         });
 
         if (signature === this.lastRegisteredUserSettingsSignature) {
@@ -140,7 +149,14 @@ export default class EnhancedEmojisPlugin {
         }
 
         this.lastRegisteredUserSettingsSignature = signature;
-        registerEnhancedEmojisUserSettings(this.registry, this.adminConfig, locale, userPreferences);
+        registerEnhancedEmojisUserSettings(
+            this.registry,
+            this.adminConfig,
+            locale,
+            userPreferences,
+            currentUserId,
+            () => getEnhancedEmojisUserPreferences(store.getState()),
+        );
     }
 
     private scheduleInitialConfigSync(): void {

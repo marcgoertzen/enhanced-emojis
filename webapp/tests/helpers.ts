@@ -1,5 +1,4 @@
-const PLUGIN_ID = 'io.github.marcgoertzen.enhanced-emojis';
-const USER_PREFERENCES_PREFIX = `pp_${PLUGIN_ID}`;
+const USER_PREFERENCES_PREFIX = 'enhanced_emojis';
 
 interface StoredPreference {
     category: string;

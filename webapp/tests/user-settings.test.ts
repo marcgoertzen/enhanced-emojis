@@ -1,11 +1,27 @@
-import {getEnhancedEmojisUserPreferences} from 'config';
+import {
+    buildEnhancedEmojisPreferenceSavePayload,
+    createEnhancedEmojisPreferenceSavePayload,
+    getEnhancedEmojisUserPreferences,
+} from 'config';
 import {getEnhancedEmojisTranslations} from 'i18n';
 import React from 'react';
 import {useSelector} from 'react-redux';
-import {createEnableEnhancedEmojisSettingComponent, registerEnhancedEmojisUserSettings} from 'settings';
+import {
+    createEnableEnhancedEmojisSettingComponent,
+    createEnhancedEmojisUserSettingsConfig,
+    registerEnhancedEmojisUserSettings,
+} from 'settings';
+
+import {Client4} from 'mattermost-redux/client';
 
 jest.mock('react-redux', () => ({
     useSelector: jest.fn(),
+}));
+
+jest.mock('mattermost-redux/client', () => ({
+    Client4: {
+        savePreferences: jest.fn(),
+    },
 }));
 
 function makeRegistry() {
@@ -18,6 +34,8 @@ function getRegisteredSettings(registry: ReturnType<typeof makeRegistry>) {
     expect(registry.registerUserSettings).toHaveBeenCalledTimes(1);
     return registry.registerUserSettings.mock.calls[0][0];
 }
+
+const mockedSavePreferences = Client4.savePreferences as jest.MockedFunction<typeof Client4.savePreferences>;
 
 describe('registerEnhancedEmojisUserSettings', () => {
     test.each([
@@ -120,7 +138,7 @@ describe('registerEnhancedEmojisUserSettings', () => {
         expect(settings.id).toBe('io.github.marcgoertzen.enhanced-emojis');
         expect(settings.uiName).toBe(translations['enhanced_emojis.settings.title']);
         expect(settings.sections).toHaveLength(expectedSectionKeys.length);
-        expect(settings.sections.map((section: {title: string}) => section.title)).toEqual(
+        expect(settings.sections.map((section: { title: string }) => section.title)).toEqual(
             expectedSectionKeys.map((key) => translations[key as keyof typeof translations]),
         );
 
@@ -135,7 +153,9 @@ describe('registerEnhancedEmojisUserSettings', () => {
         }));
 
         if (userPreferences.enableEnhancedEmojis && adminConfig.enableEnhancedPostEmojis) {
-            const postSection = settings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.posts.title']);
+            const postSection = settings.sections.find((section: {
+                title: string;
+            }) => section.title === translations['enhanced_emojis.settings.posts.title']);
             expect(postSection).toMatchObject({
                 title: translations['enhanced_emojis.settings.posts.title'],
                 settings: [
@@ -152,7 +172,9 @@ describe('registerEnhancedEmojisUserSettings', () => {
                 ],
             });
 
-            const inlinePostSection = settings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.posts.inline.title']);
+            const inlinePostSection = settings.sections.find((section: {
+                title: string;
+            }) => section.title === translations['enhanced_emojis.settings.posts.inline.title']);
             expect(inlinePostSection).toMatchObject({
                 title: translations['enhanced_emojis.settings.posts.inline.title'],
                 settings: [
@@ -172,7 +194,9 @@ describe('registerEnhancedEmojisUserSettings', () => {
         }
 
         if (userPreferences.enableEnhancedEmojis && adminConfig.enableEnhancedReactionEmojis) {
-            const reactionSection = settings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.reactions.title']);
+            const reactionSection = settings.sections.find((section: {
+                title: string;
+            }) => section.title === translations['enhanced_emojis.settings.reactions.title']);
             expect(reactionSection).toMatchObject({
                 title: translations['enhanced_emojis.settings.reactions.title'],
                 settings: [
@@ -208,7 +232,7 @@ describe('registerEnhancedEmojisUserSettings', () => {
         });
 
         const settings = getRegisteredSettings(registry);
-        const messageSetting = settings.sections[0].settings[1] as {component: () => {props: {children: string}}};
+        const messageSetting = settings.sections[0].settings[1] as { component: () => { props: { children: string } } };
         const rendered = messageSetting.component();
 
         expect(rendered.props.children).toBe(translations['enhanced_emojis.settings.no_features_enabled']);
@@ -231,7 +255,7 @@ describe('registerEnhancedEmojisUserSettings', () => {
         });
 
         const settings = getRegisteredSettings(registry);
-        const messageSetting = settings.sections[0].settings[1] as {component: () => {props: {children: string}}};
+        const messageSetting = settings.sections[0].settings[1] as { component: () => { props: { children: string } } };
         const rendered = messageSetting.component();
 
         expect(rendered.props.children).toBe(translations['enhanced_emojis.settings.enable.disabled_message']);
@@ -255,7 +279,9 @@ describe('registerEnhancedEmojisUserSettings', () => {
         }, locale, savedPreferences);
 
         const hiddenSettings = getRegisteredSettings(hiddenRegistry);
-        expect(hiddenSettings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.posts.title'])).toBeUndefined();
+        expect(hiddenSettings.sections.find((section: {
+            title: string;
+        }) => section.title === translations['enhanced_emojis.settings.posts.title'])).toBeUndefined();
 
         const visibleRegistry = makeRegistry();
         registerEnhancedEmojisUserSettings(visibleRegistry as never, {
@@ -265,7 +291,9 @@ describe('registerEnhancedEmojisUserSettings', () => {
         }, locale, savedPreferences);
 
         const visibleSettings = getRegisteredSettings(visibleRegistry);
-        const postSection = visibleSettings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.posts.title']);
+        const postSection = visibleSettings.sections.find((section: {
+            title: string;
+        }) => section.title === translations['enhanced_emojis.settings.posts.title']);
 
         expect(postSection).toMatchObject({
             settings: expect.arrayContaining([
@@ -276,11 +304,13 @@ describe('registerEnhancedEmojisUserSettings', () => {
             ]),
         });
 
-        const inlinePostSection = visibleSettings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.posts.inline.title']);
+        const inlinePostSection = visibleSettings.sections.find((section: {
+            title: string;
+        }) => section.title === translations['enhanced_emojis.settings.posts.inline.title']);
         expect(inlinePostSection).toMatchObject({
             settings: expect.arrayContaining([
                 expect.objectContaining({
-                    name: 'InlinePostEmojiSize',
+                    name: 'inlinePostEmojiSize',
                     default: 'default',
                 }),
             ]),
@@ -304,15 +334,153 @@ describe('registerEnhancedEmojisUserSettings', () => {
         });
 
         const settings = getRegisteredSettings(registry);
-        const postSection = settings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.posts.title']);
-        const inlinePostSection = settings.sections.find((section: {title: string}) => section.title === translations['enhanced_emojis.settings.posts.inline.title']);
+        const postSection = settings.sections.find((section: {
+            title: string;
+        }) => section.title === translations['enhanced_emojis.settings.posts.title']);
+        const inlinePostSection = settings.sections.find((section: {
+            title: string;
+        }) => section.title === translations['enhanced_emojis.settings.posts.inline.title']);
 
         expect(postSection).toMatchObject({
             settings: [expect.objectContaining({name: 'postEmojiSize'})],
         });
         expect(inlinePostSection).toMatchObject({
-            settings: [expect.objectContaining({name: 'InlinePostEmojiSize'})],
+            settings: [expect.objectContaining({name: 'inlinePostEmojiSize'})],
         });
+    });
+
+    test('saves all preferences through Mattermost user preferences when a section is submitted', async () => {
+        mockedSavePreferences.mockResolvedValue({status: 'OK'} as never);
+
+        const settings = createEnhancedEmojisUserSettingsConfig({
+            enableEnhancedPostEmojis: true,
+            enableEnhancedReactionEmojis: true,
+            enableDeveloperMode: false,
+        }, 'en', {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'large',
+            inlinePostEmojiSize: 'medium',
+            reactionEmojiSize: 'default',
+        }, 'user-id');
+
+        (settings.sections[2] as {
+            onSubmit?: (changes: { [name: string]: string }) => void;
+        }).onSubmit?.({inlinePostEmojiSize: 'extraLarge'});
+        await Promise.resolve();
+
+        expect(mockedSavePreferences).toHaveBeenCalledTimes(1);
+        expect(mockedSavePreferences).toHaveBeenCalledWith('user-id', [
+            {user_id: 'user-id', category: 'enhanced_emojis', name: 'enableEnhancedEmojis', value: 'true'},
+            {user_id: 'user-id', category: 'enhanced_emojis', name: 'postEmojiSize', value: 'large'},
+            {user_id: 'user-id', category: 'enhanced_emojis', name: 'inlinePostEmojiSize', value: 'extraLarge'},
+            {user_id: 'user-id', category: 'enhanced_emojis', name: 'reactionEmojiSize', value: 'default'},
+        ]);
+    });
+
+    test('uses the latest stored preferences as merge base for single-setting saves', async () => {
+        mockedSavePreferences.mockResolvedValue({status: 'OK'} as never);
+
+        let currentPreferences: {
+            enableEnhancedEmojis: boolean;
+            postEmojiSize: 'maxSize' | 'default';
+            inlinePostEmojiSize: 'medium' | 'large';
+            reactionEmojiSize: 'maxSize' | 'default';
+        } = {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'maxSize' as const,
+            inlinePostEmojiSize: 'medium' as const,
+            reactionEmojiSize: 'maxSize' as const,
+        };
+
+        const settings = createEnhancedEmojisUserSettingsConfig({
+            enableEnhancedPostEmojis: true,
+            enableEnhancedReactionEmojis: true,
+            enableDeveloperMode: false,
+        }, 'en', currentPreferences, 'user-id', () => currentPreferences);
+
+        currentPreferences = {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'maxSize',
+            inlinePostEmojiSize: 'large',
+            reactionEmojiSize: 'default',
+        };
+
+        (settings.sections[1] as {
+            onSubmit?: (changes: { [name: string]: string }) => void;
+        }).onSubmit?.({postEmojiSize: 'default'});
+        await Promise.resolve();
+
+        expect(mockedSavePreferences).toHaveBeenCalledWith('user-id', [
+            {user_id: 'user-id', category: 'enhanced_emojis', name: 'enableEnhancedEmojis', value: 'true'},
+            {user_id: 'user-id', category: 'enhanced_emojis', name: 'postEmojiSize', value: 'default'},
+            {user_id: 'user-id', category: 'enhanced_emojis', name: 'inlinePostEmojiSize', value: 'large'},
+            {user_id: 'user-id', category: 'enhanced_emojis', name: 'reactionEmojiSize', value: 'default'},
+        ]);
+    });
+
+    test('logs save errors only in developer mode', async () => {
+        const consoleDebug = jest.spyOn(console, 'debug').mockImplementation(() => undefined);
+        const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        mockedSavePreferences.mockRejectedValue(new Error('401 Unauthorized'));
+
+        const settings = createEnhancedEmojisUserSettingsConfig({
+            enableEnhancedPostEmojis: true,
+            enableEnhancedReactionEmojis: true,
+            enableDeveloperMode: true,
+        }, 'en', {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'large',
+            inlinePostEmojiSize: 'medium',
+            reactionEmojiSize: 'default',
+        }, 'user-id');
+
+        (settings.sections[0] as {
+            onSubmit?: (changes: { [name: string]: string }) => void;
+        }).onSubmit?.({enableEnhancedEmojis: 'false'});
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(consoleDebug).toHaveBeenCalledWith('[Enhanced Emojis Debug] Saving preference change', expect.objectContaining({
+            changedKey: 'enableEnhancedEmojis',
+            oldNormalizedPreferences: expect.objectContaining({
+                enableEnhancedEmojis: true,
+                postEmojiSize: 'large',
+                inlinePostEmojiSize: 'medium',
+                reactionEmojiSize: 'default',
+            }),
+            newNormalizedPreferences: expect.objectContaining({
+                enableEnhancedEmojis: false,
+                postEmojiSize: 'large',
+                inlinePostEmojiSize: 'medium',
+                reactionEmojiSize: 'default',
+            }),
+            payload: expect.any(Array),
+        }));
+        expect(consoleError).toHaveBeenCalledWith('[Enhanced Emojis Debug] Failed to save user preferences', expect.any(Error));
+
+        consoleError.mockClear();
+        consoleDebug.mockClear();
+        mockedSavePreferences.mockRejectedValue(new Error('401 Unauthorized'));
+
+        const productionSettings = createEnhancedEmojisUserSettingsConfig({
+            enableEnhancedPostEmojis: true,
+            enableEnhancedReactionEmojis: true,
+            enableDeveloperMode: false,
+        }, 'en', {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'large',
+            inlinePostEmojiSize: 'medium',
+            reactionEmojiSize: 'default',
+        }, 'user-id');
+
+        (productionSettings.sections[0] as {
+            onSubmit?: (changes: { [name: string]: string }) => void;
+        }).onSubmit?.({enableEnhancedEmojis: 'false'});
+        await Promise.resolve();
+        await Promise.resolve();
+
+        expect(consoleDebug).not.toHaveBeenCalled();
+        expect(consoleError).not.toHaveBeenCalled();
     });
 });
 
@@ -340,25 +508,25 @@ describe('getEnhancedEmojisUserPreferences', () => {
                 preferences: {
                     myPreferences: {
                         enable: {
-                            category: 'pp_io.github.marcgoertzen.enhanced-emojis',
-                            name: 'EnableEnhancedEmojis',
+                            category: 'enhanced_emojis',
+                            name: 'enableEnhancedEmojis',
                             user_id: 'user-id',
                             value: 'true',
                         },
                         post: {
-                            category: 'pp_io.github.marcgoertzen.enhanced-emojis',
+                            category: 'enhanced_emojis',
                             name: 'postEmojiSize',
                             user_id: 'user-id',
                             value: 'extraLarge',
                         },
                         inline: {
-                            category: 'pp_io.github.marcgoertzen.enhanced-emojis',
-                            name: 'InlinePostEmojiSize',
+                            category: 'enhanced_emojis',
+                            name: 'inlinePostEmojiSize',
                             user_id: 'user-id',
                             value: 'medium',
                         },
                         reaction: {
-                            category: 'pp_io.github.marcgoertzen.enhanced-emojis',
+                            category: 'enhanced_emojis',
                             name: 'reactionEmojiSize',
                             user_id: 'user-id',
                             value: 'maxSize',
@@ -377,12 +545,114 @@ describe('getEnhancedEmojisUserPreferences', () => {
     });
 });
 
+describe('createEnhancedEmojisPreferenceSavePayload', () => {
+    test('creates an array payload with canonical keys and string values', () => {
+        expect(createEnhancedEmojisPreferenceSavePayload('user-id', {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'large',
+            inlinePostEmojiSize: 'medium',
+            reactionEmojiSize: 'maxSize',
+        })).toEqual([
+            {user_id: 'user-id', category: 'enhanced_emojis', name: 'enableEnhancedEmojis', value: 'true'},
+            {user_id: 'user-id', category: 'enhanced_emojis', name: 'postEmojiSize', value: 'large'},
+            {user_id: 'user-id', category: 'enhanced_emojis', name: 'inlinePostEmojiSize', value: 'medium'},
+            {user_id: 'user-id', category: 'enhanced_emojis', name: 'reactionEmojiSize', value: 'maxSize'},
+        ]);
+    });
+});
+
+describe('buildEnhancedEmojisPreferenceSavePayload', () => {
+    test('saving only post keeps inline and reaction unchanged', () => {
+        expect(buildEnhancedEmojisPreferenceSavePayload('user-id', {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'maxSize',
+            inlinePostEmojiSize: 'medium',
+            reactionEmojiSize: 'maxSize',
+        }, {
+            name: 'postEmojiSize',
+            value: 'default',
+        })).toMatchObject({
+            changedKey: 'postEmojiSize',
+            previousPreferences: {
+                enableEnhancedEmojis: true,
+                postEmojiSize: 'maxSize',
+                inlinePostEmojiSize: 'medium',
+                reactionEmojiSize: 'maxSize',
+            },
+            nextPreferences: {
+                enableEnhancedEmojis: true,
+                postEmojiSize: 'default',
+                inlinePostEmojiSize: 'medium',
+                reactionEmojiSize: 'maxSize',
+            },
+            payload: [
+                {user_id: 'user-id', category: 'enhanced_emojis', name: 'enableEnhancedEmojis', value: 'true'},
+                {user_id: 'user-id', category: 'enhanced_emojis', name: 'postEmojiSize', value: 'default'},
+                {user_id: 'user-id', category: 'enhanced_emojis', name: 'inlinePostEmojiSize', value: 'medium'},
+                {user_id: 'user-id', category: 'enhanced_emojis', name: 'reactionEmojiSize', value: 'maxSize'},
+            ],
+        });
+    });
+
+    test('saving only inline keeps post and reaction unchanged', () => {
+        expect(buildEnhancedEmojisPreferenceSavePayload('user-id', {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'maxSize',
+            inlinePostEmojiSize: 'medium',
+            reactionEmojiSize: 'maxSize',
+        }, {
+            name: 'inlinePostEmojiSize',
+            value: 'large',
+        }).nextPreferences).toEqual({
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'maxSize',
+            inlinePostEmojiSize: 'large',
+            reactionEmojiSize: 'maxSize',
+        });
+    });
+
+    test('saving only reaction keeps post and inline unchanged', () => {
+        expect(buildEnhancedEmojisPreferenceSavePayload('user-id', {
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'maxSize',
+            inlinePostEmojiSize: 'medium',
+            reactionEmojiSize: 'maxSize',
+        }, {
+            name: 'reactionEmojiSize',
+            value: 'default',
+        }).nextPreferences).toEqual({
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'maxSize',
+            inlinePostEmojiSize: 'medium',
+            reactionEmojiSize: 'default',
+        });
+    });
+
+    test('saving the master toggle preserves all size values', () => {
+        expect(buildEnhancedEmojisPreferenceSavePayload('user-id', {
+            enableEnhancedEmojis: false,
+            postEmojiSize: 'maxSize',
+            inlinePostEmojiSize: 'medium',
+            reactionEmojiSize: 'maxSize',
+        }, {
+            name: 'enableEnhancedEmojis',
+            value: 'true',
+        }).nextPreferences).toEqual({
+            enableEnhancedEmojis: true,
+            postEmojiSize: 'maxSize',
+            inlinePostEmojiSize: 'medium',
+            reactionEmojiSize: 'maxSize',
+        });
+    });
+});
+
 describe('createEnableEnhancedEmojisSettingComponent', () => {
     const mockedUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
 
     afterEach(() => {
         jest.restoreAllMocks();
         mockedUseSelector.mockReset();
+        mockedSavePreferences.mockReset();
     });
 
     test('defaults the toggle to off', () => {
@@ -414,7 +684,7 @@ describe('createEnableEnhancedEmojisSettingComponent', () => {
         rendered.props.onClick();
 
         expect(setEnabled).toHaveBeenCalledWith(true);
-        expect(informChange).toHaveBeenCalledWith('EnableEnhancedEmojis', 'true');
+        expect(informChange).toHaveBeenCalledWith('enableEnhancedEmojis', 'true');
         expect(rendered.props.children[1].props.style.transform).toBe('translateX(0)');
     });
 
@@ -434,7 +704,7 @@ describe('createEnableEnhancedEmojisSettingComponent', () => {
 
         expect(preventDefault).toHaveBeenCalledTimes(1);
         expect(setEnabled).toHaveBeenCalledWith(true);
-        expect(informChange).toHaveBeenCalledWith('EnableEnhancedEmojis', 'true');
+        expect(informChange).toHaveBeenCalledWith('enableEnhancedEmojis', 'true');
     });
 
     test('enabled state positions the knob on the right and shows the localized on label', () => {
