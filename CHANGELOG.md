@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and the project uses Semantic Versioning.
 
+## [0.4.1]
+
+### Fixed
+- Fixed post and inline post emoji sizing after channel navigation.
+- Fixed post emoji classification after client-side rerendering.
+
 ## [0.4.0]
 
 ### Added
