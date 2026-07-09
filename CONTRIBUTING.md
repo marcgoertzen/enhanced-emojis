@@ -55,4 +55,4 @@ npm run verify
 - Update `CHANGELOG.md` for user-visible changes.
 - Keep the plugin name as `Enhanced Emojis`.
 - Use semantic versioning.
-- Keep release version references aligned with `plugin.json` and `package.json`. The current release is `0.4.0`.
+- Keep release version references aligned with `plugin.json` and `package.json`. The current release is `0.4.1`.

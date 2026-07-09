@@ -2,7 +2,7 @@
 
 Enhanced Emojis is a Mattermost plugin that improves custom emoji rendering in posts and reactions.
 
-Current release: `v0.4.0`.
+Current release: `v0.4.1`.
 
 ## Features
 
