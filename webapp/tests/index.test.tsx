@@ -693,7 +693,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         } as never, store as never);
 
         expect(consoleWarn).toHaveBeenCalledWith('[Enhanced Emojis Debug] plugin_runtime_identity_warning', expect.objectContaining({
-            expectedPluginVersion: '0.4.0',
+            expectedPluginVersion: '0.4.1',
             missingFields: expect.arrayContaining(['pluginVersion', 'buildTimestamp', 'buildEpoch', 'buildId']),
             pluginVersionMatches: false,
         }));

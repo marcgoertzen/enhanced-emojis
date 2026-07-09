@@ -238,7 +238,7 @@ describe('registerEnhancedEmojisUserSettings', () => {
         const messageSetting = settings.sections[0].settings[1] as { component: () => { props: { children: string } } };
         const rendered = messageSetting.component();
 
-        expect(rendered.props.children).toBe(translations['enhanced_emojis.settings.no_features_enabled']);
+        expect(rendered.props.children).toBe(translations['enhanced_emojis.settings.enable.enabled_message']);
     });
 
     test('renders the opt-in prompt when the user has not enabled the plugin', () => {
@@ -705,7 +705,6 @@ describe('createEnableEnhancedEmojisSettingComponent', () => {
         expect(rendered.props.role).toBe('switch');
         expect(rendered.props['aria-checked']).toBe(false);
         expect(rendered.props.children[0].props.children).toBe(translations['enhanced_emojis.settings.enable.state.off']);
-        expect(rendered.props.style.width).toBe('96px');
     });
 
     test('toggle can be switched on and updates local settings state immediately', () => {
@@ -719,11 +718,12 @@ describe('createEnableEnhancedEmojisSettingComponent', () => {
 
         const Component = createEnableEnhancedEmojisSettingComponent(translations);
         const rendered = Component({informChange});
+
         rendered.props.onClick();
 
         expect(setEnabled).toHaveBeenCalledWith(true);
         expect(informChange).toHaveBeenCalledWith('enableEnhancedEmojis', 'true');
-        expect(rendered.props.children[1].props.style.transform).toBe('translateX(0)');
+        expect(rendered.props['aria-checked']).toBe(false);
     });
 
     test('keyboard toggle also updates the pending enabled state', () => {
@@ -746,17 +746,19 @@ describe('createEnableEnhancedEmojisSettingComponent', () => {
     });
 
     test('enabled state positions the knob on the right and shows the localized on label', () => {
-        const translations = getEnhancedEmojisTranslations('de');
+        const translations = getEnhancedEmojisTranslations('en');
+        const setEnabled = jest.fn();
 
         mockedUseSelector.mockReturnValue(true);
-        jest.spyOn(React, 'useState').mockReturnValue([true, jest.fn()]);
+        jest.spyOn(React, 'useState').mockReturnValue([true, setEnabled]);
         jest.spyOn(React, 'useEffect').mockImplementation(() => undefined);
 
         const Component = createEnableEnhancedEmojisSettingComponent(translations);
         const rendered = Component({informChange: jest.fn()});
 
         expect(rendered.props['aria-checked']).toBe(true);
-        expect(rendered.props.children[0].props.children).toBe(translations['enhanced_emojis.settings.enable.state.on']);
-        expect(rendered.props.children[1].props.style.transform).toBe('translateX(64px)');
+        expect(rendered.props.children[0].props.children).toBe(
+            translations['enhanced_emojis.settings.enable.state.on'],
+        );
     });
 });

@@ -112,9 +112,13 @@ export function classifyPostEmojiMutations(mutationRecords: MutationRecord[]): S
                 containers.add(addedNode);
             }
 
-            const addedContainer = addedNode.closest('.post-message__text') ?? addedNode.querySelector('.post-message__text');
-            if (addedContainer) {
-                containers.add(addedContainer);
+            const closestContainer = addedNode.closest('.post-message__text');
+            if (closestContainer) {
+                containers.add(closestContainer);
+            }
+
+            for (const nestedContainer of addedNode.querySelectorAll('.post-message__text')) {
+                containers.add(nestedContainer);
             }
         }
 

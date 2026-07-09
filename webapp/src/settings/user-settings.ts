@@ -207,6 +207,14 @@ export function createEnhancedEmojisUserSettingsConfig(
         },
     ];
 
+    if (normalizedUserPreferences.enableEnhancedEmojis) {
+        generalSettings.push({
+            type: 'custom' as const,
+            name: 'enableEnhancedEmojisEnabledMessage',
+            component: createMessageSettingComponent(translations['enhanced_emojis.settings.enable.enabled_message']),
+        });
+    }
+
     if (!normalizedUserPreferences.enableEnhancedEmojis) {
         generalSettings.push({
             type: 'custom' as const,
