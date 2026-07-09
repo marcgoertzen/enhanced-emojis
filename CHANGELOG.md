@@ -13,6 +13,9 @@ The format is based on Keep a Changelog and the project uses Semantic Versioning
 - Fixed post and inline post emoji sizing after channel navigation.
 - Fixed post emoji classification after client-side rerendering.
 
+### Changed
+- Updated the user settings toggle to use theme-aware styling and centralized CSS.
+
 ## [0.4.0]
 
 ### Added
