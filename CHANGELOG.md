@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and the project uses Semantic Versioning.
 
+## [0.4.2]
+
+### Changed
+
+- Updated Go and WebApp dependencies, including Mattermost client packages.
+- Updated the Node.js, TypeScript, and GitHub Actions build toolchain.
+- Updated `github.com/mattermost/mattermost/server/public` from v0.1.21 to v0.3.0, removing the vulnerable transitive `github.com/mattermost/mattermost/server/v8` dependency from the module graph.
+
 ## [0.4.1]
 
 ### Added
