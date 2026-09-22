@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on Keep a Changelog and the project uses Semantic Versioning.
 
+## [0.5.0]
+
+### Added
+
+- Added support for enlarging standard Mattermost emojis in standalone posts, inline post content, and reactions.
+- Added independent custom and standard emoji size preferences for posts, inline posts, and reactions.
+- Added separate administrator feature gates for custom and standard post and reaction emojis.
+
+### Changed
+
+- Improved Developer Mode diagnostics and highlighting for custom and standard emojis without overriding user-configured sizes.
+- Refactored emoji classification, configuration, settings, and rendering behavior to keep custom and standard emojis explicit.
+- Added English and German settings localization and expanded automated coverage for standard emoji behavior.
+
 ## [0.4.2]
 
 ### Changed
