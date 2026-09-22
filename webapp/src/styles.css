@@ -1,3 +1,20 @@
+:root {
+    --enhanced-emojis-custom-post-size: 32px;
+    --enhanced-emojis-custom-inline-post-size: 20px;
+    --enhanced-emojis-custom-reaction-size: 20px;
+    --enhanced-emojis-standard-post-size: 32px;
+    --enhanced-emojis-standard-inline-post-size: 20px;
+    --enhanced-emojis-standard-reaction-size: 20px;
+    --enhanced-emojis-custom-reaction-chip-padding-inline: 4px;
+    --enhanced-emojis-custom-reaction-chip-padding-block: 2px;
+    --enhanced-emojis-custom-reaction-chip-gap: 2px;
+    --enhanced-emojis-custom-reaction-chip-min-height: 24px;
+    --enhanced-emojis-standard-reaction-chip-padding-inline: 4px;
+    --enhanced-emojis-standard-reaction-chip-padding-block: 2px;
+    --enhanced-emojis-standard-reaction-chip-gap: 2px;
+    --enhanced-emojis-standard-reaction-chip-min-height: 24px;
+}
+
 /*
  * Post emojis: shared sizing with explicit custom/standard selectors
  */
