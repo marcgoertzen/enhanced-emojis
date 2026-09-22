@@ -39,9 +39,17 @@ test('includes standard and custom emoji section translations for English and Ge
     expect(getEnhancedEmojisTranslations('en')).toMatchObject({
         'enhanced_emojis.settings.standard.title': 'Standard Emojis',
         'enhanced_emojis.settings.custom.title': 'Custom Emojis',
+        'enhanced_emojis.settings.standard.post.size': 'Standard Emoji Post Size',
+        'enhanced_emojis.settings.standard.inline_post.size': 'Standard Emoji Inline Post Size',
+        'enhanced_emojis.settings.standard.reaction.size': 'Standard Emoji Reaction Size',
+        'enhanced_emojis.settings.custom.post.size': 'Custom Emoji Post Size',
+        'enhanced_emojis.settings.custom.inline_post.size': 'Custom Emoji Inline Post Size',
+        'enhanced_emojis.settings.custom.reaction.size': 'Custom Emoji Reaction Size',
     });
     expect(getEnhancedEmojisTranslations('de')).toMatchObject({
         'enhanced_emojis.settings.standard.title': 'Standard-Emojis',
         'enhanced_emojis.settings.custom.title': 'Benutzerdefinierte Emojis',
+        'enhanced_emojis.settings.standard.post.size': 'Beitragsgröße für Standard-Emojis',
+        'enhanced_emojis.settings.custom.reaction.size': 'Reaktionsgröße für benutzerdefinierte Emojis',
     });
 });

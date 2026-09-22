@@ -90,10 +90,25 @@ describe('settings UI', () => {
         const target = registry();
         registerEnhancedEmojisUserSettings(target as never, {enableEnhancedPostEmojis: true, enableEnhancedReactionEmojis: true, enableDeveloperMode: false}, 'en', sizes);
         const settings = registeredSettings(target);
-        expect(settings.sections.map((section: {title: string}) => section.title)).toEqual(['Enhanced Emojis', 'Standard Emojis', 'Custom Emojis']);
+        expect(settings.sections.map((section: {title: string}) => section.title)).toEqual([
+            'Enhanced Emojis',
+            'Standard Emoji Post Size',
+            'Standard Emoji Inline Post Size',
+            'Standard Emoji Reaction Size',
+            'Custom Emoji Post Size',
+            'Custom Emoji Inline Post Size',
+            'Custom Emoji Reaction Size',
+        ]);
         expect(settings.sections.flatMap((section: {settings: Array<{name?: string}>}) => section.settings).map((setting: {name?: string}) => setting.name)).not.toContain('enableStandardEmojis');
-        expect(settings.sections[1].settings.map((setting: {name: string}) => setting.name)).toEqual(['standardPostEmojiSize', 'standardInlinePostEmojiSize', 'standardReactionEmojiSize']);
-        expect(settings.sections[2].settings.map((setting: {name?: string}) => setting.name)).toEqual(['customPostEmojiSize', 'customInlinePostEmojiSize', 'customReactionEmojiSize']);
+        expect(settings.sections.slice(1).every((section: {settings: Array<{name?: string}>}) => section.settings)).toBe(true);
+        expect(settings.sections.slice(1).map((section: {settings: Array<{name?: string}>}) => section.settings[0].name)).toEqual([
+            'standardPostEmojiSize',
+            'standardInlinePostEmojiSize',
+            'standardReactionEmojiSize',
+            'customPostEmojiSize',
+            'customInlinePostEmojiSize',
+            'customReactionEmojiSize',
+        ]);
     });
 
     test('hides size sections while master switch is disabled', () => {
@@ -102,15 +117,34 @@ describe('settings UI', () => {
         expect(registeredSettings(target).sections).toHaveLength(1);
     });
 
-    test('submitting a size persists all six values', async () => {
+    test('saving one size persists only that preference', async () => {
         mockedSavePreferences.mockResolvedValue({status: 'OK'} as never);
         const settings = createEnhancedEmojisUserSettingsConfig({enableEnhancedPostEmojis: true, enableEnhancedReactionEmojis: true, enableDeveloperMode: false}, 'en', sizes, 'user-id');
         (settings.sections[1] as {onSubmit?: (changes: {[name: string]: string}) => void}).onSubmit?.({standardPostEmojiSize: 'maxSize'});
         await Promise.resolve();
-        expect(mockedSavePreferences).toHaveBeenCalledWith('user-id', expect.arrayContaining([
+        expect(mockedSavePreferences).toHaveBeenCalledWith('user-id', [
             {user_id: 'user-id', category: 'enhanced_emojis', name: 'standardPostEmojiSize', value: 'maxSize'},
-            {user_id: 'user-id', category: 'enhanced_emojis', name: 'customPostEmojiSize', value: 'default'},
-        ]));
+        ]);
+    });
+
+    test('saving custom reaction sends only the custom reaction preference', async () => {
+        mockedSavePreferences.mockResolvedValue({status: 'OK'} as never);
+        const settings = createEnhancedEmojisUserSettingsConfig({enableEnhancedPostEmojis: true, enableEnhancedReactionEmojis: true, enableDeveloperMode: false}, 'en', sizes, 'user-id');
+        (settings.sections[6] as {onSubmit?: (changes: {[name: string]: string}) => void}).onSubmit?.({customReactionEmojiSize: 'maxSize'});
+        await Promise.resolve();
+        expect(mockedSavePreferences).toHaveBeenCalledWith('user-id', [
+            {user_id: 'user-id', category: 'enhanced_emojis', name: 'customReactionEmojiSize', value: 'maxSize'},
+        ]);
+    });
+
+    test('admin gating hides post rows without hiding reactions', () => {
+        const target = registry();
+        registerEnhancedEmojisUserSettings(target as never, {enableEnhancedPostEmojis: false, enableEnhancedReactionEmojis: true, enableDeveloperMode: false}, 'en', sizes);
+        expect(registeredSettings(target).sections.map((section: {title: string}) => section.title)).toEqual([
+            'Enhanced Emojis',
+            'Standard Emoji Reaction Size',
+            'Custom Emoji Reaction Size',
+        ]);
     });
 
     test('master toggle remains the only boolean preference', () => {

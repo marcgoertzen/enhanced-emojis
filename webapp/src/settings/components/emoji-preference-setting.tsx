@@ -13,12 +13,6 @@ export interface EmojiPreferenceSectionDescriptor<ValueType extends string> exte
     onSubmit?: (changes: { [name: string]: string }) => void;
 }
 
-export interface EmojiPreferenceGroupDescriptor {
-    sectionTitle: string;
-    settings: Array<EmojiPreferenceSettingDescriptor<string>>;
-    onSubmit?: (changes: { [name: string]: string }) => void;
-}
-
 export function createEmojiPreferenceSection<ValueType extends string>(
     descriptor: EmojiPreferenceSectionDescriptor<ValueType>,
 ): PluginConfiguration['sections'][number] {
@@ -35,22 +29,5 @@ export function createEmojiPreferenceSection<ValueType extends string>(
                 options: descriptor.options,
             },
         ],
-    };
-}
-
-export function createEmojiPreferenceGroupSection(
-    descriptor: EmojiPreferenceGroupDescriptor,
-): PluginConfiguration['sections'][number] {
-    return {
-        title: descriptor.sectionTitle,
-        onSubmit: descriptor.onSubmit,
-        settings: descriptor.settings.map((setting) => ({
-            type: 'radio' as const,
-            name: setting.settingName,
-            title: setting.settingTitle,
-            helpText: setting.helpText,
-            default: setting.defaultValue,
-            options: setting.options,
-        })),
     };
 }

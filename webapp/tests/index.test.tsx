@@ -251,7 +251,11 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
                 postEmojiSize: 'large',
                 reactionEmojiSize: 'medium',
             },
-            expectedSectionTitles: ['enhanced_emojis.settings.title', 'enhanced_emojis.settings.standard.title', 'enhanced_emojis.settings.custom.title'] as EnhancedEmojisTranslationKey[],
+            expectedSectionTitles: [
+                'enhanced_emojis.settings.title',
+                'enhanced_emojis.settings.standard.reaction.size',
+                'enhanced_emojis.settings.custom.reaction.size',
+            ] as EnhancedEmojisTranslationKey[],
             expectedClasses: {
                 posts: false,
                 reactions: true,
@@ -301,8 +305,12 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             },
             expectedSectionTitles: [
                 'enhanced_emojis.settings.title',
-                'enhanced_emojis.settings.standard.title',
-                'enhanced_emojis.settings.custom.title',
+                'enhanced_emojis.settings.standard.post.size',
+                'enhanced_emojis.settings.standard.inline_post.size',
+                'enhanced_emojis.settings.standard.reaction.size',
+                'enhanced_emojis.settings.custom.post.size',
+                'enhanced_emojis.settings.custom.inline_post.size',
+                'enhanced_emojis.settings.custom.reaction.size',
             ] as EnhancedEmojisTranslationKey[],
             expectedClasses: {
                 posts: true,
