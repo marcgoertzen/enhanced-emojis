@@ -1,14 +1,15 @@
 # Enhanced Emojis
 
-Enhanced Emojis is a Mattermost plugin that improves custom emoji rendering in posts and reactions.
+Enhanced Emojis is a Mattermost plugin that improves custom and standard emoji rendering in posts and reactions.
 
 Current release: `v0.4.2`.
 
 ## Features
 
 - Larger custom emojis in post content
+- Optional enlargement of standard Mattermost emojis in posts and reactions
 - Separate sizing for standalone and inline post emojis
-- Larger custom emoji reactions with size-aware chip layout
+- Larger custom emoji reactions with size-aware chip layout, plus optional standard reaction enlargement
 - User-level opt-in with saved size preferences
 - Admin-controlled post, reaction, and developer-mode availability
 - WebApp user settings localized to English and German
@@ -28,9 +29,9 @@ The plugin exposes three admin settings:
 - `Enable Enhanced Reaction Emojis`
 - `Enable Developer Mode`
 
-`Enable Enhanced Post Emojis` controls post custom emojis only.
+`Enable Enhanced Post Emojis` controls post emoji enhancements for custom emojis and opted-in standard emojis.
 
-`Enable Enhanced Reaction Emojis` controls custom emoji reactions only and is enabled by default.
+`Enable Enhanced Reaction Emojis` controls reaction emoji enhancements for custom emojis and opted-in standard emojis; it is enabled by default.
 
 `Enable Developer Mode` enables debug logging and developer-facing build information. Debug logs appear only while this
 admin setting is enabled.
@@ -40,6 +41,7 @@ admin setting is enabled.
 The plugin adds an `Enhanced Emojis` section in user settings with:
 
 - `Enable Enhanced Emojis`
+- `Enlarge standard emojis` (disabled by default)
 - `Post Emoji Size`
 - `Inline Post Emoji Size`
 - `Reaction Emoji Size`
@@ -48,14 +50,15 @@ Behavior:
 
 - The plugin is disabled by default for every user.
 - Users must explicitly enable `Enable Enhanced Emojis` before any visual changes apply.
+- Standard emojis remain at Mattermost's default size unless `Enlarge standard emojis` is enabled.
 - User preferences never override admin-disabled features.
 - Hidden preferences remain stored and apply again when the related feature becomes available.
 - Preferences are stored in the Mattermost preference category `enhanced_emojis`.
 
 Post sizing:
 
-- `Post Emoji Size` applies to standalone or emoji-only custom emoji posts.
-- `Inline Post Emoji Size` applies to custom emojis inside normal post text.
+- `Post Emoji Size` applies to standalone or emoji-only custom emojis and, when enabled, standard emojis.
+- `Inline Post Emoji Size` applies to custom emojis and, when enabled, standard emojis inside normal post text.
 - Inline post emojis default to normal text size so they stay readable inside sentences.
 
 Visibility:
@@ -149,14 +152,15 @@ dist/io.github.marcgoertzen.enhanced-emojis.tar.gz
 4. Enable `Enhanced Emojis` in user settings.
 5. Verify standalone custom emoji posts use `Post Emoji Size`.
 6. Verify inline custom emoji posts use `Inline Post Emoji Size`.
-7. Verify reactions use `Reaction Emoji Size` only when the reaction feature is enabled.
-8. Hard reload Mattermost and confirm post and inline emoji sizes still apply without saving settings again.
-9. Verify saved preferences are still read from the Mattermost preference category `enhanced_emojis`.
-10. If `Enable Developer Mode` is enabled, verify console debug logs and the `Debug Build Info` block are visible.
+7. Enable `Enlarge standard emojis` and verify standalone and inline standard emoji posts use the same size settings.
+8. Verify custom and standard reactions use `Reaction Emoji Size` only when the corresponding feature and standard opt-in are enabled.
+9. Hard reload Mattermost and confirm post and inline emoji sizes still apply without saving settings again.
+10. Verify saved preferences are still read from the Mattermost preference category `enhanced_emojis`.
+11. If `Enable Developer Mode` is enabled, verify console debug logs and the `Debug Build Info` block are visible.
 
 ## Known Limitations
 
-- Unicode emojis are unchanged.
+- Standard Unicode emojis are supported when `Enlarge standard emojis` is enabled.
 - The emoji picker is unchanged.
 - The plugin depends on the server config endpoint. If configuration cannot be loaded, the WebApp falls back to built-in
   defaults.

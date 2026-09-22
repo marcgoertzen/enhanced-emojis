@@ -2,7 +2,7 @@
     "id": "io.github.marcgoertzen.enhanced-emojis",
     "name": "Enhanced Emojis",
     "version": "0.4.2",
-    "description": "Mattermost plugin for improving custom emoji rendering in posts and reactions.",
+    "description": "Mattermost plugin for improving custom and standard emoji rendering in posts and reactions.",
     "homepage_url": "https://github.com/marcgoertzen/enhanced-emojis",
     "support_url": "https://github.com/marcgoertzen/enhanced-emojis/issues",
     "icon_path": "assets/enhanced_emojis_icon.png",
@@ -15,7 +15,7 @@
                 "key": "EnableEnhancedPostEmojis",
                 "display_name": "Enable Enhanced Post Emojis",
                 "type": "bool",
-                "help_text": "Controls larger custom emojis in Mattermost post content.",
+                "help_text": "Controls larger custom and opted-in standard emojis in Mattermost post content.",
                 "placeholder": "",
                 "default": true
             },
@@ -23,7 +23,7 @@
                 "key": "EnableEnhancedReactionEmojis",
                 "display_name": "Enable Enhanced Reaction Emojis",
                 "type": "bool",
-                "help_text": "Controls larger custom emojis in emoji reactions.",
+                "help_text": "Controls larger custom and opted-in standard emojis in emoji reactions.",
                 "placeholder": "",
                 "default": true
             },

@@ -1,42 +1,59 @@
 import type {EnhancedEmojisConfig} from './admin-config';
 import {getInlinePostEmojiSizePixels, getPostEmojiSizePixels, getReactionEmojiSizePixels} from './emoji-sizes';
-import {normalizeEnhancedEmojisUserPreferences, type EnhancedEmojisUserPreferences} from './user-preferences';
+import {normalizeEnhancedEmojisUserPreferences, type EnhancedEmojisUserPreferenceInput} from './user-preferences';
 
 export interface EnhancedEmojisEffectiveConfig {
-    enablePostEmojis: boolean;
-    enableReactionEmojis: boolean;
+    enableCustomPostEmojis: boolean;
+    enableCustomReactionEmojis: boolean;
+    enableStandardPostEmojis: boolean;
+    enableStandardReactionEmojis: boolean;
     enableDeveloperMode: boolean;
-    postEmojiSize: string;
-    inlinePostEmojiSize: string;
-    reactionEmojiSize: string;
+    customPostEmojiSize: string;
+    customInlinePostEmojiSize: string;
+    customReactionEmojiSize: string;
+    standardPostEmojiSize: string;
+    standardInlinePostEmojiSize: string;
+    standardReactionEmojiSize: string;
 }
 
 export function resolveEnhancedEmojisEffectiveConfig(
     adminConfig: EnhancedEmojisConfig,
-    userPreferences: Partial<EnhancedEmojisUserPreferences> | null | undefined,
+    userPreferences: EnhancedEmojisUserPreferenceInput | null | undefined,
 ): EnhancedEmojisEffectiveConfig {
     const normalizedUserPreferences = normalizeEnhancedEmojisUserPreferences(userPreferences);
-    const enablePostEmojis = adminConfig.enableEnhancedPostEmojis && normalizedUserPreferences.enableEnhancedEmojis;
-    const enableReactionEmojis = adminConfig.enableEnhancedReactionEmojis && normalizedUserPreferences.enableEnhancedEmojis;
-    const enableDeveloperMode = adminConfig.enableDeveloperMode && (enablePostEmojis || enableReactionEmojis);
+    const enableCustomPostEmojis = adminConfig.enableEnhancedPostEmojis && normalizedUserPreferences.enableEnhancedEmojis;
+    const enableCustomReactionEmojis = adminConfig.enableEnhancedReactionEmojis && normalizedUserPreferences.enableEnhancedEmojis;
+    const enableStandardPostEmojis = enableCustomPostEmojis;
+    const enableStandardReactionEmojis = enableCustomReactionEmojis;
+    const enableDeveloperMode = adminConfig.enableDeveloperMode && (enableCustomPostEmojis || enableCustomReactionEmojis);
 
     if (enableDeveloperMode) {
         return {
-            enablePostEmojis,
+            enableCustomPostEmojis,
             enableDeveloperMode,
-            enableReactionEmojis,
-            postEmojiSize: '64px',
-            inlinePostEmojiSize: '32px',
-            reactionEmojiSize: '64px',
+            enableCustomReactionEmojis,
+            enableStandardPostEmojis,
+            enableStandardReactionEmojis,
+            customPostEmojiSize: '64px',
+            customInlinePostEmojiSize: '32px',
+            customReactionEmojiSize: '64px',
+            standardPostEmojiSize: '64px',
+            standardInlinePostEmojiSize: '32px',
+            standardReactionEmojiSize: '64px',
         };
     }
 
     return {
-        enablePostEmojis,
+        enableCustomPostEmojis,
         enableDeveloperMode,
-        enableReactionEmojis,
-        postEmojiSize: `${getPostEmojiSizePixels(normalizedUserPreferences.postEmojiSize)}px`,
-        inlinePostEmojiSize: `${getInlinePostEmojiSizePixels(normalizedUserPreferences.inlinePostEmojiSize)}px`,
-        reactionEmojiSize: `${getReactionEmojiSizePixels(normalizedUserPreferences.reactionEmojiSize)}px`,
+        enableCustomReactionEmojis,
+        enableStandardPostEmojis,
+        enableStandardReactionEmojis,
+        customPostEmojiSize: `${getPostEmojiSizePixels(normalizedUserPreferences.customPostEmojiSize)}px`,
+        customInlinePostEmojiSize: `${getInlinePostEmojiSizePixels(normalizedUserPreferences.customInlinePostEmojiSize)}px`,
+        customReactionEmojiSize: `${getReactionEmojiSizePixels(normalizedUserPreferences.customReactionEmojiSize)}px`,
+        standardPostEmojiSize: `${getPostEmojiSizePixels(normalizedUserPreferences.standardPostEmojiSize)}px`,
+        standardInlinePostEmojiSize: `${getInlinePostEmojiSizePixels(normalizedUserPreferences.standardInlinePostEmojiSize)}px`,
+        standardReactionEmojiSize: `${getReactionEmojiSizePixels(normalizedUserPreferences.standardReactionEmojiSize)}px`,
     };
 }

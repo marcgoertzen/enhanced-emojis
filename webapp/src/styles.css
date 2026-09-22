@@ -1,56 +1,105 @@
 /*
- * Posts
+ * Post emojis: shared sizing with explicit custom/standard selectors
  */
 
-html.enhanced-emojis-posts-enabled .post-message__text .emoticon.enhanced-emojis-standalone {
-    width: var(--enhanced-post-emojis-size) !important;
-    height: var(--enhanced-post-emojis-size) !important;
-    min-width: var(--enhanced-post-emojis-size) !important;
-    min-height: var(--enhanced-post-emojis-size) !important;
+html.enhanced-emojis-custom-posts-enabled .post-message__text .emoticon.enhanced-emojis-custom-post-emoji.enhanced-emojis-post-emoji-standalone {
+    width: var(--enhanced-emojis-custom-post-size) !important;
+    height: var(--enhanced-emojis-custom-post-size) !important;
+    min-width: var(--enhanced-emojis-custom-post-size) !important;
+    min-height: var(--enhanced-emojis-custom-post-size) !important;
     vertical-align: text-bottom;
 }
 
-html.enhanced-emojis-posts-enabled .post-message__text .emoticon.enhanced-emojis-inline {
-    width: var(--enhanced-inline-post-emojis-size) !important;
-    height: var(--enhanced-inline-post-emojis-size) !important;
-    min-width: var(--enhanced-inline-post-emojis-size) !important;
-    min-height: var(--enhanced-inline-post-emojis-size) !important;
+html.enhanced-emojis-standard-posts-enabled .post-message__text .emoticon.enhanced-emojis-standard-post-emoji.enhanced-emojis-post-emoji-standalone {
+    width: var(--enhanced-emojis-standard-post-size) !important;
+    height: var(--enhanced-emojis-standard-post-size) !important;
+    min-width: var(--enhanced-emojis-standard-post-size) !important;
+    min-height: var(--enhanced-emojis-standard-post-size) !important;
     vertical-align: text-bottom;
 }
 
-html.enhanced-emojis-posts-enabled.enhanced-emojis-developer-mode .post-message__text .emoticon.enhanced-emojis-standalone,
-html.enhanced-emojis-posts-enabled.enhanced-emojis-developer-mode .post-message__text .emoticon.enhanced-emojis-inline {
+html.enhanced-emojis-custom-posts-enabled .post-message__text .emoticon.enhanced-emojis-custom-post-emoji.enhanced-emojis-post-emoji-inline {
+    width: var(--enhanced-emojis-custom-inline-post-size) !important;
+    height: var(--enhanced-emojis-custom-inline-post-size) !important;
+    min-width: var(--enhanced-emojis-custom-inline-post-size) !important;
+    min-height: var(--enhanced-emojis-custom-inline-post-size) !important;
+    vertical-align: text-bottom;
+}
+
+html.enhanced-emojis-standard-posts-enabled .post-message__text .emoticon.enhanced-emojis-standard-post-emoji.enhanced-emojis-post-emoji-inline {
+    width: var(--enhanced-emojis-standard-inline-post-size) !important;
+    height: var(--enhanced-emojis-standard-inline-post-size) !important;
+    min-width: var(--enhanced-emojis-standard-inline-post-size) !important;
+    min-height: var(--enhanced-emojis-standard-inline-post-size) !important;
+    vertical-align: text-bottom;
+}
+
+html.enhanced-emojis-standard-posts-enabled .post-message__text .emoticon.emoticon--unicode.enhanced-emojis-standard-post-emoji.enhanced-emojis-post-emoji-standalone {
+    font-size: var(--enhanced-emojis-standard-post-size) !important;
+    line-height: 1;
+}
+
+html.enhanced-emojis-standard-posts-enabled .post-message__text .emoticon.emoticon--unicode.enhanced-emojis-standard-post-emoji.enhanced-emojis-post-emoji-inline {
+    font-size: var(--enhanced-emojis-standard-inline-post-size) !important;
+    line-height: 1;
+}
+
+html.enhanced-emojis-developer-mode.enhanced-emojis-custom-posts-enabled .post-message__text .emoticon.enhanced-emojis-custom-post-emoji.enhanced-emojis-post-emoji-standalone,
+html.enhanced-emojis-developer-mode.enhanced-emojis-custom-posts-enabled .post-message__text .emoticon.enhanced-emojis-custom-post-emoji.enhanced-emojis-post-emoji-inline,
+html.enhanced-emojis-developer-mode.enhanced-emojis-standard-posts-enabled .post-message__text .emoticon.enhanced-emojis-standard-post-emoji.enhanced-emojis-post-emoji-standalone,
+html.enhanced-emojis-developer-mode.enhanced-emojis-standard-posts-enabled .post-message__text .emoticon.enhanced-emojis-standard-post-emoji.enhanced-emojis-post-emoji-inline {
     outline: 2px solid red;
 }
 
 /*
- * Reactions
+ * Reaction emojis: shared layout with explicit custom/standard selectors
  */
 
-html.enhanced-emojis-reactions-enabled .Reaction:has(img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"]) {
+html.enhanced-emojis-custom-reactions-enabled .Reaction:has(img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"]),
+html.enhanced-emojis-standard-reactions-enabled .Reaction:has(img.Reaction__emoji.emoticon[src*="/static/emoji/"]) {
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
-    gap: var(--enhanced-reaction-chip-gap);
-    min-height: var(--enhanced-reaction-chip-min-height);
-    padding-block: var(--enhanced-reaction-chip-padding-block);
-    padding-inline: var(--enhanced-reaction-chip-padding-inline);
     box-sizing: border-box;
     white-space: nowrap;
     line-height: 1;
     vertical-align: middle;
 }
 
-html.enhanced-emojis-reactions-enabled .Reaction:has(img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"]) img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"] {
-    width: var(--enhanced-reaction-emojis-size) !important;
-    height: var(--enhanced-reaction-emojis-size) !important;
-    min-width: var(--enhanced-reaction-emojis-size) !important;
-    min-height: var(--enhanced-reaction-emojis-size) !important;
+html.enhanced-emojis-custom-reactions-enabled .Reaction:has(img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"]) {
+    gap: var(--enhanced-emojis-custom-reaction-chip-gap);
+    min-height: var(--enhanced-emojis-custom-reaction-chip-min-height);
+    padding-block: var(--enhanced-emojis-custom-reaction-chip-padding-block);
+    padding-inline: var(--enhanced-emojis-custom-reaction-chip-padding-inline);
+}
+
+html.enhanced-emojis-standard-reactions-enabled .Reaction:has(img.Reaction__emoji.emoticon[src*="/static/emoji/"]) {
+    gap: var(--enhanced-emojis-standard-reaction-chip-gap);
+    min-height: var(--enhanced-emojis-standard-reaction-chip-min-height);
+    padding-block: var(--enhanced-emojis-standard-reaction-chip-padding-block);
+    padding-inline: var(--enhanced-emojis-standard-reaction-chip-padding-inline);
+}
+
+html.enhanced-emojis-custom-reactions-enabled .Reaction img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"] {
+    width: var(--enhanced-emojis-custom-reaction-size) !important;
+    height: var(--enhanced-emojis-custom-reaction-size) !important;
+    min-width: var(--enhanced-emojis-custom-reaction-size) !important;
+    min-height: var(--enhanced-emojis-custom-reaction-size) !important;
     flex: 0 0 auto;
     vertical-align: text-bottom;
 }
 
-html.enhanced-emojis-reactions-enabled.enhanced-emojis-developer-mode .Reaction:has(img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"]) img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"] {
+html.enhanced-emojis-standard-reactions-enabled .Reaction img.Reaction__emoji.emoticon[src*="/static/emoji/"] {
+    width: var(--enhanced-emojis-standard-reaction-size) !important;
+    height: var(--enhanced-emojis-standard-reaction-size) !important;
+    min-width: var(--enhanced-emojis-standard-reaction-size) !important;
+    min-height: var(--enhanced-emojis-standard-reaction-size) !important;
+    flex: 0 0 auto;
+    vertical-align: text-bottom;
+}
+
+html.enhanced-emojis-developer-mode.enhanced-emojis-custom-reactions-enabled .Reaction img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"],
+html.enhanced-emojis-developer-mode.enhanced-emojis-standard-reactions-enabled .Reaction img.Reaction__emoji.emoticon[src*="/static/emoji/"] {
     outline: 2px solid red;
 }
 

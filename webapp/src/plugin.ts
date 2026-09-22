@@ -108,8 +108,8 @@ export default class EnhancedEmojisPlugin {
         this.adminConfig = await fetchEnhancedEmojisAdminConfig();
         enhancedEmojisDebug.debugLog('admin_config_loaded', {
             adminDeveloperModeEnabled: this.adminConfig.enableDeveloperMode,
-            adminPostFeatureEnabled: this.adminConfig.enableEnhancedPostEmojis,
-            adminReactionFeatureEnabled: this.adminConfig.enableEnhancedReactionEmojis,
+            adminPostEmojiEnhancementsEnabled: this.adminConfig.enableEnhancedPostEmojis,
+            adminReactionEmojiEnhancementsEnabled: this.adminConfig.enableEnhancedReactionEmojis,
         }, {
             adminDeveloperModeEnabled: this.adminConfig.enableDeveloperMode,
         });
@@ -200,12 +200,17 @@ export default class EnhancedEmojisPlugin {
         enhancedEmojisDebug.debugLog('effective_config_resolved', {
             developerModeActive: effectiveConfig.enableDeveloperMode,
             effectiveEnableState: {
-                posts: effectiveConfig.enablePostEmojis,
-                reactions: effectiveConfig.enableReactionEmojis,
+                customPostEmojis: effectiveConfig.enableCustomPostEmojis,
+                customReactionEmojis: effectiveConfig.enableCustomReactionEmojis,
+                standardPostEmojis: effectiveConfig.enableStandardPostEmojis,
+                standardReactionEmojis: effectiveConfig.enableStandardReactionEmojis,
             },
-            inlinePostEmojiSize: effectiveConfig.inlinePostEmojiSize,
-            postEmojiSize: effectiveConfig.postEmojiSize,
-            reactionEmojiSize: effectiveConfig.reactionEmojiSize,
+            customPostEmojiSize: effectiveConfig.customPostEmojiSize,
+            customInlinePostEmojiSize: effectiveConfig.customInlinePostEmojiSize,
+            customReactionEmojiSize: effectiveConfig.customReactionEmojiSize,
+            standardPostEmojiSize: effectiveConfig.standardPostEmojiSize,
+            standardInlinePostEmojiSize: effectiveConfig.standardInlinePostEmojiSize,
+            standardReactionEmojiSize: effectiveConfig.standardReactionEmojiSize,
         }, {
             adminDeveloperModeEnabled: this.adminConfig.enableDeveloperMode,
         });
@@ -238,9 +243,12 @@ export default class EnhancedEmojisPlugin {
             enableEnhancedPostEmojis: this.adminConfig.enableEnhancedPostEmojis,
             enableEnhancedReactionEmojis: this.adminConfig.enableEnhancedReactionEmojis,
             enableEnhancedEmojis: userPreferences.enableEnhancedEmojis,
-            postEmojiSize: userPreferences.postEmojiSize,
-            inlinePostEmojiSize: userPreferences.inlinePostEmojiSize,
-            reactionEmojiSize: userPreferences.reactionEmojiSize,
+            customPostEmojiSize: userPreferences.customPostEmojiSize,
+            customInlinePostEmojiSize: userPreferences.customInlinePostEmojiSize,
+            customReactionEmojiSize: userPreferences.customReactionEmojiSize,
+            standardPostEmojiSize: userPreferences.standardPostEmojiSize,
+            standardInlinePostEmojiSize: userPreferences.standardInlinePostEmojiSize,
+            standardReactionEmojiSize: userPreferences.standardReactionEmojiSize,
         });
 
         if (signature === this.lastRegisteredUserSettingsSignature) {

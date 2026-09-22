@@ -47,9 +47,12 @@ export default class PostEmojiFeature {
         this.clearPostEmojiClasses();
 
         if (this.rootElement) {
-            this.rootElement.classList.remove('enhanced-emojis-posts-enabled');
-            this.rootElement.style.removeProperty('--enhanced-post-emojis-size');
-            this.rootElement.style.removeProperty('--enhanced-inline-post-emojis-size');
+            this.rootElement.classList.remove('enhanced-emojis-custom-posts-enabled');
+            this.rootElement.classList.remove('enhanced-emojis-standard-posts-enabled');
+            this.rootElement.style.removeProperty('--enhanced-emojis-custom-post-size');
+            this.rootElement.style.removeProperty('--enhanced-emojis-custom-inline-post-size');
+            this.rootElement.style.removeProperty('--enhanced-emojis-standard-post-size');
+            this.rootElement.style.removeProperty('--enhanced-emojis-standard-inline-post-size');
         }
 
         this.debugLoggingEnabled = false;
@@ -62,17 +65,20 @@ export default class PostEmojiFeature {
         }
 
         this.currentConfig = config;
-        this.rootElement.classList.toggle('enhanced-emojis-posts-enabled', config.enablePostEmojis);
-        this.rootElement.style.setProperty('--enhanced-post-emojis-size', config.postEmojiSize);
-        this.rootElement.style.setProperty('--enhanced-inline-post-emojis-size', config.inlinePostEmojiSize);
-        this.syncPostEmojiClassification(config.enablePostEmojis);
+        this.rootElement.classList.toggle('enhanced-emojis-custom-posts-enabled', config.enableCustomPostEmojis);
+        this.rootElement.classList.toggle('enhanced-emojis-standard-posts-enabled', config.enableStandardPostEmojis);
+        this.rootElement.style.setProperty('--enhanced-emojis-custom-post-size', config.customPostEmojiSize);
+        this.rootElement.style.setProperty('--enhanced-emojis-custom-inline-post-size', config.customInlinePostEmojiSize);
+        this.rootElement.style.setProperty('--enhanced-emojis-standard-post-size', config.standardPostEmojiSize);
+        this.rootElement.style.setProperty('--enhanced-emojis-standard-inline-post-size', config.standardInlinePostEmojiSize);
+        this.syncPostEmojiClassification(config.enableCustomPostEmojis);
     }
 
     private hasMutationObserver(): boolean {
         return typeof globalThis.MutationObserver === 'function';
     }
 
-    private syncPostEmojiClassification(enablePostEmojis: boolean): void {
+    private syncPostEmojiClassification(enableCustomPostEmojis: boolean): void {
         const body = globalThis.document?.body;
         const root = globalThis.document?.documentElement;
 
@@ -80,7 +86,7 @@ export default class PostEmojiFeature {
             return;
         }
 
-        if (!enablePostEmojis) {
+        if (!enableCustomPostEmojis) {
             this.stopPostEmojiObserver();
             this.stopPostEmojiBodyObserver();
             this.clearPostEmojiInitialScanTimeout();
@@ -208,7 +214,8 @@ export default class PostEmojiFeature {
         enhancedEmojisDebug.debugLog('post_emojis_applied', {
             affectedElementCount: counts.matched,
             postMode,
-            selectedSize: this.currentConfig?.postEmojiSize,
+            customSelectedSize: this.currentConfig?.customPostEmojiSize,
+            standardSelectedSize: this.currentConfig?.standardPostEmojiSize,
         }, {
             adminDeveloperModeEnabled: this.debugLoggingEnabled,
         });

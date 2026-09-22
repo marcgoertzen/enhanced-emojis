@@ -34,3 +34,14 @@ test('includes inline post emoji size translations for English and German', () =
         'enhanced_emojis.settings.posts.inline.option.default': 'Standard',
     });
 });
+
+test('includes standard and custom emoji section translations for English and German', () => {
+    expect(getEnhancedEmojisTranslations('en')).toMatchObject({
+        'enhanced_emojis.settings.standard.title': 'Standard Emojis',
+        'enhanced_emojis.settings.custom.title': 'Custom Emojis',
+    });
+    expect(getEnhancedEmojisTranslations('de')).toMatchObject({
+        'enhanced_emojis.settings.standard.title': 'Standard-Emojis',
+        'enhanced_emojis.settings.custom.title': 'Benutzerdefinierte Emojis',
+    });
+});

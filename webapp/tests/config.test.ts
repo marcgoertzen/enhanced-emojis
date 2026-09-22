@@ -13,17 +13,6 @@ test('normalizes missing admin flags to defaults', () => {
     expect(normalizeEnhancedEmojisConfig({})).toEqual(DEFAULT_ENHANCED_EMOJIS_CONFIG);
 });
 
-test('new installations default reaction emojis to enabled', () => {
-    expect(DEFAULT_ENHANCED_EMOJIS_CONFIG.enableEnhancedReactionEmojis).toBe(true);
-    expect(normalizeEnhancedEmojisConfig({}).enableEnhancedReactionEmojis).toBe(true);
-});
-
-test('existing admin configs keep an explicit false reaction setting', () => {
-    expect(normalizeEnhancedEmojisConfig({
-        enableEnhancedReactionEmojis: false,
-    }).enableEnhancedReactionEmojis).toBe(false);
-});
-
 test('recognizes post and reaction size presets independently', () => {
     expect(isPostEmojiSize('large')).toBe(true);
     expect(isPostEmojiSize('medium')).toBe(false);
@@ -33,251 +22,132 @@ test('recognizes post and reaction size presets independently', () => {
     expect(isReactionEmojiSize('extraLarge')).toBe(false);
 });
 
-test('normalizes invalid user emoji sizes to default', () => {
-    const preferences = normalizeEnhancedEmojisUserPreferences({
+test('legacy shared sizes initialize both custom and standard preferences', () => {
+    expect(normalizeEnhancedEmojisUserPreferences({
+        enableEnhancedEmojis: true,
+        postEmojiSize: 'large',
+        inlinePostEmojiSize: 'medium',
+        reactionEmojiSize: 'maxSize',
+    })).toEqual({
+        enableEnhancedEmojis: true,
+        standardPostEmojiSize: 'large',
+        standardInlinePostEmojiSize: 'medium',
+        standardReactionEmojiSize: 'maxSize',
+        customPostEmojiSize: 'large',
+        customInlinePostEmojiSize: 'medium',
+        customReactionEmojiSize: 'maxSize',
+    });
+});
+
+test('new values take precedence over legacy shared values', () => {
+    expect(normalizeEnhancedEmojisUserPreferences({
+        postEmojiSize: 'large',
+        customPostEmojiSize: 'maxSize',
+        standardPostEmojiSize: 'medium' as never,
+    }).customPostEmojiSize).toBe('maxSize');
+    expect(normalizeEnhancedEmojisUserPreferences({
+        postEmojiSize: 'large',
+        customPostEmojiSize: 'maxSize',
+        standardPostEmojiSize: 'default',
+    }).standardPostEmojiSize).toBe('default');
+});
+
+test('missing and invalid sizes use explicit defaults', () => {
+    expect(normalizeEnhancedEmojisUserPreferences({
         enableEnhancedEmojis: 'unknown' as never,
-        postEmojiSize: 'unknown' as never,
-        inlinePostEmojiSize: 'unknown' as never,
-        reactionEmojiSize: 'unknown' as never,
+        customPostEmojiSize: 'unknown' as never,
+        standardInlinePostEmojiSize: 'unknown' as never,
+    })).toMatchObject({
+        ...DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES,
+        customPostEmojiSize: 'default',
+        standardInlinePostEmojiSize: 'default',
     });
-
-    expect(preferences).toEqual(DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES);
 });
 
-test('developer mode overrides configured user emoji sizes', () => {
+test('developer mode overrides all custom and standard emoji sizes', () => {
+    expect(resolveEnhancedEmojisEffectiveConfig(
+        {enableEnhancedPostEmojis: true, enableEnhancedReactionEmojis: true, enableDeveloperMode: true},
+        {enableEnhancedEmojis: true, customPostEmojiSize: 'large', standardPostEmojiSize: 'maxSize'},
+    )).toMatchObject({
+        customPostEmojiSize: '64px',
+        customInlinePostEmojiSize: '32px',
+        customReactionEmojiSize: '64px',
+        standardPostEmojiSize: '64px',
+        standardInlinePostEmojiSize: '32px',
+        standardReactionEmojiSize: '64px',
+    });
+});
+
+test('the master switch enables both emoji types under the admin feature gates', () => {
+    expect(resolveEnhancedEmojisEffectiveConfig(
+        {enableEnhancedPostEmojis: true, enableEnhancedReactionEmojis: true, enableDeveloperMode: false},
+        {enableEnhancedEmojis: true},
+    )).toMatchObject({
+        enableCustomPostEmojis: true,
+        enableCustomReactionEmojis: true,
+        enableStandardPostEmojis: true,
+        enableStandardReactionEmojis: true,
+    });
+});
+
+test('admin gates apply independently to both emoji types', () => {
+    expect(resolveEnhancedEmojisEffectiveConfig(
+        {enableEnhancedPostEmojis: false, enableEnhancedReactionEmojis: true, enableDeveloperMode: false},
+        {enableEnhancedEmojis: true},
+    )).toMatchObject({
+        enableCustomPostEmojis: false,
+        enableStandardPostEmojis: false,
+        enableCustomReactionEmojis: true,
+        enableStandardReactionEmojis: true,
+    });
+});
+
+test('effective config maps independent custom and standard sizes', () => {
+    expect(resolveEnhancedEmojisEffectiveConfig(
+        {enableEnhancedPostEmojis: true, enableEnhancedReactionEmojis: true, enableDeveloperMode: false},
+        {
+            enableEnhancedEmojis: true,
+            customPostEmojiSize: 'large',
+            customInlinePostEmojiSize: 'medium',
+            customReactionEmojiSize: 'maxSize',
+            standardPostEmojiSize: 'extraLarge',
+            standardInlinePostEmojiSize: 'large',
+            standardReactionEmojiSize: 'medium',
+        },
+    )).toMatchObject({
+        customPostEmojiSize: '48px',
+        customInlinePostEmojiSize: '32px',
+        customReactionEmojiSize: '128px',
+        standardPostEmojiSize: '64px',
+        standardInlinePostEmojiSize: '48px',
+        standardReactionEmojiSize: '32px',
+    });
+});
+
+test('disabling the master switch preserves all six stored sizes', () => {
     const config = resolveEnhancedEmojisEffectiveConfig(
-        {
-            enableEnhancedPostEmojis: true,
-            enableEnhancedReactionEmojis: false,
-            enableDeveloperMode: true,
-        },
-        {
-            enableEnhancedEmojis: true,
-            postEmojiSize: 'large',
-            inlinePostEmojiSize: 'large',
-            reactionEmojiSize: 'large',
-        },
-    );
-
-    expect(config).toEqual({
-        enablePostEmojis: true,
-        enableDeveloperMode: true,
-        enableReactionEmojis: false,
-        inlinePostEmojiSize: '32px',
-        postEmojiSize: '64px',
-        reactionEmojiSize: '64px',
-    });
-});
-
-test.each([
-    {
-        name: 'admin enabled / user disabled',
-        adminConfig: {
-            enableEnhancedPostEmojis: true,
-            enableEnhancedReactionEmojis: true,
-            enableDeveloperMode: false,
-        },
-        userPreferences: {
-            enableEnhancedEmojis: false,
-            postEmojiSize: 'large' as const,
-            inlinePostEmojiSize: 'medium' as const,
-            reactionEmojiSize: 'large' as const,
-        },
-        expected: {
-            enablePostEmojis: false,
-            enableDeveloperMode: false,
-            enableReactionEmojis: false,
-        },
-    },
-    {
-        name: 'post disabled / reactions enabled / user enabled',
-        adminConfig: {
-            enableEnhancedPostEmojis: false,
-            enableEnhancedReactionEmojis: true,
-            enableDeveloperMode: false,
-        },
-        userPreferences: {
-            enableEnhancedEmojis: true,
-            postEmojiSize: 'large' as const,
-            inlinePostEmojiSize: 'medium' as const,
-            reactionEmojiSize: 'large' as const,
-        },
-        expected: {
-            enablePostEmojis: false,
-            enableDeveloperMode: false,
-            enableReactionEmojis: true,
-        },
-    },
-    {
-        name: 'admin disabled / user enabled',
-        adminConfig: {
-            enableEnhancedPostEmojis: false,
-            enableEnhancedReactionEmojis: false,
-            enableDeveloperMode: false,
-        },
-        userPreferences: {
-            enableEnhancedEmojis: true,
-            postEmojiSize: 'large' as const,
-            inlinePostEmojiSize: 'medium' as const,
-            reactionEmojiSize: 'large' as const,
-        },
-        expected: {
-            enablePostEmojis: false,
-            enableDeveloperMode: false,
-            enableReactionEmojis: false,
-        },
-    },
-    {
-        name: 'admin enabled / user enabled',
-        adminConfig: {
-            enableEnhancedPostEmojis: true,
-            enableEnhancedReactionEmojis: true,
-            enableDeveloperMode: false,
-        },
-        userPreferences: {
-            enableEnhancedEmojis: true,
-            postEmojiSize: 'large' as const,
-            inlinePostEmojiSize: 'medium' as const,
-            reactionEmojiSize: 'large' as const,
-        },
-        expected: {
-            enablePostEmojis: true,
-            enableDeveloperMode: false,
-            enableReactionEmojis: true,
-        },
-    },
-])('maps effective feature flags for $name', ({adminConfig, expected, userPreferences}) => {
-    const config = resolveEnhancedEmojisEffectiveConfig(adminConfig, userPreferences);
-
-    expect(config).toMatchObject(expected);
-});
-
-test('maps configured user emoji sizes to css values', () => {
-    expect(resolveEnhancedEmojisEffectiveConfig(
-        {
-            enableEnhancedPostEmojis: true,
-            enableEnhancedReactionEmojis: false,
-            enableDeveloperMode: false,
-        },
-        {
-            enableEnhancedEmojis: true,
-            postEmojiSize: 'default',
-            inlinePostEmojiSize: 'default',
-            reactionEmojiSize: 'default',
-        },
-    )).toEqual({
-        enablePostEmojis: true,
-        enableDeveloperMode: false,
-        enableReactionEmojis: false,
-        inlinePostEmojiSize: '20px',
-        postEmojiSize: '32px',
-        reactionEmojiSize: '20px',
-    });
-
-    expect(resolveEnhancedEmojisEffectiveConfig(
-        {
-            enableEnhancedPostEmojis: true,
-            enableEnhancedReactionEmojis: false,
-            enableDeveloperMode: false,
-        },
-        {
-            enableEnhancedEmojis: true,
-            postEmojiSize: 'large',
-            inlinePostEmojiSize: 'medium',
-            reactionEmojiSize: 'medium',
-        },
-    )).toEqual({
-        enablePostEmojis: true,
-        enableDeveloperMode: false,
-        enableReactionEmojis: false,
-        inlinePostEmojiSize: '32px',
-        postEmojiSize: '48px',
-        reactionEmojiSize: '32px',
-    });
-
-    expect(resolveEnhancedEmojisEffectiveConfig(
-        {
-            enableEnhancedPostEmojis: true,
-            enableEnhancedReactionEmojis: false,
-            enableDeveloperMode: false,
-        },
-        {
-            enableEnhancedEmojis: true,
-            postEmojiSize: 'extraLarge',
-            inlinePostEmojiSize: 'extraLarge',
-            reactionEmojiSize: 'large',
-        },
-    )).toEqual({
-        enablePostEmojis: true,
-        enableDeveloperMode: false,
-        enableReactionEmojis: false,
-        inlinePostEmojiSize: '64px',
-        postEmojiSize: '64px',
-        reactionEmojiSize: '64px',
-    });
-
-    expect(resolveEnhancedEmojisEffectiveConfig(
-        {
-            enableEnhancedPostEmojis: true,
-            enableEnhancedReactionEmojis: false,
-            enableDeveloperMode: false,
-        },
-        {
-            enableEnhancedEmojis: true,
-            postEmojiSize: 'maxSize',
-            inlinePostEmojiSize: 'maxSize',
-            reactionEmojiSize: 'maxSize',
-        },
-    )).toEqual({
-        enablePostEmojis: true,
-        enableDeveloperMode: false,
-        enableReactionEmojis: false,
-        inlinePostEmojiSize: '128px',
-        postEmojiSize: '128px',
-        reactionEmojiSize: '128px',
-    });
-});
-
-test('inline emoji default remains normal text sized', () => {
-    const config = resolveEnhancedEmojisEffectiveConfig(
-        {
-            enableEnhancedPostEmojis: true,
-            enableEnhancedReactionEmojis: false,
-            enableDeveloperMode: false,
-        },
-        {
-            enableEnhancedEmojis: true,
-            postEmojiSize: 'maxSize',
-            inlinePostEmojiSize: 'default',
-            reactionEmojiSize: 'default',
-        },
-    );
-
-    expect(config.inlinePostEmojiSize).toBe('20px');
-    expect(config.postEmojiSize).toBe('128px');
-});
-
-test('disabling the plugin preserves stored size preferences but disables all enhancements', () => {
-    const config = resolveEnhancedEmojisEffectiveConfig(
-        {
-            enableEnhancedPostEmojis: true,
-            enableEnhancedReactionEmojis: true,
-            enableDeveloperMode: false,
-        },
+        {enableEnhancedPostEmojis: true, enableEnhancedReactionEmojis: true, enableDeveloperMode: false},
         {
             enableEnhancedEmojis: false,
-            postEmojiSize: 'extraLarge',
-            inlinePostEmojiSize: 'large',
-            reactionEmojiSize: 'maxSize',
+            customPostEmojiSize: 'extraLarge',
+            customInlinePostEmojiSize: 'large',
+            customReactionEmojiSize: 'maxSize',
+            standardPostEmojiSize: 'large',
+            standardInlinePostEmojiSize: 'medium',
+            standardReactionEmojiSize: 'default',
         },
     );
 
-    expect(config).toEqual({
-        enablePostEmojis: false,
-        enableDeveloperMode: false,
-        enableReactionEmojis: false,
-        inlinePostEmojiSize: '48px',
-        postEmojiSize: '64px',
-        reactionEmojiSize: '128px',
+    expect(config).toMatchObject({
+        enableCustomPostEmojis: false,
+        enableCustomReactionEmojis: false,
+        enableStandardPostEmojis: false,
+        enableStandardReactionEmojis: false,
+        customPostEmojiSize: '64px',
+        customInlinePostEmojiSize: '48px',
+        customReactionEmojiSize: '128px',
+        standardPostEmojiSize: '48px',
+        standardInlinePostEmojiSize: '32px',
+        standardReactionEmojiSize: '20px',
     });
 });

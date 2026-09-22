@@ -1,6 +1,8 @@
 import type {EnhancedEmojisEffectiveConfig} from 'config';
 import * as enhancedEmojisDebug from 'debug/enhanced-emojis-debug';
 
+import {classifyEmojiElement} from '../emoji-classifier';
+
 export default class ReactionEmojiFeature {
     private rootElement?: HTMLElement;
 
@@ -25,12 +27,16 @@ export default class ReactionEmojiFeature {
 
     public stop(): void {
         if (this.rootElement) {
-            this.rootElement.classList.remove('enhanced-emojis-reactions-enabled');
-            this.rootElement.style.removeProperty('--enhanced-reaction-emojis-size');
-            this.rootElement.style.removeProperty('--enhanced-reaction-chip-padding-inline');
-            this.rootElement.style.removeProperty('--enhanced-reaction-chip-padding-block');
-            this.rootElement.style.removeProperty('--enhanced-reaction-chip-gap');
-            this.rootElement.style.removeProperty('--enhanced-reaction-chip-min-height');
+            this.rootElement.classList.remove('enhanced-emojis-custom-reactions-enabled');
+            this.rootElement.classList.remove('enhanced-emojis-standard-reactions-enabled');
+            this.rootElement.style.removeProperty('--enhanced-emojis-custom-reaction-size');
+            this.rootElement.style.removeProperty('--enhanced-emojis-standard-reaction-size');
+            for (const emojiType of ['custom', 'standard'] as const) {
+                this.rootElement.style.removeProperty(`--enhanced-emojis-${emojiType}-reaction-chip-padding-inline`);
+                this.rootElement.style.removeProperty(`--enhanced-emojis-${emojiType}-reaction-chip-padding-block`);
+                this.rootElement.style.removeProperty(`--enhanced-emojis-${emojiType}-reaction-chip-gap`);
+                this.rootElement.style.removeProperty(`--enhanced-emojis-${emojiType}-reaction-chip-min-height`);
+            }
         }
 
         this.debugLoggingEnabled = false;
@@ -44,13 +50,16 @@ export default class ReactionEmojiFeature {
         }
 
         this.currentConfig = config;
-        this.rootElement.classList.toggle('enhanced-emojis-reactions-enabled', config.enableReactionEmojis);
-        this.rootElement.style.setProperty('--enhanced-reaction-emojis-size', config.reactionEmojiSize);
-        this.applyReactionLayoutConfig(config.reactionEmojiSize);
+        this.rootElement.classList.toggle('enhanced-emojis-custom-reactions-enabled', config.enableCustomReactionEmojis);
+        this.rootElement.classList.toggle('enhanced-emojis-standard-reactions-enabled', config.enableStandardReactionEmojis);
+        this.rootElement.style.setProperty('--enhanced-emojis-custom-reaction-size', config.customReactionEmojiSize);
+        this.rootElement.style.setProperty('--enhanced-emojis-standard-reaction-size', config.standardReactionEmojiSize);
+        this.applyReactionLayoutConfig(config.customReactionEmojiSize, 'custom');
+        this.applyReactionLayoutConfig(config.standardReactionEmojiSize, 'standard');
         this.logReactionEmojiApplication();
     }
 
-    private applyReactionLayoutConfig(reactionEmojiSize: string): void {
+    private applyReactionLayoutConfig(reactionEmojiSize: string, emojiType: 'custom' | 'standard'): void {
         if (!this.rootElement) {
             return;
         }
@@ -61,18 +70,23 @@ export default class ReactionEmojiFeature {
         const reactionChipGap = Math.max(2, Math.min(8, Math.round(reactionSize * 0.12)));
         const reactionChipMinHeight = Math.max(reactionSize + (reactionChipPaddingBlock * 2), 24);
 
-        this.rootElement.style.setProperty('--enhanced-reaction-chip-padding-inline', `${reactionChipPaddingInline}px`);
-        this.rootElement.style.setProperty('--enhanced-reaction-chip-padding-block', `${reactionChipPaddingBlock}px`);
-        this.rootElement.style.setProperty('--enhanced-reaction-chip-gap', `${reactionChipGap}px`);
-        this.rootElement.style.setProperty('--enhanced-reaction-chip-min-height', `${reactionChipMinHeight}px`);
+        this.rootElement.style.setProperty(`--enhanced-emojis-${emojiType}-reaction-chip-padding-inline`, `${reactionChipPaddingInline}px`);
+        this.rootElement.style.setProperty(`--enhanced-emojis-${emojiType}-reaction-chip-padding-block`, `${reactionChipPaddingBlock}px`);
+        this.rootElement.style.setProperty(`--enhanced-emojis-${emojiType}-reaction-chip-gap`, `${reactionChipGap}px`);
+        this.rootElement.style.setProperty(`--enhanced-emojis-${emojiType}-reaction-chip-min-height`, `${reactionChipMinHeight}px`);
     }
 
     private logReactionEmojiApplication(): void {
-        const reactionCount = globalThis.document?.body?.querySelectorAll('img.Reaction__emoji.emoticon[src*="/api/v4/emoji/"]').length ?? 0;
+        const reactionElements = Array.from(globalThis.document?.body?.querySelectorAll('img.Reaction__emoji.emoticon') ?? []);
+        const reactionCount = reactionElements.filter((element) => {
+            const kind = classifyEmojiElement(element);
+            return kind === 'custom' || (kind === 'standard' && this.currentConfig?.enableStandardReactionEmojis);
+        }).length;
 
         enhancedEmojisDebug.debugLog('reaction_emojis_applied', {
             affectedReactionCount: reactionCount,
-            selectedSize: this.currentConfig?.reactionEmojiSize,
+            customSelectedSize: this.currentConfig?.customReactionEmojiSize,
+            standardSelectedSize: this.currentConfig?.standardReactionEmojiSize,
         }, {
             adminDeveloperModeEnabled: this.debugLoggingEnabled,
         });
