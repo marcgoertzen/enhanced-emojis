@@ -1,7 +1,18 @@
-const INLINE_POST_EMOJI_CLASS = 'enhanced-emojis-inline';
-const STANDALONE_POST_EMOJI_CLASS = 'enhanced-emojis-standalone';
+import {classifyEmojiElement, type EmojiKind} from '../emoji-classifier';
 
-function hasMeaningfulContent(node: Node): boolean {
+const CUSTOM_POST_EMOJI_CLASS = 'enhanced-emojis-custom-post-emoji';
+const INLINE_POST_EMOJI_CLASS = 'enhanced-emojis-post-emoji-inline';
+const STANDARD_POST_EMOJI_CLASS = 'enhanced-emojis-standard-post-emoji';
+const STANDALONE_POST_EMOJI_CLASS = 'enhanced-emojis-post-emoji-standalone';
+
+const POST_EMOJI_CLASSES = [
+    CUSTOM_POST_EMOJI_CLASS,
+    INLINE_POST_EMOJI_CLASS,
+    STANDARD_POST_EMOJI_CLASS,
+    STANDALONE_POST_EMOJI_CLASS,
+] as const;
+
+function hasNonEmojiContent(node: Node): boolean {
     if (node.nodeType === Node.TEXT_NODE) {
         return (node.textContent ?? '').trim().length > 0;
     }
@@ -10,11 +21,11 @@ function hasMeaningfulContent(node: Node): boolean {
         return false;
     }
 
-    if (node.matches('span.emoticon[style*="/api/v4/emoji/"]') || node.tagName === 'BR') {
+    if (classifyEmojiElement(node) !== 'unknown' || node.tagName === 'BR') {
         return false;
     }
 
-    return Array.from(node.childNodes).some((childNode) => hasMeaningfulContent(childNode));
+    return Array.from(node.childNodes).some((childNode) => hasNonEmojiContent(childNode));
 }
 
 interface ClassificationCounts {
@@ -24,15 +35,20 @@ interface ClassificationCounts {
 }
 
 export function classifyPostEmojiContainer(container: Element): ClassificationCounts {
-    const existingClassifiedEmojiElements = Array.from(container.querySelectorAll<HTMLElement>(`.${INLINE_POST_EMOJI_CLASS}, .${STANDALONE_POST_EMOJI_CLASS}`));
+    const existingClassifiedEmojiElements = Array.from(container.querySelectorAll<HTMLElement>(POST_EMOJI_CLASSES.map((className) => `.${className}`).join(', ')));
     existingClassifiedEmojiElements.forEach((emojiElement) => {
-        emojiElement.classList.remove(INLINE_POST_EMOJI_CLASS);
-        emojiElement.classList.remove(STANDALONE_POST_EMOJI_CLASS);
+        emojiElement.classList.remove(...POST_EMOJI_CLASSES);
     });
 
-    const customEmojiElements = Array.from(container.querySelectorAll<HTMLElement>('span.emoticon[style*="/api/v4/emoji/"]'));
+    const emojiElements = Array.from(container.querySelectorAll<HTMLElement>('.emoticon')).map((element): {
+        element: HTMLElement;
+        kind: Exclude<EmojiKind, 'unknown'>;
+    } | null => {
+        const kind = classifyEmojiElement(element);
+        return kind === 'unknown' ? null : {element, kind};
+    }).filter((entry): entry is {element: HTMLElement; kind: Exclude<EmojiKind, 'unknown'>} => entry !== null);
 
-    if (customEmojiElements.length === 0) {
+    if (emojiElements.length === 0) {
         return {
             inline: 0,
             matched: 0,
@@ -40,18 +56,19 @@ export function classifyPostEmojiContainer(container: Element): ClassificationCo
         };
     }
 
-    const hasNonEmojiContent = Array.from(container.childNodes).some(hasMeaningfulContent);
-    const classificationClass = hasNonEmojiContent ? INLINE_POST_EMOJI_CLASS : STANDALONE_POST_EMOJI_CLASS;
+    const containsNonEmojiContent = Array.from(container.childNodes).some(hasNonEmojiContent);
+    const layoutClass = containsNonEmojiContent ? INLINE_POST_EMOJI_CLASS : STANDALONE_POST_EMOJI_CLASS;
     const counts: ClassificationCounts = {
         inline: 0,
-        matched: customEmojiElements.length,
+        matched: emojiElements.length,
         standalone: 0,
     };
 
-    for (const emojiElement of customEmojiElements) {
-        emojiElement.classList.add(classificationClass);
+    for (const {element: emojiElement, kind} of emojiElements) {
+        emojiElement.classList.add(layoutClass);
+        emojiElement.classList.add(kind === 'custom' ? CUSTOM_POST_EMOJI_CLASS : STANDARD_POST_EMOJI_CLASS);
 
-        if (hasNonEmojiContent) {
+        if (containsNonEmojiContent) {
             counts.inline += 1;
         } else {
             counts.standalone += 1;
@@ -86,9 +103,8 @@ export function classifyAllPostEmojiContainers(root: ParentNode): Classification
 }
 
 export function clearPostEmojiClassification(root: ParentNode): void {
-    for (const emojiElement of root.querySelectorAll<HTMLElement>(`.${INLINE_POST_EMOJI_CLASS}, .${STANDALONE_POST_EMOJI_CLASS}`)) {
-        emojiElement.classList.remove(INLINE_POST_EMOJI_CLASS);
-        emojiElement.classList.remove(STANDALONE_POST_EMOJI_CLASS);
+    for (const emojiElement of root.querySelectorAll<HTMLElement>(POST_EMOJI_CLASSES.map((className) => `.${className}`).join(', '))) {
+        emojiElement.classList.remove(...POST_EMOJI_CLASSES);
     }
 }
 

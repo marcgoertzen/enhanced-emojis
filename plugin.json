@@ -1,8 +1,8 @@
 {
     "id": "io.github.marcgoertzen.enhanced-emojis",
     "name": "Enhanced Emojis",
-    "version": "0.4.2",
-    "description": "Mattermost plugin for improving custom emoji rendering in posts and reactions.",
+    "version": "0.5.0",
+    "description": "Mattermost plugin for improving custom and standard emoji rendering in posts and reactions.",
     "homepage_url": "https://github.com/marcgoertzen/enhanced-emojis",
     "support_url": "https://github.com/marcgoertzen/enhanced-emojis/issues",
     "icon_path": "assets/enhanced_emojis_icon.png",
@@ -12,18 +12,34 @@
         "footer": "",
         "settings": [
             {
-                "key": "EnableEnhancedPostEmojis",
-                "display_name": "Enable Enhanced Post Emojis",
+                "key": "EnableCustomPostEmojis",
+                "display_name": "Enable Custom Post Emojis",
                 "type": "bool",
-                "help_text": "Controls larger custom emojis in Mattermost post content.",
+                "help_text": "Allows users to enlarge custom emojis in Mattermost post content.",
                 "placeholder": "",
                 "default": true
             },
             {
-                "key": "EnableEnhancedReactionEmojis",
-                "display_name": "Enable Enhanced Reaction Emojis",
+                "key": "EnableCustomReactionEmojis",
+                "display_name": "Enable Custom Reaction Emojis",
                 "type": "bool",
-                "help_text": "Controls larger custom emojis in emoji reactions.",
+                "help_text": "Allows users to enlarge custom emojis in reactions.",
+                "placeholder": "",
+                "default": true
+            },
+            {
+                "key": "EnableStandardPostEmojis",
+                "display_name": "Enable Standard Post Emojis",
+                "type": "bool",
+                "help_text": "Allows users to enlarge standard emojis in Mattermost post content.",
+                "placeholder": "",
+                "default": true
+            },
+            {
+                "key": "EnableStandardReactionEmojis",
+                "display_name": "Enable Standard Reaction Emojis",
+                "type": "bool",
+                "help_text": "Allows users to enlarge standard emojis in reactions.",
                 "placeholder": "",
                 "default": true
             },

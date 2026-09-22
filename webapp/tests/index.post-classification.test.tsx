@@ -54,11 +54,11 @@ describe('EnhancedEmojisPlugin post classification', () => {
         } as never, store as never);
 
         const emoji = document.body.querySelector('.emoticon') as HTMLElement;
-        expect(emoji.classList.contains('enhanced-emojis-inline')).toBe(true);
+        expect(emoji.classList.contains('enhanced-emojis-post-emoji-inline')).toBe(true);
         plugin.uninitialize();
     });
 
-    test('classifier runs when custom emoji style attributes are updated', async () => {
+    test('custom emoji classifier runs when style attributes are updated', async () => {
         document.body.innerHTML = '<div class="post-message__text">Hello <span class="emoticon"></span></div>';
         const fetch = jest.fn(async () => ({
             ok: true,
@@ -86,7 +86,7 @@ describe('EnhancedEmojisPlugin post classification', () => {
         emoji.setAttribute('style', 'background-image:url(/api/v4/emoji/cat)');
         await Promise.resolve();
 
-        expect(emoji.classList.contains('enhanced-emojis-inline')).toBe(true);
+        expect(emoji.classList.contains('enhanced-emojis-post-emoji-inline')).toBe(true);
         plugin.uninitialize();
     });
 
@@ -121,7 +121,8 @@ describe('EnhancedEmojisPlugin post classification', () => {
         expect(postLog?.[1]).toEqual(expect.objectContaining({
             affectedElementCount: 1,
             postMode: 'inline',
-            selectedSize: '64px',
+            standardSelectedSize: '48px',
+            customSelectedSize: '48px',
         }));
         expect(JSON.stringify(postLog?.[1])).not.toContain('Secret message');
         plugin.uninitialize();

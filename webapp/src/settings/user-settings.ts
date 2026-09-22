@@ -1,19 +1,23 @@
 import buildInfo from 'build-info';
 import {
     buildEnhancedEmojisPreferenceSavePayload,
-    DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES,
-    type EnhancedEmojisConfig,
+    type EnhancedEmojisConfigInput,
+    type EnhancedEmojisUserPreferenceInput,
     type EnhancedEmojisUserPreferences,
     getEnhancedEmojisUserPreferences,
-    INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME,
+    CUSTOM_INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME,
+    CUSTOM_POST_EMOJI_SIZE_PREFERENCE_NAME,
+    CUSTOM_REACTION_EMOJI_SIZE_PREFERENCE_NAME,
     type InlinePostEmojiSize,
     normalizeEnhancedEmojisUserPreferences,
-    POST_EMOJI_SIZE_PREFERENCE_NAME,
+    normalizeEnhancedEmojisConfig,
+    STANDARD_INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME,
+    STANDARD_POST_EMOJI_SIZE_PREFERENCE_NAME,
+    STANDARD_REACTION_EMOJI_SIZE_PREFERENCE_NAME,
     type PostEmojiSize,
-    REACTION_EMOJI_SIZE_PREFERENCE_NAME,
     type ReactionEmojiSize,
     saveEnhancedEmojisUserPreferences,
-    USER_ENABLE_PREFERENCE_NAME,
+    MASTER_ENABLE_PREFERENCE_NAME,
     USER_PREFERENCES_CATEGORY,
 } from 'config';
 import * as enhancedEmojisDebug from 'debug/enhanced-emojis-debug';
@@ -98,7 +102,7 @@ function createDeveloperBuildInfoComponent(): () => React.ReactElement {
 
 function createUserPreferencesSubmitHandler(
     currentUserId: string | undefined,
-    getCurrentUserPreferences: () => Partial<EnhancedEmojisUserPreferences> | null | undefined,
+    getCurrentUserPreferences: () => EnhancedEmojisUserPreferenceInput | null | undefined,
     enableDeveloperMode: boolean,
 ): (changes: { [name: string]: string }) => void {
     return (changes: { [name: string]: string }): void => {
@@ -106,7 +110,7 @@ function createUserPreferencesSubmitHandler(
             return;
         }
 
-        const changedEntry = Object.entries(changes)[0] as [typeof USER_ENABLE_PREFERENCE_NAME | typeof POST_EMOJI_SIZE_PREFERENCE_NAME | typeof INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME | typeof REACTION_EMOJI_SIZE_PREFERENCE_NAME, string] | undefined;
+        const changedEntry = Object.entries(changes)[0] as [typeof MASTER_ENABLE_PREFERENCE_NAME | typeof STANDARD_POST_EMOJI_SIZE_PREFERENCE_NAME | typeof STANDARD_INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME | typeof STANDARD_REACTION_EMOJI_SIZE_PREFERENCE_NAME | typeof CUSTOM_POST_EMOJI_SIZE_PREFERENCE_NAME | typeof CUSTOM_INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME | typeof CUSTOM_REACTION_EMOJI_SIZE_PREFERENCE_NAME, string] | undefined;
         if (!changedEntry) {
             return;
         }
@@ -116,6 +120,7 @@ function createUserPreferencesSubmitHandler(
             name: changedEntry[0],
             value: changedEntry[1],
         });
+        const changedPreferencePayload = savePlan.payload.filter((preference) => preference.name === savePlan.changedKey);
 
         enhancedEmojisDebug.debugLog('settings_change', {
             changedKey: savePlan.changedKey,
@@ -129,18 +134,21 @@ function createUserPreferencesSubmitHandler(
             changedKey: savePlan.changedKey,
             newNormalizedPreferences: savePlan.nextPreferences,
             oldNormalizedPreferences: savePlan.previousPreferences,
-            payload: savePlan.payload,
+            payload: changedPreferencePayload,
             unchangedValues: {
-                enableEnhancedEmojis: savePlan.changedKey === USER_ENABLE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.enableEnhancedEmojis,
-                inlinePostEmojiSize: savePlan.changedKey === INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.inlinePostEmojiSize,
-                postEmojiSize: savePlan.changedKey === POST_EMOJI_SIZE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.postEmojiSize,
-                reactionEmojiSize: savePlan.changedKey === REACTION_EMOJI_SIZE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.reactionEmojiSize,
+                enableEnhancedEmojis: savePlan.changedKey === MASTER_ENABLE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.enableEnhancedEmojis,
+                standardPostEmojiSize: savePlan.changedKey === STANDARD_POST_EMOJI_SIZE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.standardPostEmojiSize,
+                standardInlinePostEmojiSize: savePlan.changedKey === STANDARD_INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.standardInlinePostEmojiSize,
+                standardReactionEmojiSize: savePlan.changedKey === STANDARD_REACTION_EMOJI_SIZE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.standardReactionEmojiSize,
+                customPostEmojiSize: savePlan.changedKey === CUSTOM_POST_EMOJI_SIZE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.customPostEmojiSize,
+                customInlinePostEmojiSize: savePlan.changedKey === CUSTOM_INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.customInlinePostEmojiSize,
+                customReactionEmojiSize: savePlan.changedKey === CUSTOM_REACTION_EMOJI_SIZE_PREFERENCE_NAME ? 'changed' : savePlan.nextPreferences.customReactionEmojiSize,
             },
         }, {
             adminDeveloperModeEnabled: enableDeveloperMode,
         });
 
-        saveEnhancedEmojisUserPreferences(currentUserId, savePlan.payload).then(() => {
+        saveEnhancedEmojisUserPreferences(currentUserId, changedPreferencePayload).then(() => {
             enhancedEmojisDebug.debugLog('settings_save_success', {
                 savedPreferences: savePlan.nextPreferences,
             }, {
@@ -149,7 +157,7 @@ function createUserPreferencesSubmitHandler(
         }).catch((error: unknown) => {
             enhancedEmojisDebug.debugError('settings_save_failed', error, {
                 changedKey: savePlan.changedKey,
-                payload: savePlan.payload,
+                payload: changedPreferencePayload,
             }, {
                 adminDeveloperModeEnabled: enableDeveloperMode,
             });
@@ -157,13 +165,15 @@ function createUserPreferencesSubmitHandler(
     };
 }
 
-export function createEnableEnhancedEmojisSettingComponent(
+function createBooleanPreferenceSettingComponent(
     translations: EnhancedEmojisTranslations,
+    preferenceName: typeof MASTER_ENABLE_PREFERENCE_NAME,
+    label: string,
 ): (props: { informChange: (name: string, value: string) => void }) => React.ReactElement {
-    return function EnableEnhancedEmojisSetting({informChange}: {
+    return function BooleanPreferenceSetting({informChange}: {
         informChange: (name: string, value: string) => void;
     }): React.ReactElement {
-        const savedEnabled = useSelector((state: GlobalState) => getEnhancedEmojisUserPreferences(state).enableEnhancedEmojis);
+        const savedEnabled = useSelector((state: GlobalState) => getEnhancedEmojisUserPreferences(state)[preferenceName]);
         const [enabled, setEnabled] = React.useState(savedEnabled);
 
         React.useEffect(() => {
@@ -173,12 +183,12 @@ export function createEnableEnhancedEmojisSettingComponent(
         const toggleEnabled = (): void => {
             const nextEnabled = !enabled;
             setEnabled(nextEnabled);
-            informChange(USER_ENABLE_PREFERENCE_NAME, nextEnabled ? 'true' : 'false');
+            informChange(preferenceName, nextEnabled ? 'true' : 'false');
         };
 
         return renderToggleSetting({
             checked: enabled,
-            label: translations['enhanced_emojis.settings.enable.title'],
+            label,
             offText: translations['enhanced_emojis.settings.enable.state.off'],
             onText: translations['enhanced_emojis.settings.enable.state.on'],
             onToggle: toggleEnabled,
@@ -186,24 +196,80 @@ export function createEnableEnhancedEmojisSettingComponent(
     };
 }
 
+export function createMasterEnableSettingComponent(
+    translations: EnhancedEmojisTranslations,
+): (props: { informChange: (name: string, value: string) => void }) => React.ReactElement {
+    return createBooleanPreferenceSettingComponent(
+        translations,
+        MASTER_ENABLE_PREFERENCE_NAME,
+        translations['enhanced_emojis.settings.enable.title'],
+    );
+}
+
+function createEmojiSizePreferenceSection(
+    emojiType: 'standard' | 'custom',
+    preferenceKind: 'post' | 'inlinePost' | 'reaction',
+    translations: EnhancedEmojisTranslations,
+    preferences: EnhancedEmojisUserPreferences,
+    onSubmit: (changes: { [name: string]: string }) => void,
+): PluginConfiguration['sections'][number] {
+    if (preferenceKind === 'post') {
+        const settingTitle = emojiType === 'standard' ? translations['enhanced_emojis.settings.standard.post.size'] : translations['enhanced_emojis.settings.custom.post.size'];
+        return createEmojiPreferenceSection({
+            sectionTitle: settingTitle,
+            settingName: emojiType === 'standard' ? STANDARD_POST_EMOJI_SIZE_PREFERENCE_NAME : CUSTOM_POST_EMOJI_SIZE_PREFERENCE_NAME,
+            settingTitle,
+            helpText: emojiType === 'standard' ? translations['enhanced_emojis.settings.standard.post.help_text'] : translations['enhanced_emojis.settings.custom.post.help_text'],
+            defaultValue: emojiType === 'standard' ? preferences.standardPostEmojiSize : preferences.customPostEmojiSize,
+            options: getPostEmojiSizeOptions(translations),
+            onSubmit,
+        });
+    }
+
+    if (preferenceKind === 'inlinePost') {
+        const settingTitle = emojiType === 'standard' ? translations['enhanced_emojis.settings.standard.inline_post.size'] : translations['enhanced_emojis.settings.custom.inline_post.size'];
+        return createEmojiPreferenceSection({
+            sectionTitle: settingTitle,
+            settingName: emojiType === 'standard' ? STANDARD_INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME : CUSTOM_INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME,
+            settingTitle,
+            helpText: emojiType === 'standard' ? translations['enhanced_emojis.settings.standard.inline_post.help_text'] : translations['enhanced_emojis.settings.custom.inline_post.help_text'],
+            defaultValue: emojiType === 'standard' ? preferences.standardInlinePostEmojiSize : preferences.customInlinePostEmojiSize,
+            options: getInlinePostEmojiSizeOptions(translations),
+            onSubmit,
+        });
+    }
+
+    const settingTitle = emojiType === 'standard' ? translations['enhanced_emojis.settings.standard.reaction.size'] : translations['enhanced_emojis.settings.custom.reaction.size'];
+    return createEmojiPreferenceSection({
+        sectionTitle: settingTitle,
+        settingName: emojiType === 'standard' ? STANDARD_REACTION_EMOJI_SIZE_PREFERENCE_NAME : CUSTOM_REACTION_EMOJI_SIZE_PREFERENCE_NAME,
+        settingTitle,
+        helpText: emojiType === 'standard' ? translations['enhanced_emojis.settings.standard.reaction.help_text'] : translations['enhanced_emojis.settings.custom.reaction.help_text'],
+        defaultValue: emojiType === 'standard' ? preferences.standardReactionEmojiSize : preferences.customReactionEmojiSize,
+        options: getReactionEmojiSizeOptions(translations),
+        onSubmit,
+    });
+}
+
 export function createEnhancedEmojisUserSettingsConfig(
-    adminConfig: EnhancedEmojisConfig,
+    adminConfig: EnhancedEmojisConfigInput,
     locale: string,
-    userPreferences: Partial<EnhancedEmojisUserPreferences> | null | undefined,
+    userPreferences: EnhancedEmojisUserPreferenceInput | null | undefined,
     currentUserId?: string,
-    getCurrentUserPreferences: () => Partial<EnhancedEmojisUserPreferences> | null | undefined = () => userPreferences,
+    getCurrentUserPreferences: () => EnhancedEmojisUserPreferenceInput | null | undefined = () => userPreferences,
 ): PluginConfiguration {
+    const normalizedAdminConfig = normalizeEnhancedEmojisConfig(adminConfig);
     const translations = getEnhancedEmojisTranslations(locale);
     const normalizedUserPreferences = normalizeEnhancedEmojisUserPreferences(userPreferences);
-    const onSubmit = createUserPreferencesSubmitHandler(currentUserId, getCurrentUserPreferences, adminConfig.enableDeveloperMode);
+    const onSubmit = createUserPreferencesSubmitHandler(currentUserId, getCurrentUserPreferences, normalizedAdminConfig.enableDeveloperMode);
     const sections: PluginConfiguration['sections'] = [];
     const generalSettings: PluginConfigurationSetting[] = [
         {
             type: 'custom' as const,
-            name: USER_ENABLE_PREFERENCE_NAME,
+            name: MASTER_ENABLE_PREFERENCE_NAME,
             title: translations['enhanced_emojis.settings.enable.title'],
             helpText: translations['enhanced_emojis.settings.enable.help_text'],
-            component: createEnableEnhancedEmojisSettingComponent(translations),
+            component: createMasterEnableSettingComponent(translations),
         },
     ];
 
@@ -223,7 +289,7 @@ export function createEnhancedEmojisUserSettingsConfig(
         });
     }
 
-    if (normalizedUserPreferences.enableEnhancedEmojis && !adminConfig.enableEnhancedPostEmojis && !adminConfig.enableEnhancedReactionEmojis) {
+    if (normalizedUserPreferences.enableEnhancedEmojis && !normalizedAdminConfig.enableCustomPostEmojis && !normalizedAdminConfig.enableCustomReactionEmojis && !normalizedAdminConfig.enableStandardPostEmojis && !normalizedAdminConfig.enableStandardReactionEmojis) {
         generalSettings.push({
             type: 'custom' as const,
             name: 'noFeaturesEnabledMessage',
@@ -231,7 +297,7 @@ export function createEnhancedEmojisUserSettingsConfig(
         });
     }
 
-    if (adminConfig.enableDeveloperMode) {
+    if (normalizedAdminConfig.enableDeveloperMode) {
         generalSettings.push({
             type: 'custom' as const,
             name: 'developerBuildInfo',
@@ -246,38 +312,28 @@ export function createEnhancedEmojisUserSettingsConfig(
         settings: generalSettings,
     });
 
-    if (normalizedUserPreferences.enableEnhancedEmojis && adminConfig.enableEnhancedPostEmojis) {
-        sections.push(createEmojiPreferenceSection({
-            sectionTitle: translations['enhanced_emojis.settings.posts.title'],
-            settingName: POST_EMOJI_SIZE_PREFERENCE_NAME,
-            settingTitle: translations['enhanced_emojis.settings.posts.size'],
-            helpText: translations['enhanced_emojis.settings.posts.help_text'],
-            defaultValue: DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.postEmojiSize,
-            options: getPostEmojiSizeOptions(translations),
-            onSubmit,
-        }));
+    if (normalizedUserPreferences.enableEnhancedEmojis && (normalizedAdminConfig.enableCustomPostEmojis || normalizedAdminConfig.enableCustomReactionEmojis || normalizedAdminConfig.enableStandardPostEmojis || normalizedAdminConfig.enableStandardReactionEmojis)) {
+        const sizeSections = [
+            ['standard', 'post'],
+            ['standard', 'inlinePost'],
+            ['standard', 'reaction'],
+            ['custom', 'post'],
+            ['custom', 'inlinePost'],
+            ['custom', 'reaction'],
+        ] as const;
 
-        sections.push(createEmojiPreferenceSection({
-            sectionTitle: translations['enhanced_emojis.settings.posts.inline.title'],
-            settingName: INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME,
-            settingTitle: translations['enhanced_emojis.settings.posts.inline.size'],
-            helpText: translations['enhanced_emojis.settings.posts.inline.help_text'],
-            defaultValue: DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.inlinePostEmojiSize,
-            options: getInlinePostEmojiSizeOptions(translations),
-            onSubmit,
-        }));
-    }
-
-    if (normalizedUserPreferences.enableEnhancedEmojis && adminConfig.enableEnhancedReactionEmojis) {
-        sections.push(createEmojiPreferenceSection({
-            sectionTitle: translations['enhanced_emojis.settings.reactions.title'],
-            settingName: REACTION_EMOJI_SIZE_PREFERENCE_NAME,
-            settingTitle: translations['enhanced_emojis.settings.reactions.size'],
-            helpText: translations['enhanced_emojis.settings.reactions.help_text'],
-            defaultValue: DEFAULT_ENHANCED_EMOJIS_USER_PREFERENCES.reactionEmojiSize,
-            options: getReactionEmojiSizeOptions(translations),
-            onSubmit,
-        }));
+        sizeSections.forEach(([emojiType, preferenceKind]) => {
+            const isPostPreference = preferenceKind === 'post' || preferenceKind === 'inlinePost';
+            let isEnabled = false;
+            if (isPostPreference) {
+                isEnabled = emojiType === 'custom' ? normalizedAdminConfig.enableCustomPostEmojis : normalizedAdminConfig.enableStandardPostEmojis;
+            } else {
+                isEnabled = emojiType === 'custom' ? normalizedAdminConfig.enableCustomReactionEmojis : normalizedAdminConfig.enableStandardReactionEmojis;
+            }
+            if (isEnabled) {
+                sections.push(createEmojiSizePreferenceSection(emojiType, preferenceKind, translations, normalizedUserPreferences, onSubmit));
+            }
+        });
     }
 
     enhancedEmojisDebug.debugLog('settings_render', {
@@ -290,7 +346,7 @@ export function createEnhancedEmojisUserSettingsConfig(
             return section.settings.map((setting) => setting.name);
         }),
     }, {
-        adminDeveloperModeEnabled: adminConfig.enableDeveloperMode,
+        adminDeveloperModeEnabled: normalizedAdminConfig.enableDeveloperMode,
     });
 
     return {
@@ -302,11 +358,11 @@ export function createEnhancedEmojisUserSettingsConfig(
 
 export function registerEnhancedEmojisUserSettings(
     registry: PluginRegistry,
-    adminConfig: EnhancedEmojisConfig,
+    adminConfig: EnhancedEmojisConfigInput,
     locale: string,
-    userPreferences: Partial<EnhancedEmojisUserPreferences> | null | undefined,
+    userPreferences: EnhancedEmojisUserPreferenceInput | null | undefined,
     currentUserId?: string,
-    getCurrentUserPreferences: () => Partial<EnhancedEmojisUserPreferences> | null | undefined = () => userPreferences,
+    getCurrentUserPreferences: () => EnhancedEmojisUserPreferenceInput | null | undefined = () => userPreferences,
 ): void {
     registry.registerUserSettings(createEnhancedEmojisUserSettingsConfig(adminConfig, locale, userPreferences, currentUserId, getCurrentUserPreferences));
 }

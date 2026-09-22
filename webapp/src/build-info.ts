@@ -7,11 +7,11 @@ export interface EnhancedEmojisBuildInfo {
 }
 
 const buildInfo: EnhancedEmojisBuildInfo = {
-    pluginVersion: '0.4.2',
-    buildTimestamp: '2026-09-21T08:48:12.713Z',
-    buildEpoch: 1789980492713,
-    buildId: 'e3431538e8638869',
-    gitCommit: '79502cc',
+    pluginVersion: '0.5.0',
+    buildTimestamp: '2026-09-22T10:37:06.557Z',
+    buildEpoch: 1790073426557,
+    buildId: 'a7187e2d64471d4a',
+    gitCommit: 'b1992b2',
 };
 
 export default buildInfo;

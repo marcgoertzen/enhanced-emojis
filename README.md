@@ -1,48 +1,63 @@
 # Enhanced Emojis
 
-Enhanced Emojis is a Mattermost plugin that improves custom emoji rendering in posts and reactions.
-
-Current release: `v0.4.2`.
+Enhanced Emojis is a Mattermost plugin that improves custom and standard emoji rendering in posts and reactions.
 
 ## Features
 
-- Larger custom emojis in post content
+- Larger custom and standard Mattermost emojis in post content and reactions
 - Separate sizing for standalone and inline post emojis
-- Larger custom emoji reactions with size-aware chip layout
-- User-level opt-in with saved size preferences
-- Admin-controlled post, reaction, and developer-mode availability
+- Larger custom and standard emoji reactions with size-aware chip layout
+- Per-user enable/disable setting with six independent size preferences for custom and standard emojis
+- Admin-controlled custom/standard post, reaction, and developer-mode availability
 - WebApp user settings localized to English and German
-- Build identity metadata for runtime and cache verification
 
 ## Compatibility
 
-- Mattermost plugin ID: `io.github.marcgoertzen.enhanced-emojis`
 - Minimum server version: `10.0.0`
-- Package archive: `dist/io.github.marcgoertzen.enhanced-emojis.tar.gz`
+- Plugin ID: `io.github.marcgoertzen.enhanced-emojis`
+- Release package: `io.github.marcgoertzen.enhanced-emojis.tar.gz`
 
-## Admin Settings
+## Installation
 
-The plugin exposes three admin settings:
+1. Download the latest `io.github.marcgoertzen.enhanced-emojis.tar.gz` from the project's [GitHub Releases](https://github.com/marcgoertzen/enhanced-emojis/releases).
+2. In Mattermost, open **System Console** and go to **Plugin Management**.
+3. Upload the `.tar.gz` plugin package.
+4. Enable **Enhanced Emojis**.
+5. Open the Enhanced Emojis plugin configuration.
+6. Choose which custom and standard post and reaction features are available.
 
-- `Enable Enhanced Post Emojis`
-- `Enable Enhanced Reaction Emojis`
+> [!NOTE]
+> Plugin uploads must be enabled on the Mattermost server. If the upload option is unavailable, contact your Mattermost administrator.
+
+Users configure their personal emoji sizes under **Settings → Enhanced Emojis**.
+
+## Administrator Configuration
+
+The plugin exposes four emoji feature gates and one developer setting:
+
+- `Enable Custom Post Emojis`
+- `Enable Custom Reaction Emojis`
+- `Enable Standard Post Emojis`
+- `Enable Standard Reaction Emojis`
 - `Enable Developer Mode`
 
-`Enable Enhanced Post Emojis` controls post custom emojis only.
+Post gates include both standalone and inline post emojis. User size preferences remain hidden while their corresponding
+admin feature gate is disabled, but saved values are retained.
 
-`Enable Enhanced Reaction Emojis` controls custom emoji reactions only and is enabled by default.
+`Enable Developer Mode` enables debug logging, developer-facing build information, and visual emoji highlighting. Debug
+logs appear only while this admin setting is enabled.
 
-`Enable Developer Mode` enables debug logging and developer-facing build information. Debug logs appear only while this
-admin setting is enabled.
+## User Configuration
 
-## User Settings
-
-The plugin adds an `Enhanced Emojis` section in user settings with:
+After an administrator enables the relevant features, users open **Settings → Enhanced Emojis** and can configure:
 
 - `Enable Enhanced Emojis`
-- `Post Emoji Size`
-- `Inline Post Emoji Size`
-- `Reaction Emoji Size`
+- `Standard Emoji Post Size`
+- `Standard Emoji Inline Post Size`
+- `Standard Emoji Reaction Size`
+- `Custom Emoji Post Size`
+- `Custom Emoji Inline Post Size`
+- `Custom Emoji Reaction Size`
 
 Behavior:
 
@@ -50,23 +65,23 @@ Behavior:
 - Users must explicitly enable `Enable Enhanced Emojis` before any visual changes apply.
 - User preferences never override admin-disabled features.
 - Hidden preferences remain stored and apply again when the related feature becomes available.
-- Preferences are stored in the Mattermost preference category `enhanced_emojis`.
 
 Post sizing:
 
-- `Post Emoji Size` applies to standalone or emoji-only custom emoji posts.
-- `Inline Post Emoji Size` applies to custom emojis inside normal post text.
+- Standard and custom post size preferences apply to their matching emoji type for standalone or emoji-only posts.
+- Standard and custom inline post size preferences apply to their matching emoji type inside normal post text.
 - Inline post emojis default to normal text size so they stay readable inside sentences.
 
 Visibility:
 
 - The master switch is always visible.
-- `Post Emoji Size` and `Inline Post Emoji Size` are shown only when the user enabled the plugin and the admin post
-  feature is enabled.
-- `Reaction Emoji Size` is shown only when the user enabled the plugin and the admin reaction feature is enabled.
+- Each standard/custom post and inline size setting is shown only when the user enabled the plugin and its matching
+  admin post feature is enabled.
+- Each standard/custom reaction size setting is shown only when the user enabled the plugin and its matching admin
+  reaction feature is enabled.
 - If the user has not enabled the plugin, the size settings stay hidden and the UI shows
   `Enable Enhanced Emojis to customize your emoji appearance.`
-- If both admin features are disabled, the UI shows
+- If all admin emoji features are disabled, the UI shows
   `No Enhanced Emojis features are currently enabled by your administrator.`
 
 Presets:
@@ -74,6 +89,14 @@ Presets:
 - Post emojis: `Default` = `32px`, `Large` = `48px`, `Extra Large` = `64px`, `Max` = `128px`
 - Inline post emojis: `Default` = `20px`, `Medium` = `32px`, `Large` = `48px`, `Extra Large` = `64px`, `Max` = `128px`
 - Reaction emojis: `Default` = `20px`, `Medium` = `32px`, `Large` = `64px`, `Max` = `128px`
+
+## Upgrading from v0.4.x
+
+Version `0.5.0` adds support for standard Mattermost emojis and separates custom and standard emoji sizing. Existing
+shared `postEmojiSize`, `inlinePostEmojiSize`, and `reactionEmojiSize` preferences continue to initialize both emoji
+types until separate values are saved. Existing `Enable Enhanced Post Emojis` and `Enable Enhanced Reaction Emojis`
+administrator values are used as fallbacks for the corresponding custom and standard gates until the new explicit gates
+are configured. Existing users must still enable the `Enhanced Emojis` master setting for visual changes to apply.
 
 ## Developer Mode
 
@@ -83,8 +106,10 @@ When `Enable Developer Mode` is enabled by an administrator, the plugin:
 - shows a `Debug Build Info` block in the plugin user settings
 - logs runtime identity data including plugin version, build timestamp, build ID, git commit, bundle file name, and the
   preference category
+- outlines recognized custom and standard post, inline, and reaction emojis for visual debugging
 
 Developer Mode does not bypass admin feature flags or the user opt-in toggle.
+It also does not override the user's configured emoji sizes.
 
 ## Localization
 
@@ -103,13 +128,10 @@ Locale behavior:
 
 Admin settings in `plugin.json` remain English-only.
 
-## Installation
-
-1. Run `npm run package`.
-2. Upload `dist/io.github.marcgoertzen.enhanced-emojis.tar.gz` in the Mattermost System Console.
-3. Enable the plugin.
-
 ## Development
+
+Clone the repository when developing or testing unreleased changes. Normal users should install the released package
+from GitHub Releases instead.
 
 Source layout:
 
@@ -130,8 +152,6 @@ npm run package
 npm run verify
 ```
 
-## Build And Package
-
 `npm run package` builds the WebApp, builds the server executables, and creates:
 
 ```bash
@@ -141,26 +161,26 @@ dist/io.github.marcgoertzen.enhanced-emojis.tar.gz
 `webapp/src/build-info.ts` is generated automatically during `typecheck`, `test`, `build:webapp`, `package`, and
 `verify`. It contains the build identity used for runtime verification and should not be edited manually.
 
-## Manual Testing
+Packaging requires the Go toolchain plus `tar` and `gzip` on the build machine.
+
+### Manual Testing
 
 1. Run `npm run package`.
 2. Upload `dist/io.github.marcgoertzen.enhanced-emojis.tar.gz`.
 3. Enable the plugin and configure the admin feature flags.
 4. Enable `Enhanced Emojis` in user settings.
-5. Verify standalone custom emoji posts use `Post Emoji Size`.
-6. Verify inline custom emoji posts use `Inline Post Emoji Size`.
-7. Verify reactions use `Reaction Emoji Size` only when the reaction feature is enabled.
-8. Hard reload Mattermost and confirm post and inline emoji sizes still apply without saving settings again.
-9. Verify saved preferences are still read from the Mattermost preference category `enhanced_emojis`.
+5. Verify standalone custom emoji posts use the custom post size setting.
+6. Verify inline custom emoji posts use the custom inline post size setting.
+7. Verify standard and custom post sizes follow their corresponding admin gates and user size settings.
+8. Verify standard and custom reactions follow their corresponding admin gates and user size settings.
+9. Hard reload Mattermost and confirm post and inline emoji sizes still apply without saving settings again.
 10. If `Enable Developer Mode` is enabled, verify console debug logs and the `Debug Build Info` block are visible.
 
 ## Known Limitations
 
-- Unicode emojis are unchanged.
 - The emoji picker is unchanged.
 - The plugin depends on the server config endpoint. If configuration cannot be loaded, the WebApp falls back to built-in
   defaults.
-- Packaging requires the Go toolchain plus `tar` and `gzip` on the build machine.
 
 ## Contributing
 

@@ -1,12 +1,15 @@
 import type {PluginConfiguration} from 'types/mattermost-webapp';
 
-export interface EmojiPreferenceSectionDescriptor<ValueType extends string> {
-    sectionTitle: string;
+export interface EmojiPreferenceSettingDescriptor<ValueType extends string> {
     settingName: string;
     settingTitle: string;
     helpText: string;
     defaultValue: ValueType;
     options: Array<{ text: string; value: ValueType }>;
+}
+
+export interface EmojiPreferenceSectionDescriptor<ValueType extends string> extends EmojiPreferenceSettingDescriptor<ValueType> {
+    sectionTitle: string;
     onSubmit?: (changes: { [name: string]: string }) => void;
 }
 
