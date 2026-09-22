@@ -194,10 +194,21 @@ export function buildEnhancedEmojisPreferenceSavePayload(
     currentPreferences: EnhancedEmojisUserPreferenceInput | null | undefined,
     changedPreference: {name: (typeof ENHANCED_EMOJIS_PREFERENCE_NAMES)[number]; value: string},
 ): EnhancedEmojisPreferenceSavePlan {
-    const previousPreferences = normalizeEnhancedEmojisUserPreferences(currentPreferences);
-    const nextPreferences = mergeEnhancedEmojisUserPreferenceChanges(previousPreferences, {[changedPreference.name]: changedPreference.value});
+    return buildEnhancedEmojisPreferenceSavePayloadForChanges(userId, currentPreferences, {[changedPreference.name]: changedPreference.value}, changedPreference.name);
+}
 
-    return {changedKey: changedPreference.name, previousPreferences, nextPreferences, payload: createEnhancedEmojisPreferenceSavePayload(userId, nextPreferences)};
+export function buildEnhancedEmojisPreferenceSavePayloadForChanges(
+    userId: string,
+    currentPreferences: EnhancedEmojisUserPreferenceInput | null | undefined,
+    changes: Partial<Record<(typeof ENHANCED_EMOJIS_PREFERENCE_NAMES)[number], string>>,
+    changedKey: (typeof ENHANCED_EMOJIS_PREFERENCE_NAMES)[number],
+): EnhancedEmojisPreferenceSavePlan {
+    const previousPreferences = normalizeEnhancedEmojisUserPreferences(currentPreferences);
+    const nextPreferences = mergeEnhancedEmojisUserPreferenceChanges(previousPreferences, changes);
+    const changedNames = new Set(Object.keys(changes));
+    const payload = createEnhancedEmojisPreferenceSavePayload(userId, nextPreferences).filter((preference) => changedNames.has(preference.name));
+
+    return {changedKey, previousPreferences, nextPreferences, payload};
 }
 
 export async function saveEnhancedEmojisUserPreferences(userId: string, preferences: MattermostUserPreference[]): Promise<void> {

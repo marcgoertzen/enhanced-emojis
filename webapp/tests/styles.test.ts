@@ -46,3 +46,12 @@ test('developer highlighting covers recognized custom and standard post and reac
     expect(styles).toContain('html.enhanced-emojis-developer-mode.enhanced-emojis-standard-reactions-enabled');
     expect(styles).toContain('outline: 2px solid red;');
 });
+
+test('emoji size setting options use consistent radio-label spacing', () => {
+    expect(styles).toContain('.enhanced-emojis-preference-setting__option');
+    expect(styles).toContain('display: flex;');
+    expect(styles).toContain('align-items: center;');
+    expect(styles).toContain('gap: 6px;');
+    expect(styles).toContain("input[type='radio']");
+    expect(styles).toContain('margin: 0;');
+});

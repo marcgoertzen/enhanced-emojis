@@ -15,6 +15,17 @@
     --enhanced-emojis-standard-reaction-chip-min-height: 24px;
 }
 
+/* User settings radio options */
+.enhanced-emojis-preference-setting__option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.enhanced-emojis-preference-setting__option > input[type='radio'] {
+    margin: 0;
+}
+
 /*
  * Post emojis: shared sizing with explicit custom/standard selectors
  */

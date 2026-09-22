@@ -1,6 +1,7 @@
 import buildInfo from 'build-info';
 import {
     buildEnhancedEmojisPreferenceSavePayload,
+    buildEnhancedEmojisPreferenceSavePayloadForChanges,
     type EnhancedEmojisConfigInput,
     type EnhancedEmojisUserPreferenceInput,
     type EnhancedEmojisUserPreferences,
@@ -19,6 +20,9 @@ import {
     saveEnhancedEmojisUserPreferences,
     MASTER_ENABLE_PREFERENCE_NAME,
     USER_PREFERENCES_CATEGORY,
+    detectEmojiSizePreset,
+    getEmojiSizePresetValues,
+    type EmojiSizePreset,
 } from 'config';
 import * as enhancedEmojisDebug from 'debug/enhanced-emojis-debug';
 import {type EnhancedEmojisTranslations, getEnhancedEmojisTranslations} from 'i18n';
@@ -27,12 +31,16 @@ import React from 'react';
 import {useSelector} from 'react-redux';
 
 import {createEmojiPreferenceSection} from './components/emoji-preference-setting';
+import {commitEmojiSizeDraft, initializeEmojiSizeDraft, updateEmojiSizeDraft} from './components/emoji-size-draft';
 import renderToggleSetting from './components/toggle-setting';
 
 type GlobalState = import('@mattermost/types/store').GlobalState;
 type PluginConfiguration = import('types/mattermost-webapp').PluginConfiguration;
 type PluginConfigurationSetting = import('types/mattermost-webapp').PluginConfigurationSetting;
 type PluginRegistry = import('types/mattermost-webapp').PluginRegistry;
+
+// UI-only setting name; the selected preset is derived from and saves the six real size preferences.
+const EMOJI_SIZE_PRESET_SETTING_NAME = 'emojiSizePreset';
 
 function getPostEmojiSizeOptions(translations: EnhancedEmojisTranslations): Array<{
     text: string;
@@ -149,6 +157,7 @@ function createUserPreferencesSubmitHandler(
         });
 
         saveEnhancedEmojisUserPreferences(currentUserId, changedPreferencePayload).then(() => {
+            commitEmojiSizeDraft(savePlan.nextPreferences);
             enhancedEmojisDebug.debugLog('settings_save_success', {
                 savedPreferences: savePlan.nextPreferences,
             }, {
@@ -251,6 +260,93 @@ function createEmojiSizePreferenceSection(
     });
 }
 
+function createEmojiSizePresetSubmitHandler(
+    currentUserId: string | undefined,
+    getCurrentUserPreferences: () => EnhancedEmojisUserPreferenceInput | null | undefined,
+    enableDeveloperMode: boolean,
+): (changes: { [name: string]: string }) => void {
+    return (changes: { [name: string]: string }): void => {
+        if (!currentUserId) {
+            return;
+        }
+
+        const currentPreferences = normalizeEnhancedEmojisUserPreferences(getCurrentUserPreferences());
+        const preset = changes[EMOJI_SIZE_PRESET_SETTING_NAME] ?? detectEmojiSizePreset({...currentPreferences, ...changes} as EnhancedEmojisUserPreferences);
+        if (preset === 'custom') {
+            return;
+        }
+
+        const typedPreset = preset as Exclude<EmojiSizePreset, 'custom'>;
+        if (!['compact', 'balanced', 'large'].includes(typedPreset)) {
+            return;
+        }
+
+        const savePlan = buildEnhancedEmojisPreferenceSavePayloadForChanges(
+            currentUserId,
+            currentPreferences,
+            getEmojiSizePresetValues(typedPreset),
+            STANDARD_POST_EMOJI_SIZE_PREFERENCE_NAME,
+        );
+
+        enhancedEmojisDebug.debugLog('settings_preset_change', {
+            preset: typedPreset,
+            newNormalizedPreferences: savePlan.nextPreferences,
+            payload: savePlan.payload,
+        }, {
+            adminDeveloperModeEnabled: enableDeveloperMode,
+        });
+
+        saveEnhancedEmojisUserPreferences(currentUserId, savePlan.payload).then(() => {
+            commitEmojiSizeDraft(savePlan.nextPreferences);
+            enhancedEmojisDebug.debugLog('settings_preset_save_success', {
+                preset: typedPreset,
+                savedPreferences: savePlan.nextPreferences,
+            }, {
+                adminDeveloperModeEnabled: enableDeveloperMode,
+            });
+        }).catch((error: unknown) => {
+            enhancedEmojisDebug.debugError('settings_preset_save_failed', error, {
+                preset: typedPreset,
+                payload: savePlan.payload,
+            }, {
+                adminDeveloperModeEnabled: enableDeveloperMode,
+            });
+        });
+    };
+}
+
+function createEmojiSizePresetSection(
+    translations: EnhancedEmojisTranslations,
+    preferences: EnhancedEmojisUserPreferences,
+    onSubmit: (changes: { [name: string]: string }) => void,
+): PluginConfiguration['sections'][number] {
+    const options: Array<{text: string; value: EmojiSizePreset}> = [
+        {text: translations['enhanced_emojis.settings.preset.option.compact'], value: 'compact'},
+        {text: translations['enhanced_emojis.settings.preset.option.balanced'], value: 'balanced'},
+        {text: translations['enhanced_emojis.settings.preset.option.large'], value: 'large'},
+        {text: translations['enhanced_emojis.settings.preset.option.custom'], value: 'custom'},
+    ];
+
+    return createEmojiPreferenceSection({
+        sectionTitle: translations['enhanced_emojis.settings.preset.title'],
+        settingName: EMOJI_SIZE_PRESET_SETTING_NAME,
+        settingTitle: translations['enhanced_emojis.settings.preset.title'],
+        helpText: translations['enhanced_emojis.settings.preset.help_text'],
+        defaultValue: detectEmojiSizePreset(preferences),
+        options,
+        onValueChange: (value, informChange) => {
+            if (value === 'custom') {
+                return;
+            }
+
+            const presetValues = getEmojiSizePresetValues(value);
+            updateEmojiSizeDraft(presetValues);
+            Object.entries(presetValues).forEach(([name, presetValue]) => informChange(name, presetValue));
+        },
+        onSubmit,
+    });
+}
+
 export function createEnhancedEmojisUserSettingsConfig(
     adminConfig: EnhancedEmojisConfigInput,
     locale: string,
@@ -261,7 +357,9 @@ export function createEnhancedEmojisUserSettingsConfig(
     const normalizedAdminConfig = normalizeEnhancedEmojisConfig(adminConfig);
     const translations = getEnhancedEmojisTranslations(locale);
     const normalizedUserPreferences = normalizeEnhancedEmojisUserPreferences(userPreferences);
+    initializeEmojiSizeDraft(normalizedUserPreferences);
     const onSubmit = createUserPreferencesSubmitHandler(currentUserId, getCurrentUserPreferences, normalizedAdminConfig.enableDeveloperMode);
+    const onPresetSubmit = createEmojiSizePresetSubmitHandler(currentUserId, getCurrentUserPreferences, normalizedAdminConfig.enableDeveloperMode);
     const sections: PluginConfiguration['sections'] = [];
     const generalSettings: PluginConfigurationSetting[] = [
         {
@@ -313,6 +411,8 @@ export function createEnhancedEmojisUserSettingsConfig(
     });
 
     if (normalizedUserPreferences.enableEnhancedEmojis && (normalizedAdminConfig.enableCustomPostEmojis || normalizedAdminConfig.enableCustomReactionEmojis || normalizedAdminConfig.enableStandardPostEmojis || normalizedAdminConfig.enableStandardReactionEmojis)) {
+        sections.push(createEmojiSizePresetSection(translations, normalizedUserPreferences, onPresetSubmit));
+
         const sizeSections = [
             ['standard', 'post'],
             ['standard', 'inlinePost'],
