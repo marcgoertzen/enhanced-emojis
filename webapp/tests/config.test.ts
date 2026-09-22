@@ -7,7 +7,24 @@ import {
     normalizeEnhancedEmojisConfig,
     normalizeEnhancedEmojisUserPreferences,
     resolveEnhancedEmojisEffectiveConfig,
+    detectEmojiSizePreset,
+    getEmojiSizePresetValues,
 } from 'config';
+
+test.each([
+    ['compact', {standardPostEmojiSize: 'default', standardInlinePostEmojiSize: 'default', standardReactionEmojiSize: 'default', customPostEmojiSize: 'default', customInlinePostEmojiSize: 'default', customReactionEmojiSize: 'default'}],
+    ['balanced', {standardPostEmojiSize: 'large', standardInlinePostEmojiSize: 'medium', standardReactionEmojiSize: 'medium', customPostEmojiSize: 'large', customInlinePostEmojiSize: 'medium', customReactionEmojiSize: 'medium'}],
+    ['large', {standardPostEmojiSize: 'extraLarge', standardInlinePostEmojiSize: 'large', standardReactionEmojiSize: 'large', customPostEmojiSize: 'extraLarge', customInlinePostEmojiSize: 'large', customReactionEmojiSize: 'large'}],
+] as const)('%s preset maps to six supported size values', (preset, expected) => {
+    expect(getEmojiSizePresetValues(preset)).toEqual(expected);
+    expect(detectEmojiSizePreset(expected)).toBe(preset);
+});
+
+test('mixed size combinations and one-value changes are detected as custom', () => {
+    const balanced = getEmojiSizePresetValues('balanced');
+    expect(detectEmojiSizePreset({...balanced, customReactionEmojiSize: 'large'})).toBe('custom');
+    expect(detectEmojiSizePreset(balanced)).toBe('balanced');
+});
 
 test('normalizes missing admin flags to defaults', () => {
     expect(normalizeEnhancedEmojisConfig({})).toEqual(DEFAULT_ENHANCED_EMOJIS_CONFIG);
