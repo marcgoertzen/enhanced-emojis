@@ -121,8 +121,8 @@ describe('EnhancedEmojisPlugin post classification', () => {
         expect(postLog?.[1]).toEqual(expect.objectContaining({
             affectedElementCount: 1,
             postMode: 'inline',
-            standardSelectedSize: '64px',
-            customSelectedSize: '64px',
+            standardSelectedSize: '48px',
+            customSelectedSize: '48px',
         }));
         expect(JSON.stringify(postLog?.[1])).not.toContain('Secret message');
         plugin.uninitialize();

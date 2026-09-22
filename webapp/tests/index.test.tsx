@@ -438,7 +438,7 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-developer-mode', true);
         expect(classList.toggle).toHaveBeenCalledWith('enhanced-emojis-custom-reactions-enabled', true);
         expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-custom-post-size', '64px');
-        expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-custom-inline-post-size', '32px');
+        expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-custom-inline-post-size', '48px');
         expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-custom-reaction-size', '64px');
         expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-custom-reaction-chip-padding-inline', '13px');
         expect(style.setProperty).toHaveBeenCalledWith('--enhanced-emojis-custom-reaction-chip-padding-block', '6px');

@@ -20,3 +20,11 @@ test('standard reaction selectors are restricted to Mattermost system emoji asse
     expect(styles).toContain('width: var(--enhanced-emojis-custom-reaction-size) !important;');
     expect(styles).toContain('width: var(--enhanced-emojis-standard-reaction-size) !important;');
 });
+
+test('developer highlighting covers recognized custom and standard post and reaction emojis', () => {
+    expect(styles).toContain('html.enhanced-emojis-developer-mode.enhanced-emojis-custom-posts-enabled');
+    expect(styles).toContain('html.enhanced-emojis-developer-mode.enhanced-emojis-standard-posts-enabled');
+    expect(styles).toContain('html.enhanced-emojis-developer-mode.enhanced-emojis-custom-reactions-enabled');
+    expect(styles).toContain('html.enhanced-emojis-developer-mode.enhanced-emojis-standard-reactions-enabled');
+    expect(styles).toContain('outline: 2px solid red;');
+});

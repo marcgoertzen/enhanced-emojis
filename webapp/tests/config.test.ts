@@ -93,17 +93,41 @@ test('missing and invalid sizes use explicit defaults', () => {
     });
 });
 
-test('developer mode overrides all custom and standard emoji sizes', () => {
-    expect(resolveEnhancedEmojisEffectiveConfig(
-        {enableEnhancedPostEmojis: true, enableEnhancedReactionEmojis: true, enableDeveloperMode: true},
-        {enableEnhancedEmojis: true, customPostEmojiSize: 'large', standardPostEmojiSize: 'maxSize'},
-    )).toMatchObject({
-        customPostEmojiSize: '64px',
+test('developer mode preserves all configured custom and standard emoji sizes', () => {
+    const userPreferences = {
+        enableEnhancedEmojis: true,
+        customPostEmojiSize: 'large' as const,
+        customInlinePostEmojiSize: 'medium' as const,
+        customReactionEmojiSize: 'maxSize' as const,
+        standardPostEmojiSize: 'extraLarge' as const,
+        standardInlinePostEmojiSize: 'large' as const,
+        standardReactionEmojiSize: 'medium' as const,
+    };
+    const adminConfig = {
+        enableCustomPostEmojis: true,
+        enableCustomReactionEmojis: true,
+        enableStandardPostEmojis: true,
+        enableStandardReactionEmojis: true,
+        enableDeveloperMode: true,
+    };
+    const developerModeConfig = resolveEnhancedEmojisEffectiveConfig(adminConfig, userPreferences);
+    const normalConfig = resolveEnhancedEmojisEffectiveConfig({...adminConfig, enableDeveloperMode: false}, userPreferences);
+
+    expect(developerModeConfig).toMatchObject({
+        customPostEmojiSize: '48px',
         customInlinePostEmojiSize: '32px',
-        customReactionEmojiSize: '64px',
+        customReactionEmojiSize: '128px',
         standardPostEmojiSize: '64px',
-        standardInlinePostEmojiSize: '32px',
-        standardReactionEmojiSize: '64px',
+        standardInlinePostEmojiSize: '48px',
+        standardReactionEmojiSize: '32px',
+    });
+    expect(developerModeConfig).toMatchObject({
+        customPostEmojiSize: normalConfig.customPostEmojiSize,
+        customInlinePostEmojiSize: normalConfig.customInlinePostEmojiSize,
+        customReactionEmojiSize: normalConfig.customReactionEmojiSize,
+        standardPostEmojiSize: normalConfig.standardPostEmojiSize,
+        standardInlinePostEmojiSize: normalConfig.standardInlinePostEmojiSize,
+        standardReactionEmojiSize: normalConfig.standardReactionEmojiSize,
     });
 });
 

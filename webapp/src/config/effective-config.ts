@@ -28,22 +28,6 @@ export function resolveEnhancedEmojisEffectiveConfig(
     const enableStandardReactionEmojis = normalizedAdminConfig.enableStandardReactionEmojis && normalizedUserPreferences.enableEnhancedEmojis;
     const enableDeveloperMode = normalizedAdminConfig.enableDeveloperMode && (enableCustomPostEmojis || enableCustomReactionEmojis || enableStandardPostEmojis || enableStandardReactionEmojis);
 
-    if (enableDeveloperMode) {
-        return {
-            enableCustomPostEmojis,
-            enableDeveloperMode,
-            enableCustomReactionEmojis,
-            enableStandardPostEmojis,
-            enableStandardReactionEmojis,
-            customPostEmojiSize: '64px',
-            customInlinePostEmojiSize: '32px',
-            customReactionEmojiSize: '64px',
-            standardPostEmojiSize: '64px',
-            standardInlinePostEmojiSize: '32px',
-            standardReactionEmojiSize: '64px',
-        };
-    }
-
     return {
         enableCustomPostEmojis,
         enableDeveloperMode,
