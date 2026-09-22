@@ -13,6 +13,35 @@ test('normalizes missing admin flags to defaults', () => {
     expect(normalizeEnhancedEmojisConfig({})).toEqual(DEFAULT_ENHANCED_EMOJIS_CONFIG);
 });
 
+test('normalizes legacy admin post and reaction flags into both emoji types', () => {
+    expect(normalizeEnhancedEmojisConfig({
+        enableEnhancedPostEmojis: false,
+        enableEnhancedReactionEmojis: true,
+    })).toEqual({
+        enableCustomPostEmojis: false,
+        enableStandardPostEmojis: false,
+        enableCustomReactionEmojis: true,
+        enableStandardReactionEmojis: true,
+        enableDeveloperMode: false,
+    });
+});
+
+test('explicit admin gates override their corresponding legacy flags independently', () => {
+    expect(normalizeEnhancedEmojisConfig({
+        enableEnhancedPostEmojis: false,
+        enableEnhancedReactionEmojis: false,
+        enableCustomPostEmojis: true,
+        enableStandardPostEmojis: false,
+        enableCustomReactionEmojis: false,
+        enableStandardReactionEmojis: true,
+    })).toMatchObject({
+        enableCustomPostEmojis: true,
+        enableStandardPostEmojis: false,
+        enableCustomReactionEmojis: false,
+        enableStandardReactionEmojis: true,
+    });
+});
+
 test('recognizes post and reaction size presets independently', () => {
     expect(isPostEmojiSize('large')).toBe(true);
     expect(isPostEmojiSize('medium')).toBe(false);
@@ -86,6 +115,24 @@ test('the master switch enables both emoji types under the admin feature gates',
         enableCustomPostEmojis: true,
         enableCustomReactionEmojis: true,
         enableStandardPostEmojis: true,
+        enableStandardReactionEmojis: true,
+    });
+});
+
+test('custom and standard admin gates operate independently', () => {
+    expect(resolveEnhancedEmojisEffectiveConfig(
+        {
+            enableCustomPostEmojis: true,
+            enableCustomReactionEmojis: false,
+            enableStandardPostEmojis: false,
+            enableStandardReactionEmojis: true,
+            enableDeveloperMode: false,
+        },
+        {enableEnhancedEmojis: true},
+    )).toMatchObject({
+        enableCustomPostEmojis: true,
+        enableCustomReactionEmojis: false,
+        enableStandardPostEmojis: false,
         enableStandardReactionEmojis: true,
     });
 });

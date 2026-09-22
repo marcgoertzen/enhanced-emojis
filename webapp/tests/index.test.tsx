@@ -601,6 +601,14 @@ describe('EnhancedEmojisPlugin entrypoint', () => {
             '[Enhanced Emojis Debug] plugin_runtime_identity',
         ]));
 
+        const adminConfigLog = consoleLog.mock.calls.find(([eventName]) => eventName === '[Enhanced Emojis Debug] admin_config_loaded');
+        expect(adminConfigLog?.[1]).toEqual(expect.objectContaining({
+            adminCustomPostEmojisEnabled: true,
+            adminCustomReactionEmojisEnabled: true,
+            adminStandardPostEmojisEnabled: true,
+            adminStandardReactionEmojisEnabled: true,
+        }));
+
         const effectiveConfigLog = consoleLog.mock.calls.find(([eventName]) => eventName === '[Enhanced Emojis Debug] effective_config_resolved');
         expect(effectiveConfigLog?.[1]).toEqual(expect.objectContaining({
             effectiveEnableState: {

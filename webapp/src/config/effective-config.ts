@@ -1,4 +1,4 @@
-import type {EnhancedEmojisConfig} from './admin-config';
+import {normalizeEnhancedEmojisConfig, type EnhancedEmojisConfigInput} from './admin-config';
 import {getInlinePostEmojiSizePixels, getPostEmojiSizePixels, getReactionEmojiSizePixels} from './emoji-sizes';
 import {normalizeEnhancedEmojisUserPreferences, type EnhancedEmojisUserPreferenceInput} from './user-preferences';
 
@@ -17,15 +17,16 @@ export interface EnhancedEmojisEffectiveConfig {
 }
 
 export function resolveEnhancedEmojisEffectiveConfig(
-    adminConfig: EnhancedEmojisConfig,
+    adminConfig: EnhancedEmojisConfigInput,
     userPreferences: EnhancedEmojisUserPreferenceInput | null | undefined,
 ): EnhancedEmojisEffectiveConfig {
+    const normalizedAdminConfig = normalizeEnhancedEmojisConfig(adminConfig);
     const normalizedUserPreferences = normalizeEnhancedEmojisUserPreferences(userPreferences);
-    const enableCustomPostEmojis = adminConfig.enableEnhancedPostEmojis && normalizedUserPreferences.enableEnhancedEmojis;
-    const enableCustomReactionEmojis = adminConfig.enableEnhancedReactionEmojis && normalizedUserPreferences.enableEnhancedEmojis;
-    const enableStandardPostEmojis = enableCustomPostEmojis;
-    const enableStandardReactionEmojis = enableCustomReactionEmojis;
-    const enableDeveloperMode = adminConfig.enableDeveloperMode && (enableCustomPostEmojis || enableCustomReactionEmojis);
+    const enableCustomPostEmojis = normalizedAdminConfig.enableCustomPostEmojis && normalizedUserPreferences.enableEnhancedEmojis;
+    const enableCustomReactionEmojis = normalizedAdminConfig.enableCustomReactionEmojis && normalizedUserPreferences.enableEnhancedEmojis;
+    const enableStandardPostEmojis = normalizedAdminConfig.enableStandardPostEmojis && normalizedUserPreferences.enableEnhancedEmojis;
+    const enableStandardReactionEmojis = normalizedAdminConfig.enableStandardReactionEmojis && normalizedUserPreferences.enableEnhancedEmojis;
+    const enableDeveloperMode = normalizedAdminConfig.enableDeveloperMode && (enableCustomPostEmojis || enableCustomReactionEmojis || enableStandardPostEmojis || enableStandardReactionEmojis);
 
     if (enableDeveloperMode) {
         return {

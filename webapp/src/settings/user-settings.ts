@@ -1,7 +1,7 @@
 import buildInfo from 'build-info';
 import {
     buildEnhancedEmojisPreferenceSavePayload,
-    type EnhancedEmojisConfig,
+    type EnhancedEmojisConfigInput,
     type EnhancedEmojisUserPreferenceInput,
     type EnhancedEmojisUserPreferences,
     getEnhancedEmojisUserPreferences,
@@ -10,6 +10,7 @@ import {
     CUSTOM_REACTION_EMOJI_SIZE_PREFERENCE_NAME,
     type InlinePostEmojiSize,
     normalizeEnhancedEmojisUserPreferences,
+    normalizeEnhancedEmojisConfig,
     STANDARD_INLINE_POST_EMOJI_SIZE_PREFERENCE_NAME,
     STANDARD_POST_EMOJI_SIZE_PREFERENCE_NAME,
     STANDARD_REACTION_EMOJI_SIZE_PREFERENCE_NAME,
@@ -251,15 +252,16 @@ function createEmojiSizePreferenceSection(
 }
 
 export function createEnhancedEmojisUserSettingsConfig(
-    adminConfig: EnhancedEmojisConfig,
+    adminConfig: EnhancedEmojisConfigInput,
     locale: string,
     userPreferences: EnhancedEmojisUserPreferenceInput | null | undefined,
     currentUserId?: string,
     getCurrentUserPreferences: () => EnhancedEmojisUserPreferenceInput | null | undefined = () => userPreferences,
 ): PluginConfiguration {
+    const normalizedAdminConfig = normalizeEnhancedEmojisConfig(adminConfig);
     const translations = getEnhancedEmojisTranslations(locale);
     const normalizedUserPreferences = normalizeEnhancedEmojisUserPreferences(userPreferences);
-    const onSubmit = createUserPreferencesSubmitHandler(currentUserId, getCurrentUserPreferences, adminConfig.enableDeveloperMode);
+    const onSubmit = createUserPreferencesSubmitHandler(currentUserId, getCurrentUserPreferences, normalizedAdminConfig.enableDeveloperMode);
     const sections: PluginConfiguration['sections'] = [];
     const generalSettings: PluginConfigurationSetting[] = [
         {
@@ -287,7 +289,7 @@ export function createEnhancedEmojisUserSettingsConfig(
         });
     }
 
-    if (normalizedUserPreferences.enableEnhancedEmojis && !adminConfig.enableEnhancedPostEmojis && !adminConfig.enableEnhancedReactionEmojis) {
+    if (normalizedUserPreferences.enableEnhancedEmojis && !normalizedAdminConfig.enableCustomPostEmojis && !normalizedAdminConfig.enableCustomReactionEmojis && !normalizedAdminConfig.enableStandardPostEmojis && !normalizedAdminConfig.enableStandardReactionEmojis) {
         generalSettings.push({
             type: 'custom' as const,
             name: 'noFeaturesEnabledMessage',
@@ -295,7 +297,7 @@ export function createEnhancedEmojisUserSettingsConfig(
         });
     }
 
-    if (adminConfig.enableDeveloperMode) {
+    if (normalizedAdminConfig.enableDeveloperMode) {
         generalSettings.push({
             type: 'custom' as const,
             name: 'developerBuildInfo',
@@ -310,7 +312,7 @@ export function createEnhancedEmojisUserSettingsConfig(
         settings: generalSettings,
     });
 
-    if (normalizedUserPreferences.enableEnhancedEmojis && (adminConfig.enableEnhancedPostEmojis || adminConfig.enableEnhancedReactionEmojis)) {
+    if (normalizedUserPreferences.enableEnhancedEmojis && (normalizedAdminConfig.enableCustomPostEmojis || normalizedAdminConfig.enableCustomReactionEmojis || normalizedAdminConfig.enableStandardPostEmojis || normalizedAdminConfig.enableStandardReactionEmojis)) {
         const sizeSections = [
             ['standard', 'post'],
             ['standard', 'inlinePost'],
@@ -322,7 +324,12 @@ export function createEnhancedEmojisUserSettingsConfig(
 
         sizeSections.forEach(([emojiType, preferenceKind]) => {
             const isPostPreference = preferenceKind === 'post' || preferenceKind === 'inlinePost';
-            const isEnabled = isPostPreference ? adminConfig.enableEnhancedPostEmojis : adminConfig.enableEnhancedReactionEmojis;
+            let isEnabled = false;
+            if (isPostPreference) {
+                isEnabled = emojiType === 'custom' ? normalizedAdminConfig.enableCustomPostEmojis : normalizedAdminConfig.enableStandardPostEmojis;
+            } else {
+                isEnabled = emojiType === 'custom' ? normalizedAdminConfig.enableCustomReactionEmojis : normalizedAdminConfig.enableStandardReactionEmojis;
+            }
             if (isEnabled) {
                 sections.push(createEmojiSizePreferenceSection(emojiType, preferenceKind, translations, normalizedUserPreferences, onSubmit));
             }
@@ -339,7 +346,7 @@ export function createEnhancedEmojisUserSettingsConfig(
             return section.settings.map((setting) => setting.name);
         }),
     }, {
-        adminDeveloperModeEnabled: adminConfig.enableDeveloperMode,
+        adminDeveloperModeEnabled: normalizedAdminConfig.enableDeveloperMode,
     });
 
     return {
@@ -351,7 +358,7 @@ export function createEnhancedEmojisUserSettingsConfig(
 
 export function registerEnhancedEmojisUserSettings(
     registry: PluginRegistry,
-    adminConfig: EnhancedEmojisConfig,
+    adminConfig: EnhancedEmojisConfigInput,
     locale: string,
     userPreferences: EnhancedEmojisUserPreferenceInput | null | undefined,
     currentUserId?: string,

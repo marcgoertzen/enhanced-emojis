@@ -147,6 +147,23 @@ describe('settings UI', () => {
         ]);
     });
 
+    test('explicit custom and standard gates control their own size rows', () => {
+        const target = registry();
+        registerEnhancedEmojisUserSettings(target as never, {
+            enableCustomPostEmojis: true,
+            enableCustomReactionEmojis: false,
+            enableStandardPostEmojis: false,
+            enableStandardReactionEmojis: true,
+            enableDeveloperMode: false,
+        }, 'en', sizes);
+        expect(registeredSettings(target).sections.map((section: {title: string}) => section.title)).toEqual([
+            'Enhanced Emojis',
+            'Standard Emoji Reaction Size',
+            'Custom Emoji Post Size',
+            'Custom Emoji Inline Post Size',
+        ]);
+    });
+
     test('master toggle remains the only boolean preference', () => {
         mockedUseSelector.mockReturnValue(false);
         jest.spyOn(React, 'useState').mockReturnValue([false, jest.fn()]);

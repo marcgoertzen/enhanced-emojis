@@ -12,18 +12,34 @@
         "footer": "",
         "settings": [
             {
-                "key": "EnableEnhancedPostEmojis",
-                "display_name": "Enable Enhanced Post Emojis",
+                "key": "EnableCustomPostEmojis",
+                "display_name": "Enable Custom Post Emojis",
                 "type": "bool",
-                "help_text": "Controls larger custom and opted-in standard emojis in Mattermost post content.",
+                "help_text": "Allows users to enlarge custom emojis in Mattermost post content.",
                 "placeholder": "",
                 "default": true
             },
             {
-                "key": "EnableEnhancedReactionEmojis",
-                "display_name": "Enable Enhanced Reaction Emojis",
+                "key": "EnableCustomReactionEmojis",
+                "display_name": "Enable Custom Reaction Emojis",
                 "type": "bool",
-                "help_text": "Controls larger custom and opted-in standard emojis in emoji reactions.",
+                "help_text": "Allows users to enlarge custom emojis in reactions.",
+                "placeholder": "",
+                "default": true
+            },
+            {
+                "key": "EnableStandardPostEmojis",
+                "display_name": "Enable Standard Post Emojis",
+                "type": "bool",
+                "help_text": "Allows users to enlarge standard emojis in Mattermost post content.",
+                "placeholder": "",
+                "default": true
+            },
+            {
+                "key": "EnableStandardReactionEmojis",
+                "display_name": "Enable Standard Reaction Emojis",
+                "type": "bool",
+                "help_text": "Allows users to enlarge standard emojis in reactions.",
                 "placeholder": "",
                 "default": true
             },

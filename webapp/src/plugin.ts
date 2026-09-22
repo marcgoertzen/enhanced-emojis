@@ -108,8 +108,10 @@ export default class EnhancedEmojisPlugin {
         this.adminConfig = await fetchEnhancedEmojisAdminConfig();
         enhancedEmojisDebug.debugLog('admin_config_loaded', {
             adminDeveloperModeEnabled: this.adminConfig.enableDeveloperMode,
-            adminPostEmojiEnhancementsEnabled: this.adminConfig.enableEnhancedPostEmojis,
-            adminReactionEmojiEnhancementsEnabled: this.adminConfig.enableEnhancedReactionEmojis,
+            adminCustomPostEmojisEnabled: this.adminConfig.enableCustomPostEmojis,
+            adminCustomReactionEmojisEnabled: this.adminConfig.enableCustomReactionEmojis,
+            adminStandardPostEmojisEnabled: this.adminConfig.enableStandardPostEmojis,
+            adminStandardReactionEmojisEnabled: this.adminConfig.enableStandardReactionEmojis,
         }, {
             adminDeveloperModeEnabled: this.adminConfig.enableDeveloperMode,
         });
@@ -240,8 +242,10 @@ export default class EnhancedEmojisPlugin {
         const signature = JSON.stringify({
             currentUserId,
             locale,
-            enableEnhancedPostEmojis: this.adminConfig.enableEnhancedPostEmojis,
-            enableEnhancedReactionEmojis: this.adminConfig.enableEnhancedReactionEmojis,
+            enableCustomPostEmojis: this.adminConfig.enableCustomPostEmojis,
+            enableCustomReactionEmojis: this.adminConfig.enableCustomReactionEmojis,
+            enableStandardPostEmojis: this.adminConfig.enableStandardPostEmojis,
+            enableStandardReactionEmojis: this.adminConfig.enableStandardReactionEmojis,
             enableEnhancedEmojis: userPreferences.enableEnhancedEmojis,
             customPostEmojiSize: userPreferences.customPostEmojiSize,
             customInlinePostEmojiSize: userPreferences.customInlinePostEmojiSize,
